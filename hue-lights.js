@@ -19,7 +19,7 @@ let adapter;
 let library;
 let bridge, dutyCycle, refreshCycle;
 
-const SUBSCRIPTIONS = ['on', 'sat', 'bri', 'ct', 'hue'];
+const SUBSCRIPTIONS = ['on', 'sat', 'bri', 'ct', 'hue', 'level'];
 let DEVICES = {
 	'groups': {},
 	'lights': {},
@@ -130,6 +130,13 @@ function startAdapter(options)
 			let action = params.splice(params.length-1, 1);
 			device.state = params.join('/');
 			
+			// if .level is changed the change will be applied to .bri instead
+			if (action == 'level')
+			{
+				action = 'bri';
+				state.val = Math.ceil(254 * state.val / 100);
+			}
+			
 			// apply command
 			setDevice(device, { [action]: state.val });
 		});
@@ -201,7 +208,11 @@ function readData(key, data)
 		// create channel
 		if (Object.keys(data).length > 0)
 		{
-			if (data.name) data.uid = key.substr(-3).replace(/^0+/, ''); // save uid as state
+			// add uid as additionalstate
+			if (data.name) data.uid = key.substr(-3).replace(/^0+/, '');
+			
+			// add level as additional state
+			if (data.bri) data.level = Math.ceil(data.bri / 254 * 100);
 			
 			// use name instead of uid
 			let id = false;
