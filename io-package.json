@@ -32,8 +32,8 @@
         "license": "MIT",
         "platform": "Javascript/Node.js",
         "mode": "daemon",
-        "icon": "hue.png",
-        "extIcon": "https://raw.githubusercontent.com/Zefau/ioBroker.hue-lights/master/admin/hue.png",
+        "icon": "hue-lights.png",
+        "extIcon": "https://raw.githubusercontent.com/Zefau/ioBroker.hue-lights/master/admin/hue-lights.png",
         "keywords": [
             "hue",
             "lights"
