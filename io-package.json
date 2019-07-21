@@ -1,0 +1,60 @@
+{
+    "common": {
+        "name": "hue-lights",
+        "version": "0.1.0",
+        "title": "Philips Hue Lights",
+        "desc": {
+            "en": "Integration of your Philips Hue Lights with your ioBroker",
+            "de": "Die Integration der Philips Hue Lampen mit Ihrem ioBroker",
+            "ru": "Интеграция вашего Philips оттенок света с ioBroker",
+            "pt": "A integração de suas Philips Hue Luzes com seu ioBroker",
+            "nl": "Integratie van je Philips Hue-Lampen met uw ioBroker",
+            "fr": "L'intégration de votre Philips Hue Lumières avec votre ioBroker",
+            "it": "L'integrazione di Hue di Philips illumina con il tuo ioBroker",
+            "es": "Integración de tu Philips Hue Luces con su ioBroker",
+            "pl": "Integracja twojej firmy Philips barwa światła z ioBroker",
+            "zh-cn": "融入你的飞利浦色灯你ioBroker"
+        },
+        "news": {
+            "0.1.0": {
+                "en": "initial version",
+                "de": "erste version",
+                "ru": "начальная версия",
+                "pt": "versão inicial",
+                "nl": "initiële versie",
+                "fr": "version initiale",
+                "it": "versione iniziale",
+                "es": "versión inicial",
+                "pl": "początkowa wersja",
+                "zh-cn": "最初的版本"
+            }
+        },
+        "license": "MIT",
+        "platform": "Javascript/Node.js",
+        "mode": "daemon",
+        "icon": "hue.png",
+        "extIcon": "https://raw.githubusercontent.com/Zefau/ioBroker.hue-lights/master/admin/hue.png",
+        "keywords": [
+            "hue",
+            "lights"
+        ],
+        "readme": "https://github.com/Zefau/ioBroker.hue-lights/blob/master/README.md",
+        "loglevel": "info",
+        "materialize": true,
+        "compact": true,
+        "enabled": true,
+        "type": "lightning",
+        "authors": [
+            {
+                "name": "Zefau",
+                "email": "zefau@mailbox.org"
+            }
+        ]
+    },
+    "native": {
+        "refresh": 30,
+        "syncLights": true
+    },
+    "objects": [],
+    "instanceObjects": []
+}

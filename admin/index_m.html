@@ -1,0 +1,203 @@
+<html>
+<head>
+	<!-- these 4 files always have to be included -->
+	<link rel="stylesheet" type="text/css" href="../../lib/css/materialize.css">
+	<link rel="stylesheet" type="text/css" href="../../css/adapter.css"/>
+
+	<script type="text/javascript" src="../../lib/js/jquery-3.2.1.min.js"></script>
+	<script type="text/javascript" src="../../socket.io/socket.io.js"></script>
+
+	<!-- these files always have to be included -->
+	<script type="text/javascript" src="../../js/translate.js"></script>
+	<script type="text/javascript" src="../../lib/js/materialize.js"></script>
+	<script type="text/javascript" src="../../js/adapter-settings.js"></script>
+	
+	<script type="text/javascript" src="words.js"></script>
+	<script type="text/javascript">
+	<!--
+	let saveParams = {};
+	let globalParams;
+	
+	// load
+	function load(settings, onChange)
+	{
+		initModal(settings.modal);
+		_load(settings, onChange);
+		globalParams = settings;
+	}
+	
+	// save
+	function save(callback)
+	{
+		_save(callback, saveParams);
+	}
+	
+	// modal
+	function initModal(modal)
+	{
+        $('.modal').modal(); // initialize all modals
+		
+		if (!modal)
+		{
+			// add listener
+			$('#buttonNotAgain').on('click', function()
+			{
+				saveParams.modal = true;
+			});
+			
+			// open modal
+			$('#modal').modal('open');
+		}
+	}
+	
+	// page loaded
+	$(window).on('load', function()
+	{
+	});
+	// -->
+	</script>
+	<script type="text/javascript" src="admin.js"></script>
+	<link rel="stylesheet" type="text/css" href="admin.css"/>
+	
+</head>
+<body>
+
+
+<div class="m adapter-container" id="settings">
+	
+	<!-- Modal Structure -->
+	<div id="modal" class="modal">
+		<div class="modal-content">
+			<h3 class="modalTitle translate">modalTitle</h3>
+			<p class="modalMessage translate">modalMessage</p>
+			
+		</div>
+		<div class="modal-footer">
+			<a href="#!" id="buttonNotAgain" class="modal-close btn waves-effect waves-green translate">buttonNotAgain</a>
+			<a href="#!" id="buttonDismiss" class="modal-close btn-flat translate">buttonDismiss</a>
+		</div>
+	</div>
+
+	<div class="row">
+		
+		<!-- TABS -->
+		<div class="col s12">
+			<ul class="tabs">
+				<li class="tab col s3"><a class="translate active" href="#config">tab_config</a></li>
+				<li class="tab col s3"><a target="_blank" class="translate" href="https://github.com/Zefau/ioBroker.hue-lights#smart-home--alexa-integration-using-iobrokerjavascript">tab_alexa</a></li>
+				<li class="tab col s3"><a target="_blank" class="translate" href="https://github.com/Zefau/ioBroker.hue-lights#iobrokerhue-lights">tab_info</a></li>
+			</ul>
+		</div>
+		
+		<!-- CONFIG -->
+		<div id="config" class="col s12">
+			
+			<!-- Plex -->
+			<div class="row">
+				<div class="col s12 m12">
+					<div class="row" style="margin-bottom: 0">
+						<div class="col s12 m12">
+							<p class="translate title">connectionTitle</p>
+						</div>
+					</div>
+					<div class="row box">
+						<p class="subtitle translate">connectionInformation</p>
+						
+						<div class="input-field col s2 m2">
+							<input class="value" id="ip" type="text" />
+							<label for="ip" class="translate">ip</label>
+						</div>
+						<div class="input-field col s1 m1">
+							<input class="value" id="port" type="number" placeholder="80" />
+							<label for="port" class="translate">port</label>
+						</div>
+						<div class="input-field col s3 m3">
+							<input class="value" id="user" type="text" />
+							<label for="user" class="translate">user</label>
+						</div>
+						<div class="input-field col s6 m6"></div>
+					</div>
+					
+				</div>
+			</div>
+			
+			<!-- Other & Events -->
+			<div class="row">
+				<div class="col s12 m12">
+					<div class="row" style="margin-bottom: 0">
+						<div class="col s12 m12">
+							<p class="translate title">other</p>
+						</div>
+					</div>
+					<div class="row box" style="margin-bottom: 0">
+						<div class="input-field col s4 m4">
+							<p class="subtitle translate">refreshInfo</p>
+							
+							<input class="value" id="refresh" type="number" placeholder="0" />
+							<label for="refresh" class="translate" style="display: none">refresh</label>
+						</div>
+						<div class="input-field col s1 m1"></div>
+						<div class="input-field col s2 m2">
+							<p class="subtitle translate">syncInfo</p>
+							
+							<div style="display: block">
+								<input class="value" id="syncConfig" type="checkbox" />
+								<label for="syncConfig" class="translate">syncConfig</label>
+							</div>
+							
+							<div style="display: block">
+								<input class="value" id="syncGroups" type="checkbox" />
+								<label for="syncGroups" class="translate">syncGroups</label>
+							</div>
+							
+							<div style="display: block">
+								<input class="value" id="syncLights" type="checkbox" />
+								<label for="syncLights" class="translate">syncLights</label>
+							</div>
+							
+							<div style="display: block">
+								<input class="value" id="syncResources" type="checkbox" />
+								<label for="syncResources" class="translate">syncResources</label>
+							</div>
+							
+							<div style="display: block">
+								<input class="value" id="syncRules" type="checkbox" />
+								<label for="syncRules" class="translate">syncRules</label>
+							</div>
+							
+							<div style="display: block">
+								<input class="value" id="syncScenes" type="checkbox" />
+								<label for="syncScenes" class="translate">syncScenes</label>
+							</div>
+							
+							<div style="display: block">
+								<input class="value" id="syncSchedules" type="checkbox" />
+								<label for="syncSchedules" class="translate">syncSchedules</label>
+							</div>
+							
+							<div style="display: block">
+								<input class="value" id="syncSensors" type="checkbox" />
+								<label for="syncSensors" class="translate">syncSensors</label>
+							</div>
+						</div>
+						<div class="input-field col s5 m5">
+							<p class="subtitle translate">nameInfo</p>
+							
+							<div style="display: block">
+								<input class="value" id="useNames" type="checkbox" />
+								<label for="useNames" class="translate">useNames</label>
+							</div>
+						</div>
+						
+					</div>
+				</div>
+			</div>
+			
+		</div>
+		
+	</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,53 @@
+{
+  "name": "iobroker.hue-lights",
+  "version": "0.1.0",
+  "description": "Integration of your Philips Hue Lights with your ioBroker",
+  "main": "hue-lights.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "author": {
+    "name": "zefau",
+    "email": "zefau@mailbox.org"
+  },
+  "bugs": {
+    "url": "https://github.com/Zefau/ioBroker.hue-lights/issues"
+  },
+  "contributors": [
+    {
+      "name": "zefau",
+      "email": "zefau@mailbox.org"
+    }
+  ],
+  "dependencies": {
+    "@iobroker/adapter-core": "^1.0.3",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4"
+  },
+  "deprecated": false,
+  "devDependencies": {
+    "@iobroker/testing": "^1.2.5",
+    "axios": "^0.19.0",
+    "chai": "^4.2.0",
+    "gulp": "^4.0.2",
+    "mocha": "^6.1.4"
+  },
+  "homepage": "https://github.com/Zefau/ioBroker.hue-lights",
+  "keywords": [
+    "ioBroker",
+    "hue",
+    "lights"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zefau/ioBroker.hue-lights.git"
+  },
+  "scripts": {
+    "test": "npm run test:package && npm run test:unit",
+    "test:integration": "mocha test/integration --exit",
+    "test:package": "mocha test/package --exit",
+    "test:unit": "mocha test/unit --exit"
+  }
+}

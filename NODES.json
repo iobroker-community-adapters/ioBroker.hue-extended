@@ -1,0 +1,12 @@
+{
+	"datetime": {"description": "Datetime of last update", "role": "text", "type": "string"},
+	"timestamp": {"description": "Timestamp of last update", "role": "text", "type": "string"},
+	
+	"lights.state.colormode": {"description": "", "role": "", "type": "string"},
+	"lights.state.alert": {"description": "", "role": "", "type": "string"},
+	"lights.state.ct": {"description": "", "role": "value", "type": "number"},
+	"lights.state.sat": {"description": "Adjust saturation", "role": "value", "type": "number"},
+	"lights.state.hue": {"description": "", "role": "value", "type": "number"},
+	"lights.state.bri": {"description": "Adjust brightness", "role": "value", "type": "number"},
+	"lights.state.on": {"description": "Switch light on / off", "role": "switch.light", "type": "boolean"}
+}
