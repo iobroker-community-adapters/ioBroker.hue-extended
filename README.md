@@ -31,6 +31,9 @@ tbd
 
 ## Changelog
 
+### 0.2.0 (2019-07-24)
+- (Zefau) Added support to change states _level_, _xy_, _effect_, _alert_, and _transitiontime_
+
 ### 0.1.0 (2019-07-21)
 - (Zefau) Retrieve lights, groups, resourcelinks, rules, scenes, schedules, sensors and config from Hue Bridge
 - (Zefau) Change states (e.g. on/off, brightness, saturation)

@@ -2,11 +2,16 @@
 	"datetime": {"description": "Datetime of last update", "role": "text", "type": "string"},
 	"timestamp": {"description": "Timestamp of last update", "role": "text", "type": "string"},
 	
-	"lights.state.colormode": {"description": "", "role": "", "type": "string"},
-	"lights.state.alert": {"description": "", "role": "", "type": "string"},
-	"lights.state.ct": {"description": "", "role": "value", "type": "number"},
-	"lights.state.sat": {"description": "Adjust saturation", "role": "value", "type": "number"},
-	"lights.state.hue": {"description": "", "role": "value", "type": "number"},
-	"lights.state.bri": {"description": "Adjust brightness", "role": "value", "type": "number"},
-	"lights.state.on": {"description": "Switch light on / off", "role": "switch.light", "type": "boolean"}
+	"lights.state.alert": {"description": "On/Off state of the light", "role": "text", "type": "string", "common": {"states": {"none": "No alert", "select": "One breathe cycle", "lselect": "Breathe cycles for 15s"}}},
+	"lights.state.bri": {"description": "Brightness of the light", "role": "value", "type": "number"},
+	"lights.state.colormode": {"description": "Indicates the color mode in which the light is working", "role": "text", "type": "string"},
+	"lights.state.ct": {"description": "The Mired Color temperature of the light", "role": "value", "type": "number"},
+	"lights.state.effect": {"description": "The dynamic effect of the light", "role": "text", "type": "string", "common": {"states": {"none": "No effect", "colorloop": "Cycle through all hues"}}},
+	"lights.state.transitiontime": {"description": "The duration of the transition from the light’s current state to the new state. This is given as a multiple of 100ms and defaults to 4 (400ms).", "role": "value", "type": "number"},
+	"lights.state.hue": {"description": "Hue of the light between 0 and 65535", "role": "value", "type": "number"},
+	"lights.state.level": {"description": "Level of the light between 0 and 100", "role": "value", "type": "number"},
+	"lights.state.mode": {"description": "", "role": "text", "type": "string"},
+	"lights.state.on": {"description": "Switch light on / off", "role": "switch.light", "type": "boolean"},
+	"lights.state.reachable": {"description": "Indicates if a light can be reached by the bridge", "role": "indicator.reachable", "type": "boolean"},
+	"lights.state.sat": {"description": "Saturation of the light", "role": "value", "type": "number"}
 }
