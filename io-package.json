@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "hue-lights",
-        "version": "0.2.0",
+        "version": "0.2.1",
         "title": "Philips Hue Lights",
         "desc": {
             "en": "Integration of your Philips Hue Lights with your ioBroker",

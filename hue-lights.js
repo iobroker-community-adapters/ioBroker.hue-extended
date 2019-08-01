@@ -158,6 +158,13 @@ function startAdapter(options)
 				state.val = Math.ceil(254 * state.val / 100);
 			}
 			
+			// if .bri is changed to off
+			if (action == 'bri' && state.val <= 1)
+			{
+				action = 'on';
+				state.val = false;
+			}
+			
 			// apply command
 			setDevice(device, { [action]: state.val });
 		});
