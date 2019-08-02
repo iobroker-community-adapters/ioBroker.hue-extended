@@ -39,6 +39,10 @@ tbd
 
 ## Changelog
 
+### 1.0.0 (2019-xx-xx) [MILESTONES / PLANNED FEATURES FOR v1.0.0 RELEASE]
+- implement user creation in interface configuration (admin panel)
+- implement bridge discovery in interface configuration (admin panel)
+
 ### 0.2.0 (2019-07-24)
 - (Zefau) Added support to change states _level_, _xy_, _effect_, _alert_, and _transitiontime_
 
