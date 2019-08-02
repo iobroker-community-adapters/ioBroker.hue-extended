@@ -13,7 +13,7 @@
     "refreshInfo": "Intervall zur Aktualisierung aller Einstellungen / Daten (in Sekunden). Wenn auf 0 gesetzt werden die Einstellungen nur beim Adapter-Start aktualisiert.",
     "syncConfig": "Synchronisation der Konfiguration",
     "syncGroups": "Synchronisation der Gruppen",
-    "syncInfo": "Wählen Sie doe Elemente aus, die synchronisiert werden sollen",
+    "syncInfo": "Wählen Sie die Elemente aus, die synchronisiert werden sollen",
     "syncLights": "Synchronisation der Lichter",
     "syncResources": "Synchronisation der Ressourcen",
     "syncRules": "Synchronisation der Regeln",
