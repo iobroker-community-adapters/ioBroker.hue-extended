@@ -21,7 +21,15 @@ Connect your Philips Hue Lights with ioBroker.
 
 
 ## 1. Features
-tbd
+- Synchronize Config
+- Synchronize Groups
+- Synchronize Lights
+- Synchronize Resources
+- Synchronize Rules
+- Synchronize Scenes
+- Synchronize Schedules
+- Synchronize Sensors 
+- Trigger changes on states `on/off`, `bri` (`level`), `hue`, `sat`, `xy`, `ct`, `alert`, `effect` and `transitiontime`  
 
 ## 2. Setup instructions
 tbd
