@@ -43,12 +43,15 @@ tbd
 - implement user creation in interface configuration (admin panel)
 - implement bridge discovery in interface configuration (admin panel)
 
+### 0.3.1 (2019-08-03)
+- (Zefau) When turning on a device, set level / bri to 100 if it was set to 0
+
 ### 0.3.0 (2019-08-03)
 
 __REMARK: If you are coming from an earlier version, please delete all your hue-lights states before running this release!__
 
 - (Zefau) Added error message when incorrect bridge credentials are provided ([see issue description](https://forum.iobroker.net/post/287505))
-- (Zefau) Set level / bri to 0 when turning off a device ([see issue description](https://forum.iobroker.net/post/287566))
+- (Zefau) When turning off a device, set level / bri to 0 ([see issue description](https://forum.iobroker.net/post/287566))
 - (Zefau) Fixed error that prevented `groups` being set / changed
 - (Zefau) Added specific role information to states under `lights`, `groups` and `sensors` ([see issue description](https://forum.iobroker.net/post/287566))
 - (Zefau) Fixed wrong value for temperature sensors ([see issue description](https://forum.iobroker.net/post/287564))

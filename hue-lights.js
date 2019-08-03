@@ -156,22 +156,30 @@ function startAdapter(options)
 			
 			let device = getDevice([type, uid]);
 			let action = params.splice(params.length-1, 1);
-			device.state = params.join('/');
+			device.trigger = params.join('/');
 			
 			// build command
 			let commands = { [action]: state.val };
 			
-			// if device is turn off, set level / bri to 0
+			// if device is turned on, make sure brightness is not 0
+			if (action == 'on' && state.val == true)
+				commands.bri = device.state.bri == 0 ? 254 : device.state.bri;
+			
+			// if device is turned off, set level / bri to 0
 			if (action == 'on' && state.val == false)
 				commands.bri = 0;
 			
 			// if .level is changed the change will be applied to .bri instead
 			if (action == 'level')
-				commands = { bri: Math.ceil(254 * state.val / 100) };
+				commands = { on: true, bri: Math.ceil(254 * state.val / 100) };
+			
+			// if .bri is changed, make sure light is on
+			if (action == 'bri')
+				commands = { on: true, bri: state.val };
 			
 			// if .bri is changed to off
 			if ((action == 'bri' || action == 'level') && state.val < 1)
-				commands = { bri: 0, on: false };
+				commands = { on: false, bri: 0 };
 			
 			// apply command
 			setDevice(device, commands);
@@ -248,9 +256,9 @@ function readData(key, data)
 			if (data.name) data.uid = key.substr(-3).replace(/^0+/, '');
 			
 			// add level as additional state
-			if (data.bri)
+			if (data.bri !== undefined)
 			{
-				data.level = Math.ceil(data.bri / 254 * 100);
+				data.level = data.bri > 0 ? Math.ceil(data.bri / 254 * 100) : 0;
 				data.transitiontime = data.transitiontime || 4;
 			}
 			
@@ -390,7 +398,7 @@ function getDevice(params)
 function setDevice(device, actions)
 {
 	let options = {
-		uri: bridge + device.state,
+		uri: bridge + device.trigger,
 		method: 'PUT',
 		json: true,
 		body: actions
@@ -401,7 +409,7 @@ function setDevice(device, actions)
 	{
 		if (!Array.isArray(res))
 		{
-			adapter.log.warn('Unknown error applying actions ' + JSON.stringify(actions) + ' on device ' + device.name + ' (to ' + device.state + ')!');
+			adapter.log.warn('Unknown error applying actions ' + JSON.stringify(actions) + ' on device ' + device.name + ' (to ' + device.trigger + ')!');
 			adapter.log.debug('Response: ' + JSON.stringify(res));
 		}
 		
@@ -423,7 +431,7 @@ function setDevice(device, actions)
 		adapter.log.warn('Failed sending request to Hue Bridge!');
 		adapter.log.debug('Error Message: ' + e);
 		adapter.log.debug('- device: ' + JSON.stringify(device));
-		adapter.log.debug('- uri: ' + bridge + device.state);
+		adapter.log.debug('- uri: ' + bridge + device.trigger);
 		adapter.log.debug('- actions: ' + JSON.stringify(actions));
 	});
 }

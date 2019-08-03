@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "hue-lights",
-        "version": "0.3.0",
+        "version": "0.3.1",
         "title": "Philips Hue Lights",
         "desc": {
             "en": "Integration of your Philips Hue Lights with your ioBroker",
@@ -16,6 +16,18 @@
             "zh-cn": "融入你的飞利浦色灯你ioBroker"
         },
         "news": {
+            "0.3.1": {
+                "en": "- When turning on a device, set level / bri to 100 if it was set to 0",
+                "de": "- Beim Einschalten des Gerätes, wird level / bri nun auf 100 gesetzt (sofern vorher 0)",
+                "ru": "- При включении устройства, установите уровень / BRI в 100, если он был установлен в 0",
+                "pt": "- Quando ligar um dispositivo, defina o nível / bri 100 se ele foi definido para 0",
+                "nl": "- Bij het aanzetten van een apparaat, stelt u het niveau / bri-100 als deze is ingesteld op 0",
+                "fr": "- Lorsque vous allumez un appareil, réglez le niveau / la bri à 100 si elle a été définie à 0",
+                "it": "- Quando l'accensione di un dispositivo, impostare il livello / bri a 100 se è stato impostato a 0",
+                "es": "- Al conectar un dispositivo, establezca el nivel de bri a 100 si se establece en 0",
+                "pl": "- Po włączeniu urządzenia, ustaw poziom / BRI w 100, jeśli został ustawiony na 0",
+                "zh-cn": "-转弯时在设备上时，设置一级/bri到100，如果它被设定为0"
+            },
             "0.3.0": {
                 "en": "-  Added error message when incorrect bridge credentials are provided\n- Set level / bri to 0 when turning off a device\n- Fixed error that prevented groups being set / changed\n- Added specific role information to states under lights, groups and sensors\n- Fixed wrong value for temperature sensors",
                 "de": "- Fehlermeldung bei falschen Bridge Anmeldeinformationen hinzugefügt\n- Beim Ausschalten des Geräts werden level / bri auf 0 gesetzt\n- Fehler behoben, der verhinderte, dass Gruppen geschaltet werden\n- Spezifische Rollen für States vergeben (für Lichter, Gruppen und Sensoren)\n- Falscher Wert für die Temperatur-Sensoren behoben",

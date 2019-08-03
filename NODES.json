@@ -44,7 +44,7 @@
 	"lights.swversion": {"description": "Software version", "role": "text", "type": "string"},
 	"lights.type": {"description": "A fixed name describing the type of light", "role": "text", "type": "string"},
 	"lights.uid": {"description": "Unique ID of the light", "role": "value", "type": "number"},
-	"lights.uniqueid": {"description": "Unique id of the device. The MAC address of the device with a unique endpoint id", "role": "text", "type": "string"},
+	"lights.uniqueid": {"description": "Unique ID of the device. The MAC address of the device with a unique endpoint id", "role": "text", "type": "string"},
 	
 	
 	"groups.action.alert": {"description": "The alert effect,is a temporary change to the bulb’s state", "role": "text", "type": "string", "common": {"states": {"none": "No alert", "select": "One breathe cycle", "lselect": "Breathe cycles for 15s"}}},
@@ -96,5 +96,5 @@
 	"sensors.swversion": {"description": "Software version ", "role": "text", "type": "string"},
 	"sensors.type": {"description": "", "role": "text", "type": "string"},
 	"sensors.uid": {"description": "Unique ID of the sensor", "role": "value", "type": "number"},
-	"sensors.uniqueid": {"description": "Unique id of the sensor", "role": "text", "type": "string"}
+	"sensors.uniqueid": {"description": "Unique ID of the sensor", "role": "text", "type": "string"}
 }
