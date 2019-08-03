@@ -89,7 +89,7 @@ function startAdapter(options)
 			{
 				if (!res || (res[0] && res[0].error))
 				{
-					adapter.log.warn('Error retrieving data from Hue Bridge' + (res[0] && res[0].error ? ': ' + res[0].error.description : '!'));
+					adapter.log.error('Error retrieving data from Hue Bridge' + (res[0] && res[0].error ? ': ' + res[0].error.description : '!'));
 					return false;
 				}
 				
@@ -128,6 +128,10 @@ function startAdapter(options)
 				if (adapter.config.refresh)
 					refreshCycle = setTimeout(refresh, adapter.config.refresh*1000);
 				
+			}).catch(function(err)
+			{
+				adapter.log.error('Error connecting to Hue Bridge! See debug for more details.');
+				adapter.log.debug(JSON.stringify(err));
 			});
 			
 		}, 1000);
@@ -166,8 +170,10 @@ function startAdapter(options)
 				commands.bri = device.state.bri == 0 ? 254 : device.state.bri;
 			
 			// if device is turned off, set level / bri to 0
+			/*
 			if (action == 'on' && state.val == false)
 				commands.bri = 0;
+			*/
 			
 			// if .level is changed the change will be applied to .bri instead
 			if (action == 'level')
@@ -177,7 +183,7 @@ function startAdapter(options)
 			if (action == 'bri')
 				commands = { on: true, bri: state.val };
 			
-			// if .bri is changed to off
+			// if .bri is changed to 0, turn off
 			if ((action == 'bri' || action == 'level') && state.val < 1)
 				commands = { on: false, bri: 0 };
 			
@@ -252,7 +258,7 @@ function readData(key, data)
 		// create channel
 		if (Object.keys(data).length > 0)
 		{
-			// add uid as additionalstate
+			// add uid as additional state
 			if (data.name) data.uid = key.substr(-3).replace(/^0+/, '');
 			
 			// add level as additional state
@@ -310,7 +316,7 @@ function readData(key, data)
 				node: key,
 				type: node.type,
 				role: node.role,
-				description: node.description,
+				description: device.name + ' - ' + node.description,
 				common: Object.assign(
 					node.common || {},
 					{
