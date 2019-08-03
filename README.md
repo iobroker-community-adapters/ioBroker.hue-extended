@@ -42,7 +42,10 @@ tbd
 ### 1.0.0 (2019-xx-xx) [MILESTONES / PLANNED FEATURES FOR v1.0.0 RELEASE]
 - implement user creation in interface configuration (admin panel)
 - implement bridge discovery in interface configuration (admin panel)
-- validate bridge credentials
+- validate bridge credentials ([see issue description](https://forum.iobroker.net/post/287505))
+- set level / bri to 0 when turning off a device ([see issue description](https://forum.iobroker.net/post/287566))
+- change roles of state to an appropriate type (as of now all is `text`) ([see issue description](https://forum.iobroker.net/post/287566))
+- temperature has wrong value ([see issue description](https://forum.iobroker.net/post/287564))
 
 ### 0.2.0 (2019-07-24)
 - (Zefau) Added support to change states _level_, _xy_, _effect_, _alert_, and _transitiontime_
