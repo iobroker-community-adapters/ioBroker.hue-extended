@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "hue-lights",
-        "version": "0.2.1",
+        "version": "0.3.0",
         "title": "Philips Hue Lights",
         "desc": {
             "en": "Integration of your Philips Hue Lights with your ioBroker",
@@ -16,9 +16,30 @@
             "zh-cn": "融入你的飞利浦色灯你ioBroker"
         },
         "news": {
+            "0.3.0": {
+                "en": "-  Added error message when incorrect bridge credentials are provided\n- Set level / bri to 0 when turning off a device\n- Fixed error that prevented groups being set / changed\n- Added specific role information to states under lights, groups and sensors\n- Fixed wrong value for temperature sensors",
+                "de": "- Fehlermeldung bei falschen Bridge Anmeldeinformationen hinzugefügt\n- Beim Ausschalten des Geräts werden level / bri auf 0 gesetzt\n- Fehler behoben, der verhinderte, dass Gruppen geschaltet werden\n- Spezifische Rollen für States vergeben (für Lichter, Gruppen und Sensoren)\n- Falscher Wert für die Temperatur-Sensoren behoben",
+                "ru": "- Добавлено сообщение об ошибке при неправильном мост данные\n- Установить уровень / BRI в 0 при выключении устройства\n- Исправлена ошибка, которая мешала групп устанавливается / изменяется\n- Добавлена особая роль информации для государств под огни, группы и датчики\n- Исправлено неверное значение для датчиков температуры",
+                "pt": "- Adicionado mensagem de erro quando incorreta ponte credenciais são fornecidos\n- Definir o nível / bri para 0 quando desligar um dispositivo de\n- Corrigido erro que impedia os \"grupos\" que está sendo definido / alterado\n- Adicionado função específica de informações para estados em luzes, grupos e sensores\n- Corrigido o valor errado para sensores de temperatura",
+                "nl": "- Toegevoegd foutbericht wanneer onjuiste brug referenties worden verstrekt\n- Niveau / bri tot 0 bij het uitschakelen van een apparaat\n- Fout opgelost dat ervoor zorgde dat groepen wordt ingesteld / veranderd\nDe toegevoegde specifieke rol van informatie aan de lidstaten uit hoofde van de verlichting, groepen en sensoren\n- Vaste verkeerde waarde voor temperatuur sensoren",
+                "fr": "- Ajout de message d'erreur lorsque des pont les informations d'identification sont fournis\n- Niveau de jeu / bri à 0 lors de la mise hors tension d'un périphérique\n- Correction d'une erreur qui empêchait les \"groupes\" en cours de jeu / changé\nAjoutée le rôle spécifique de l'information aux états en vertu de lumières, groupes et capteurs\n- Correction d'une valeur incorrecte pour les capteurs de température",
+                "it": "- Aggiunto messaggio di errore quando non corretto ponte credenziali fornite\n- Impostare il livello / bri a 0 quando spegnimento di un dispositivo\n- Corretto l'errore che impediva di gruppi in fase di impostare / cambiare\n- Aggiunto il ruolo specifico di informazioni ai membri, nell'ambito di una luce, gruppi e sensori\n- Risolto un valore errato per i sensori di temperatura",
+                "es": "- Añadido mensaje de error cuando incorrecto puente de credenciales se proporcionan\nNivel / bri a 0 cuando la desactivación de un dispositivo\n- Corregido un error que impedía a \"grupos\" se va a establecer / cambiar\n- Añadida función específica información para los estados en virtud de luces, grupos y sensores\n- Fija un valor incorrecto para los sensores de temperatura",
+                "pl": "- Dodano komunikat o błędzie w przypadku niewłaściwego most dane\n- Ustawić poziom / BRI w 0 po wyłączeniu urządzenia\n- Naprawiono błąd, który uniemożliwiał grup ustawia się / zmienia\n- Dodano szczególną rolę informacji dla państw pod światła, grupy i czujniki\n- Naprawiono niepoprawną wartość dla czujników temperatury",
+                "zh-cn": "-加入错误消息的时候不正确的桥凭据的提供\n-设定的级别/bri至0时关闭设备\n-修正错误，防止集团，正在设置/改变\n-加入的具体作用的信息来各国根据灯,集团和传感器\n-固定的错误的价值温度传感器"
+            },
             "0.2.0": {
-                "en": "Added support to change states _level_, _xy_, _effect_, _alert_, and _transitiontime_"
-			},
+                "en": "Added support to change states _level_, _xy_, _effect_, _alert_, and _transitiontime_",
+                "de": "Unterstützung für die Zustände _level_, _xy_, _effect_, _alert_, und _transitiontime_ hinzugefügt",
+                "ru": "Добавлена поддержка для изменения состояний _level_, _xy_, _effect_, _alert_, и _transitiontime_",
+                "pt": "Adicionado suporte para alterar os estados _level_, _xy_, _effect_, _alert_, e _transitiontime_",
+                "nl": "Ondersteuning toegevoegd wijzigen staten _level_, _xy_, _effect_, _alert_, en _transitiontime_",
+                "fr": "Ajout du support pour modifier les états _level_, _xy_, _effect_, _alert_, et _transitiontime_",
+                "it": "Aggiunto il supporto per modificare gli stati _level_, _xy_, _effect_, _alert_, e _transitiontime_",
+                "es": "Añadido soporte para los estados de cambio _level_, _xy_, _effect_, _alert_, y _transitiontime_",
+                "pl": "Dodano wsparcie dla zmiany stanów _level_, _xy_, _effect_, _alert_, i _transitiontime_",
+                "zh-cn": "增加支持，以改变国_level_,_xy_,_effect_,_alert_，并_transitiontime_"
+            },
             "0.1.0": {
                 "en": "Retrieve lights, groups, resourcelinks, rules, scenes, schedules, sensors and config from Hue Bridge\nChange states (e.g. on/off, brightness, saturation)",
                 "de": "erste version",

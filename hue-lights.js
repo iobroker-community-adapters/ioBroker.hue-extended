@@ -87,8 +87,13 @@ function startAdapter(options)
 		{
 			_request({ uri: bridge, json: true }).then(function(res)
 			{
-				//adapter.log.debug('Retrieved from data from hue bridge: ' + JSON.stringify(res));
+				if (!res || (res[0] && res[0].error))
+				{
+					adapter.log.warn('Error retrieving data from Hue Bridge' + (res[0] && res[0].error ? ': ' + res[0].error.description : '!'));
+					return false;
+				}
 				
+				// write data to states
 				if (adapter.config.syncConfig && res.config !== undefined)
 					addBridgeData({ config: res.config });
 				
@@ -112,16 +117,18 @@ function startAdapter(options)
 				
 				if (adapter.config.syncSensors && res.sensors !== undefined)
 					addBridgeData({ sensors: res.sensors });
+				
+				// refresh interval
+				if (adapter.config.refresh > 0 && adapter.config.refresh < 10)
+				{
+					adapter.log.warn('Refresh rate should not be less than 10s, thus set to 10s.');
+					adapter.config.refresh = 10;
+				}
+				
+				if (adapter.config.refresh)
+					refreshCycle = setTimeout(refresh, adapter.config.refresh*1000);
+				
 			});
-			
-			if (adapter.config.refresh > 0 && adapter.config.refresh < 10)
-			{
-				adapter.log.warn('Refresh rate should not be less than 10s, thus set to 10s.');
-				adapter.config.refresh = 10;
-			}
-			
-			if (adapter.config.refresh)
-				refreshCycle = setTimeout(refresh, adapter.config.refresh*1000);
 			
 		}, 1000);
 	});
@@ -151,22 +158,23 @@ function startAdapter(options)
 			let action = params.splice(params.length-1, 1);
 			device.state = params.join('/');
 			
+			// build command
+			let commands = { [action]: state.val };
+			
+			// if device is turn off, set level / bri to 0
+			if (action == 'on' && state.val == false)
+				commands.bri = 0;
+			
 			// if .level is changed the change will be applied to .bri instead
 			if (action == 'level')
-			{
-				action = 'bri';
-				state.val = Math.ceil(254 * state.val / 100);
-			}
+				commands = { bri: Math.ceil(254 * state.val / 100) };
 			
 			// if .bri is changed to off
-			if (action == 'bri' && state.val <= 1)
-			{
-				action = 'on';
-				state.val = false;
-			}
+			if ((action == 'bri' || action == 'level') && state.val < 1)
+				commands = { bri: 0, on: false };
 			
 			// apply command
-			setDevice(device, { [action]: state.val });
+			setDevice(device, commands);
 		});
 	});
 	
@@ -276,13 +284,13 @@ function readData(key, data)
 	{
 		// convert data
 		node.key = key;
-		//data = convertNode(node, data);
+		data = convertNode(node, data);
 		
 		// subscribe to states (if device not indexed yet)
 		let device = getDevice(key.split('.'));
 		let action = key.substr(key.lastIndexOf('.')+1);
 		
-		if (device === false && SUBSCRIPTIONS.indexOf(action) > -1)
+		if (device === false && SUBSCRIPTIONS.indexOf(action) > -1 && (key.indexOf('state.' + action) > -1 || key.indexOf('action.' + action) > -1))
 		{
 			node.subscribe = true;
 			adapter.subscribeStates(key);
@@ -314,6 +322,11 @@ function convertNode(node, data)
 {
 	switch(node.convert)
 	{
+		case "temperature":
+			data = data / 100;
+			break;
+			
+		/*
 		case "date-timestamp":
 			
 			// convert timestamp to date
@@ -347,6 +360,7 @@ function convertNode(node, data)
 			let duration = data/1000/60;
 			return duration < 1 ? data : Math.floor(duration);
 			break;
+		*/
 	}
 	
 	return data;
@@ -375,10 +389,21 @@ function getDevice(params)
  */
 function setDevice(device, actions)
 {
-	_request({ uri: bridge + device.state, method: 'PUT', json: true, body: actions }).then(function(res)
+	let options = {
+		uri: bridge + device.state,
+		method: 'PUT',
+		json: true,
+		body: actions
+	};
+	
+	//adapter.log.info('Sending command to set ' + Object.keys(msg[type]) + ' on device ' + device.name + ' (to ' + Object.values(msg[type]) + ').');
+	_request(options).then(function(res)
 	{
 		if (!Array.isArray(res))
-			adapter.log.warn('Unknown error applying action ' + action + ' on device ' + device.name + ' (to ' + device.state + ')!');
+		{
+			adapter.log.warn('Unknown error applying actions ' + JSON.stringify(actions) + ' on device ' + device.name + ' (to ' + device.state + ')!');
+			adapter.log.debug('Response: ' + JSON.stringify(res));
+		}
 		
 		else
 		{
