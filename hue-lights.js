@@ -41,6 +41,7 @@ const SUBSCRIPTIONS = [ // https://developers.meethue.com/develop/hue-api/lights
 	'level'
 ];
 
+let device;
 let DEVICES = {
 	'groups': {},
 	'lights': {},
@@ -131,7 +132,7 @@ function startAdapter(options)
 			}).catch(function(err)
 			{
 				adapter.log.error('Error connecting to Hue Bridge! See debug for more details.');
-				adapter.log.debug(JSON.stringify(err));
+				adapter.log.debug(err.message);
 			});
 			
 		}, 1000);
@@ -158,16 +159,16 @@ function startAdapter(options)
 			let uid = obj.val;
 			params[1] = uid;
 			
-			let device = getDevice([type, uid]);
+			let d = getDevice([type, uid]);
 			let action = params.splice(params.length-1, 1);
-			device.trigger = params.join('/');
+			d.trigger = params.join('/');
 			
 			// build command
 			let commands = { [action]: state.val };
 			
 			// if device is turned on, make sure brightness is not 0
 			if (action == 'on' && state.val == true)
-				commands.bri = device.state.bri == 0 ? 254 : device.state.bri;
+				commands.bri = d.state.bri == 0 ? 254 : d.state.bri;
 			
 			// if device is turned off, set level / bri to 0
 			/*
@@ -188,7 +189,7 @@ function startAdapter(options)
 				commands = { on: false, bri: 0 };
 			
 			// apply command
-			setDevice(device, commands);
+			setDevice(d, commands);
 		});
 	});
 	
@@ -249,6 +250,10 @@ function readData(key, data)
 	if (data === undefined || data === 'undefined')
 		return false;
 	
+	// set current device name
+	if (data && data.name)
+		device = data.name;
+	
 	// get node details
 	let node = get(key.split('.')); // lights.<NAME/ID>.folder
 	
@@ -301,10 +306,10 @@ function readData(key, data)
 		data = convertNode(node, data);
 		
 		// subscribe to states (if device not indexed yet)
-		let device = getDevice(key.split('.'));
+		let d = getDevice(key.split('.'));
 		let action = key.substr(key.lastIndexOf('.')+1);
 		
-		if (device === false && SUBSCRIPTIONS.indexOf(action) > -1 && (key.indexOf('state.' + action) > -1 || key.indexOf('action.' + action) > -1))
+		if (d === false && SUBSCRIPTIONS.indexOf(action) > -1 && (key.indexOf('state.' + action) > -1 || key.indexOf('action.' + action) > -1))
 		{
 			node.subscribe = true;
 			adapter.subscribeStates(key);
@@ -316,7 +321,7 @@ function readData(key, data)
 				node: key,
 				type: node.type,
 				role: node.role,
-				description: device.name + ' - ' + node.description,
+				description: (device ? device + ' - ' : '') + node.description,
 				common: Object.assign(
 					node.common || {},
 					{
