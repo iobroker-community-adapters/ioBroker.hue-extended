@@ -81,7 +81,7 @@
 	
 	"sensors.state.buttonevent": {"description": "Event of the button", "role": "value", "type": "number"},
 	"sensors.state.flag": {"description": "Flag", "role": "indicator", "type": "boolean"},
-	"sensors.state.temperature": {"description": "Temperature", "role": "value.temperature", "type": "number", "common": {"unit": "°C"}},
+	"sensors.state.temperature": {"description": "Temperature", "role": "value.temperature", "type": "number", "common": {"unit": "°C"}, "convert": "temperature"},
 	"sensors.state.daylight": {"description": "Indicates daylight", "role": "indicator", "type": "boolean"},
 	"sensors.state.status": {"description": "Status", "role": "value", "type": "number"},
 	"sensors.state.lastupdated": {"description": "Last update", "role": "text", "type": "string"},
