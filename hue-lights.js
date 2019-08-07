@@ -1,7 +1,6 @@
 'use strict';
 const adapterName = require('./io-package.json').common.name;
 const utils = require('@iobroker/adapter-core'); // Get common adapter utils
-
 const _request = require('request-promise');
 
 
@@ -17,6 +16,7 @@ const _NODES = require(__dirname + '/NODES.json');
  */
 let adapter;
 let library;
+let unloaded;
 let bridge, dutyCycle, refreshCycle;
 
 const SUBSCRIPTIONS = [ // https://developers.meethue.com/develop/hue-api/lights-api/#142_response
@@ -67,7 +67,8 @@ function startAdapter(options)
 	
 	adapter = new utils.Adapter(options);
 	library = new Library(adapter);
-
+	unloaded = false;
+	
 	/*
 	 * ADAPTER READY
 	 *
@@ -75,67 +76,31 @@ function startAdapter(options)
 	adapter.on('ready', function()
 	{
 		if (!adapter.config.ip || !adapter.config.user)
-		{
-			adapter.log.warn('Please provide connection settings for Hue Bridge!');
-			return;
-		}
+			return library.terminate('Please provide connection settings for Hue Bridge!');
 		
 		// Bridge connection
 		bridge = 'http://' + adapter.config.ip + ':' + (adapter.config.port || 80) + '/api/' + adapter.config.user + '/';
 		
 		// retrieve from Bridge
-		refreshCycle = setTimeout(function refresh()
+		['config', 'groups', 'lights', 'resourcelinks', 'rules', 'scenes', 'schedules', 'sensors'].forEach(function(channel)
 		{
-			_request({ uri: bridge, json: true }).then(function(res)
+			if (adapter.config['sync' + library.ucFirst(channel)])
 			{
-				if (!res || (res[0] && res[0].error))
-				{
-					adapter.log.error('Error retrieving data from Hue Bridge' + (res[0] && res[0].error ? ': ' + res[0].error.description : '!'));
-					return false;
-				}
-				
-				// write data to states
-				if (adapter.config.syncConfig && res.config !== undefined)
-					addBridgeData({ config: res.config });
-				
-				if (adapter.config.syncGroups && res.groups !== undefined)
-					addBridgeData({ groups: res.groups });
-				
-				if (adapter.config.syncLights && res.lights !== undefined)
-					addBridgeData({ lights: res.lights });
-				
-				if (adapter.config.syncResources && res.resources !== undefined)
-					addBridgeData({ resources: res.resources });
-				
-				if (adapter.config.syncRules && res.rules !== undefined)
-					addBridgeData({ rules: res.rules });
-				
-				if (adapter.config.syncScenes && res.scenes !== undefined)
-					addBridgeData({ scenes: res.scenes });
-				
-				if (adapter.config.syncSchedules && res.schedules !== undefined)
-					addBridgeData({ schedules: res.schedules });
-				
-				if (adapter.config.syncSensors && res.sensors !== undefined)
-					addBridgeData({ sensors: res.sensors });
-				
-				// refresh interval
-				if (adapter.config.refresh > 0 && adapter.config.refresh < 10)
-				{
-					adapter.log.warn('Refresh rate should not be less than 10s, thus set to 10s.');
-					adapter.config.refresh = 10;
-				}
-				
-				if (adapter.config.refresh)
-					refreshCycle = setTimeout(refresh, adapter.config.refresh*1000);
-				
-			}).catch(function(err)
-			{
-				adapter.log.error('Error connecting to Hue Bridge! See debug for more details.');
-				adapter.log.debug(err.message);
-			});
+				adapter.log.info('Retrieving ' + channel + ' from Hue Bridge...');
+				getBridgeData(channel, adapter.config.refresh);
+			}
+		});
+		
+		// delete old states (which were not updated recently)
+		clearTimeout(dutyCycle);
+		dutyCycle = setTimeout(function dutyCycleRun()
+		{
+			adapter.log.debug('Running Duty Cycle...');
+			library.runDutyCycle(adapterName + '.' + adapter.instance, Math.floor(Date.now()/1000));
+			adapter.log.debug('Duty Cycle finished.');
+			dutyCycle = setTimeout(dutyCycleRun, 4*60*60*1000);
 			
-		}, 1000);
+		}, 60*1000);
 	});
 
 	/*
@@ -202,8 +167,10 @@ function startAdapter(options)
 		try
 		{
 			adapter.log.info('Adapter stopped und unloaded.');
+			unloaded = true;
 			clearTimeout(refreshCycle);
 			clearTimeout(dutyCycle);
+			
 			callback();
 		}
 		catch(e)
@@ -214,6 +181,55 @@ function startAdapter(options)
 
 	return adapter;	
 };
+
+
+/*
+ * COMPACT MODE
+ * If started as allInOne/compact mode => return function to create instance
+ *
+ */
+if (module && module.parent)
+	module.exports = startAdapter;
+else
+	startAdapter(); // or start the instance directly
+
+
+/**
+ *
+ */
+function getBridgeData(channel, refresh)
+{
+	_request({ uri: bridge + channel + '/', json: true }).then(function(res)
+	{
+		if (!res || (res[0] && res[0].error))
+		{
+			adapter.log.error('Error retrieving ' + channel + ' from Hue Bridge' + (res[0] && res[0].error ? ': ' + res[0].error.description : '!'));
+			return false;
+		}
+		
+		// add meta data
+		res.timestamp = Math.floor(Date.now()/1000);
+		res.datetime = library.getDateTime(Date.now());
+		
+		// write data to states
+		addBridgeData({ [channel]: res });
+		
+		// refresh interval
+		if (refresh > 0 && refresh < 10)
+		{
+			adapter.log.warn('Refresh rate should not be less than 10s, thus set to 10s.');
+			refresh = 10;
+		}
+		
+		if (refresh && !unloaded)
+			refreshCycle = setTimeout(getBridgeData, refresh*1000, channel, refresh);
+		
+	}).catch(function(err)
+	{
+		library.terminate('Error connecting to Hue Bridge when retrieving channel ' + channel + ' (' + err.message + ')!');
+		adapter.log.debug(err.message);
+	});
+}
 
 /**
  *
@@ -229,16 +245,13 @@ function addBridgeData(data)
 	for (let key in data)
 	{
 		// loop through payload
+		device = null;
 		readData(key, data[key]);
 		
 		// index payload
 		if (DEVICES[key] !== undefined)
 			DEVICES[key] = data[key];
 	}
-	
-	// delete old states (which were not updated in the current payload)
-	clearTimeout(dutyCycle);
-	dutyCycle = setTimeout(function() {library.runDutyCycle(adapterName + '.' + adapter.instance, data.timestamp)}, 60000);
 }
 
 /**
@@ -263,8 +276,14 @@ function readData(key, data)
 		// create channel
 		if (Object.keys(data).length > 0)
 		{
-			// add uid as additional state
-			if (data.name) data.uid = key.substr(-3).replace(/^0+/, '');
+			// use name instead of uid
+			let id = false;
+			if (data.name && key != 'config')
+			{
+				data.uid = key.substr(key.lastIndexOf('.')+1);
+				id = data.name.toLowerCase().replace(/ /g, '_');
+				key = key.replace('.' + data.uid, '.' + data.uid + '-' + id);
+			}
 			
 			// add level as additional state
 			if (data.bri !== undefined)
@@ -273,27 +292,18 @@ function readData(key, data)
 				data.transitiontime = data.transitiontime || 4;
 			}
 			
-			// use name instead of uid
-			let id = false;
-			if (data.name && adapter.config.useNames)
-			{
-				id = data.name.toLowerCase().replace(/ /g, '_');
-				key = key.replace(RegExp('\.[0-9]{3}$'), '.' + id);
-			}
-			
 			// create channel
 			library.set({
-				node: key, role: 'channel', description: id || RegExp('\.[0-9]{3}$').test(key.substr(-4)) ?
-					(id ? data.name : 'Index ' + key.substr(key.lastIndexOf('.')+1)) :
-					library.ucFirst(key.substr(key.lastIndexOf('.')+1))
+				node: key,
+				role: 'channel',
+				description: id || RegExp('\.[0-9]{1-3}$').test(key.substr(-4)) ? data.name : library.ucFirst(key.substr(key.lastIndexOf('.')+1))
 			});
 		
 			// read nested data
-			let indexKey;
 			for (let nestedKey in data)
 			{
-				indexKey = nestedKey >= 0 && nestedKey < 100 ? (nestedKey >= 0 && nestedKey < 10 ? '00' + nestedKey : '0' + nestedKey) : nestedKey;
-				readData(key + '.' + indexKey, data[nestedKey]); // causes -Unsubscribe from all states, except system's, because over 3 seconds the number of events is over 200 (in last second 0)-
+				//setTimeout(readData, 0, key + '.' + nestedKey + '-' + data.uid, data[nestedKey]);
+				readData(key + '.' + nestedKey, data[nestedKey]); // causes -Unsubscribe from all states, except system's, because over 3 seconds the number of events is over 200 (in last second 0)-
 			}
 		}
 	}
@@ -321,7 +331,7 @@ function readData(key, data)
 				node: key,
 				type: node.type,
 				role: node.role,
-				description: (device ? device + ' - ' : '') + node.description,
+				description: (node.device !== false && device ? device + ' - ' : '') + (node.description || '(no description)'),
 				common: Object.assign(
 					node.common || {},
 					{
@@ -337,7 +347,7 @@ function readData(key, data)
 /**
  *
  */
-function convertNode(node, data)
+ function convertNode(node, data)
 {
 	switch(node.convert)
 	{
@@ -388,25 +398,26 @@ function convertNode(node, data)
 /**
  *
  */
-function get(node)
+ function get(node)
 {
+	if (node[1] == 'timestamp' || node[1] == 'datetime') node[0] = node[1];
 	node.splice(1,1);
+	
 	return _NODES[library.clean(node.join('.'), true)] || { description: '', role: 'text', type: 'string', convert: null };
 }
 
 /**
  *
  */
-function getDevice(params)
+ function getDevice(params)
 {
-	if (params !== undefined && params[1] !== undefined) params[1] = params[1].replace(/^0+/g, '');
 	return DEVICES[params[0]] && DEVICES[params[0]][params[1]] ? DEVICES[params[0]][params[1]] : false;
 }
 
 /**
  *
  */
-function setDevice(device, actions)
+ function setDevice(device, actions)
 {
 	let options = {
 		uri: bridge + device.trigger,
@@ -446,13 +457,3 @@ function setDevice(device, actions)
 		adapter.log.debug('- actions: ' + JSON.stringify(actions));
 	});
 }
-
-/*
- * COMPACT MODE
- * If started as allInOne/compact mode => return function to create instance
- *
- */
-if (module && module.parent)
-	module.exports = startAdapter;
-else
-	startAdapter(); // or start the instance directly

@@ -1,6 +1,6 @@
 {
-	"datetime": {"description": "Datetime of last update", "role": "text", "type": "string"},
-	"timestamp": {"description": "Timestamp of last update", "role": "text", "type": "string"},
+	"datetime": {"description": "Datetime of last update", "role": "text", "type": "string", "device": false},
+	"timestamp": {"description": "Timestamp of last update", "role": "text", "type": "string", "device": false},
 	
 	
 	"lights.capabilities.control.ct.max": {"description": "", "role": "value", "type": "number"},
