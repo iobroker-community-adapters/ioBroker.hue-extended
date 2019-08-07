@@ -43,6 +43,9 @@ tbd
 - implement user creation in interface configuration (admin panel)
 - implement bridge discovery in interface configuration (admin panel)
 
+### 0.3.2 (2019-08-07)
+- (Zefau) Refactored data retrieval and state creation
+
 ### 0.3.1 (2019-08-03)
 - (Zefau) When turning on a device, set level / bri to 100 if it was set to 0
 
