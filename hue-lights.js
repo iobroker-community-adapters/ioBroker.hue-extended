@@ -85,10 +85,7 @@ function startAdapter(options)
 		['config', 'groups', 'lights', 'resourcelinks', 'rules', 'scenes', 'schedules', 'sensors'].forEach(function(channel)
 		{
 			if (adapter.config['sync' + library.ucFirst(channel)])
-			{
-				adapter.log.info('Retrieving ' + channel + ' from Hue Bridge...');
 				getBridgeData(channel, adapter.config.refresh);
-			}
 		});
 		
 		// delete old states (which were not updated recently)
@@ -200,6 +197,7 @@ else
  */
 function getBridgeData(channel, refresh)
 {
+	adapter.log.debug('Retrieving ' + channel + ' from Hue Bridge...');
 	_request({ uri: bridge + channel + '/', json: true }).then(function(res)
 	{
 		if (!res || (res[0] && res[0].error))
@@ -227,7 +225,7 @@ function getBridgeData(channel, refresh)
 		
 	}).catch(function(err)
 	{
-		library.terminate('Error connecting to Hue Bridge when retrieving channel ' + channel + ' (' + err.message + ')!');
+		adapter.log.warn('Error connecting to Hue Bridge when retrieving channel ' + channel + '! See debug log for details.');
 		adapter.log.debug(err.message);
 	});
 }
@@ -346,7 +344,9 @@ function readData(key, data)
 		// set state (if value differs)
 		else if (val != data)
 		{
-			adapter.log.debug('Received updated value for ' + key + ': '+JSON.stringify(data));
+			if (key.indexOf('timestamp') == -1 && key.indexOf('datetime') == -1)
+				adapter.log.debug('Received updated value for ' + key + ': '+JSON.stringify(data));
+			
 			adapter.setState(key, {val: data, ts: Date.now(), ack: true});
 		}
 	}
