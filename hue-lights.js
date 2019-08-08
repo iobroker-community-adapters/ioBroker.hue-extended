@@ -110,52 +110,53 @@ function startAdapter(options)
 	adapter.on('stateChange', function(id, state)
 	{
 		if (state === undefined || state === null || state.ack === true || state.val === undefined || state.val === null) return;
-		
 		adapter.log.debug('State of ' + id + ' has changed ' + JSON.stringify(state) + '.');
 		
 		// get params
 		let params = id.replace(adapterName + '.' + adapter.instance + '.', '').split('.');
-		let type = params[0];
-		let deviceId = params[1];
+		let type = params.splice(0,1);
+		let deviceId = params.splice(0,1);
 		
-		// get uid
-		adapter.getState(adapterName + '.' + adapter.instance + '.' + type + '.' + deviceId + '.uid', function(err, obj)
+		let name = getDeviceState([type, deviceId, 'name']);
+		let uid = getDeviceState([type, deviceId, 'uid']);
+		let path = type + '/' + uid + '/state';
+		let action = params[params.length-1];
+		
+		if (!uid)
 		{
-			let uid = obj.val;
-			params[1] = uid;
-			
-			let d = getDevice([type, uid]);
-			let action = params.splice(params.length-1, 1);
-			d.trigger = params.join('/');
-			
-			// build command
-			let commands = { [action]: state.val };
-			
-			// if device is turned on, make sure brightness is not 0
-			if (action == 'on' && state.val == true)
-				commands.bri = d.state.bri == 0 ? 254 : d.state.bri;
-			
-			// if device is turned off, set level / bri to 0
-			/*
-			if (action == 'on' && state.val == false)
-				commands.bri = 0;
-			*/
-			
-			// if .level is changed the change will be applied to .bri instead
-			if (action == 'level')
-				commands = { on: true, bri: Math.ceil(254 * state.val / 100) };
-			
-			// if .bri is changed, make sure light is on
-			if (action == 'bri')
-				commands = { on: true, bri: state.val };
-			
-			// if .bri is changed to 0, turn off
-			if ((action == 'bri' || action == 'level') && state.val < 1)
-				commands = { on: false, bri: 0 };
-			
-			// apply command
-			setDevice(d, commands);
-		});
+			return false;
+		}
+		
+		// build command
+		let commands = { [action]: state.val };
+		
+		// if device is turned on, make sure brightness is not 0
+		if (action == 'on' && state.val == true)
+		{
+			let bri = getDeviceState([type, deviceId, 'state.bri']) || getDeviceState([type, deviceId, 'action.bri']);
+			commands.bri = bri == 0 ? 254 : bri;
+		}
+		
+		// if device is turned off, set level / bri to 0
+		/*
+		if (action == 'on' && state.val == false)
+			commands.bri = 0;
+		*/
+		
+		// if .level is changed the change will be applied to .bri instead
+		if (action == 'level')
+			commands = { on: true, bri: Math.ceil(254 * state.val / 100) };
+		
+		// if .bri is changed, make sure light is on
+		if (action == 'bri')
+			commands = { on: true, bri: state.val };
+		
+		// if .bri is changed to 0, turn off
+		if ((action == 'bri' || action == 'level') && state.val < 1)
+			commands = { on: false, bri: 0 };
+		
+		// apply command
+		sendCommand({ name: name, trigger: path }, commands);
 	});
 	
 	/*
@@ -185,7 +186,7 @@ function startAdapter(options)
 
 /*
  * COMPACT MODE
- * If started as allInOne/compact mode => return function to create instance
+ * If started as allInOne/compact mode => returnfunction to create instance
  *
  */
 if (module && module.parent)
@@ -247,10 +248,6 @@ function addBridgeData(data)
 		// loop through payload
 		device = null;
 		readData(key, data[key]);
-		
-		// index payload
-		if (DEVICES[key] !== undefined)
-			DEVICES[key] = data[key];
 	}
 }
 
@@ -301,10 +298,7 @@ function readData(key, data)
 		
 			// read nested data
 			for (let nestedKey in data)
-			{
-				//setTimeout(readData, 0, key + '.' + nestedKey + '-' + data.uid, data[nestedKey]);
-				readData(key + '.' + nestedKey, data[nestedKey]); // causes -Unsubscribe from all states, except system's, because over 3 seconds the number of events is over 200 (in last second 0)-
-			}
+				readData(key + '.' + nestedKey, data[nestedKey]);
 		}
 	}
 	
@@ -315,42 +309,60 @@ function readData(key, data)
 		node.key = key;
 		data = convertNode(node, data);
 		
-		// subscribe to states (if device not indexed yet)
-		let d = getDevice(key.split('.'));
+		// get device from cache
+		let val = getDeviceState(key.split('.'));
 		let action = key.substr(key.lastIndexOf('.')+1);
 		
-		if (d === false && SUBSCRIPTIONS.indexOf(action) > -1 && (key.indexOf('state.' + action) > -1 || key.indexOf('action.' + action) > -1))
+		if (val === false)
 		{
-			node.subscribe = true;
-			adapter.subscribeStates(key);
+			// index device
+			setDeviceState(key.split('.'), data);
+			
+			// set state
+			library.set(
+				{
+					node: key,
+					type: node.type,
+					role: node.role,
+					description: (node.device !== false && device ? device + ' - ' : '') + (node.description || '(no description)'),
+					common: Object.assign(
+						node.common || {},
+						{
+							write: node.subscribe || false
+						}
+					)
+				},
+				data
+			);
+			
+			// subscribe to states
+			if (SUBSCRIPTIONS.indexOf(action) > -1 && (key.indexOf('state.' + action) > -1 || key.indexOf('action.' + action) > -1))
+			{
+				node.subscribe = true;
+				adapter.subscribeStates(key);
+			}
 		}
 		
-		// set data
-		library.set(
-			{
-				node: key,
-				type: node.type,
-				role: node.role,
-				description: (node.device !== false && device ? device + ' - ' : '') + (node.description || '(no description)'),
-				common: Object.assign(
-					node.common || {},
-					{
-						write: node.subscribe || false
-					}
-				)
-			},
-			data
-		);
+		// set state (if value differs)
+		else if (val != data)
+		{
+			adapter.log.debug('Received updated value for ' + key + ': '+JSON.stringify(data));
+			adapter.setState(key, {val: data, ts: Date.now(), ack: true});
+		}
 	}
 }
 
 /**
  *
  */
- function convertNode(node, data)
+function convertNode(node, data)
 {
 	switch(node.convert)
 	{
+		case "string":
+			data = JSON.stringify(data);
+			break;
+			
 		case "temperature":
 			data = data / 100;
 			break;
@@ -398,7 +410,7 @@ function readData(key, data)
 /**
  *
  */
- function get(node)
+function get(node)
 {
 	if (node[1] == 'timestamp' || node[1] == 'datetime') node[0] = node[1];
 	node.splice(1,1);
@@ -409,15 +421,31 @@ function readData(key, data)
 /**
  *
  */
- function getDevice(params)
+function getDeviceState(params)
 {
-	return DEVICES[params[0]] && DEVICES[params[0]][params[1]] ? DEVICES[params[0]][params[1]] : false;
+	let type = params.splice(0,1);
+	let name = params.splice(0,1);
+	
+	return DEVICES[type] && DEVICES[type][name] && DEVICES[type][name][params.join('.')] ? DEVICES[type][name][params.join('.')] : false;
 }
 
 /**
  *
  */
- function setDevice(device, actions)
+function setDeviceState(params, value)
+{
+	let type = params.splice(0,1);
+	let name = params.splice(0,1);
+	
+	if (!DEVICES[type]) DEVICES[type] = {};
+	if (!DEVICES[type][name]) DEVICES[type][name] = {};
+	DEVICES[type][name][params.join('.')] = value;
+}
+
+/**
+ *
+ */
+function sendCommand(device, actions)
 {
 	let options = {
 		uri: bridge + device.trigger,
@@ -426,7 +454,7 @@ function readData(key, data)
 		body: actions
 	};
 	
-	//adapter.log.info('Sending command to set ' + Object.keys(msg[type]) + ' on device ' + device.name + ' (to ' + Object.values(msg[type]) + ').');
+	adapter.log.debug('Send command to ' + device.name + ' (' + device.trigger + '): ' + JSON.stringify(actions) + '.');
 	_request(options).then(function(res)
 	{
 		if (!Array.isArray(res))
@@ -450,10 +478,7 @@ function readData(key, data)
 		
 	}).catch(function(e)
 	{
-		adapter.log.warn('Failed sending request to Hue Bridge!');
+		adapter.log.warn('Failed sending request to ' + device.trigger + '!');
 		adapter.log.debug('Error Message: ' + e);
-		adapter.log.debug('- device: ' + JSON.stringify(device));
-		adapter.log.debug('- uri: ' + bridge + device.trigger);
-		adapter.log.debug('- actions: ' + JSON.stringify(actions));
 	});
 }

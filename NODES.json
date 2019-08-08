@@ -30,7 +30,7 @@
 	"lights.state.on": {"description": "Switch light on / off", "role": "switch.light", "type": "boolean"},
 	"lights.state.reachable": {"description": "Indicates if light can be reached by the bridge", "role": "indicator.reachable", "type": "boolean"},
 	"lights.state.sat": {"description": "Saturation of the light", "role": "level.color.saturation", "type": "number"},
-	"lights.state.xy": {"description": "The x and y coordinates in CIE color space", "role": "value", "type": "number"},
+	"lights.state.xy": {"description": "The x and y coordinates in CIE color space", "role": "text", "type": "string", "convert": "string"},
 	
 	"lights.swupdate.lastinstall": {"description": "Time of last software update", "role": "text", "type": "string"},
 	"lights.swupdate.state": {"description": "State of software update for the system", "role": "text", "type": "string"},
@@ -57,7 +57,7 @@
 	"groups.action.level": {"description": "Level of the light between 0 and 100", "role": "level", "type": "number"},
 	"groups.action.on": {"description": "Switch light on / off", "role": "switch.light", "type": "boolean"},
 	"groups.action.sat": {"description": "Saturation of the light", "role": "level.color.saturation", "type": "number"},
-	"groups.action.xy": {"description": "The x and y coordinates in CIE color space", "role": "value", "type": "number"},
+	"groups.action.xy": {"description": "The x and y coordinates in CIE color space", "role": "text", "type": "string", "convert": "string"},
 	
 	"groups.state.all_on": {"description": "Indicates if all lights of the group are turned on", "role": "indicator", "type": "boolean"},
 	"groups.state.any_on": {"description": "Indicates if any light of the group is turned on", "role": "indicator", "type": "boolean"},
