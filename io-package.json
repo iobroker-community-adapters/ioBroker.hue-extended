@@ -82,7 +82,7 @@
         "materialize": true,
         "compact": true,
         "enabled": true,
-        "type": "lightning",
+        "type": "lighting",
         "authors": [
             {
                 "name": "Zefau",
