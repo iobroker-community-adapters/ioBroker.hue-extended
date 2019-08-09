@@ -1,15 +1,15 @@
-![Logo](admin/hue-lights.png)
-# ioBroker.hue-lights
+![Logo](admin/hue-extended.png)
+# ioBroker.hue-extended
 Connect your Philips Hue Lights with ioBroker.
 
-![Number of Installations](http://iobroker.live/badges/hue-lights-installed.svg)
-![Stable version](http://iobroker.live/badges/hue-lights-stable.svg)
-[![NPM version](http://img.shields.io/npm/v/iobroker.hue-lights.svg)](https://www.npmjs.com/package/iobroker.hue-lights)
-[![Travis CI](https://travis-ci.org/Zefau/ioBroker.hue-lights.svg?branch=master)](https://travis-ci.org/Zefau/ioBroker.hue-lights)
-[![Downloads](https://img.shields.io/npm/dm/iobroker.hue-lights.svg)](https://www.npmjs.com/package/iobroker.hue-lights)
-[![Greenkeeper badge](https://badges.greenkeeper.io/Zefau/ioBroker.hue-lights.svg)](https://greenkeeper.io/)
+![Number of Installations](http://iobroker.live/badges/hue-extended-installed.svg)
+![Stable version](http://iobroker.live/badges/hue-extended-stable.svg)
+[![NPM version](http://img.shields.io/npm/v/iobroker.hue-extended.svg)](https://www.npmjs.com/package/iobroker.hue-extended)
+[![Travis CI](https://travis-ci.org/Zefau/ioBroker.hue-extended.svg?branch=master)](https://travis-ci.org/Zefau/ioBroker.hue-extended)
+[![Downloads](https://img.shields.io/npm/dm/iobroker.hue-extended.svg)](https://www.npmjs.com/package/iobroker.hue-extended)
+[![Greenkeeper badge](https://badges.greenkeeper.io/Zefau/ioBroker.hue-extended.svg)](https://greenkeeper.io/)
 
-[![NPM](https://nodei.co/npm/iobroker.hue-lights.png?downloads=true)](https://nodei.co/npm/iobroker.hue-lights/) 
+[![NPM](https://nodei.co/npm/iobroker.hue-extended.png?downloads=true)](https://nodei.co/npm/iobroker.hue-extended/) 
 
 
 **Table of contents**
@@ -51,7 +51,7 @@ tbd
 
 ### 0.3.0 (2019-08-03)
 
-__REMARK: If you are coming from an earlier version, please delete all your hue-lights states before running this release!__
+__REMARK: If you are coming from an earlier version, please delete all your hue-extended states before running this release!__
 
 - (Zefau) Added error message when incorrect bridge credentials are provided ([see issue description](https://forum.iobroker.net/post/287505))
 - (Zefau) When turning off a device, set level / bri to 0 ([see issue description](https://forum.iobroker.net/post/287566))

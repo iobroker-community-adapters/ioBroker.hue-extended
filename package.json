@@ -1,31 +1,31 @@
 {
-  "_from": "https://github.com/Zefau/ioBroker.hue-lights/tarball/master",
-  "_id": "iobroker.hue-lights@0.1.0",
+  "_from": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master",
+  "_id": "iobroker.hue-extended@0.1.0",
   "_inBundle": false,
   "_integrity": "sha512-U/1TcH0gOXUlrrzL3yfueyiwRTVQNtP2BMDV/z/ANaVGNH7GKA0UERNlVF6FvbzARck81aT0fD4j8uV51PGfVA==",
-  "_location": "/iobroker.hue-lights",
+  "_location": "/iobroker.hue-extended",
   "_phantomChildren": {},
   "_requested": {
     "type": "remote",
-    "raw": "https://github.com/Zefau/ioBroker.hue-lights/tarball/master",
-    "rawSpec": "https://github.com/Zefau/ioBroker.hue-lights/tarball/master",
-    "saveSpec": "https://github.com/Zefau/ioBroker.hue-lights/tarball/master",
-    "fetchSpec": "https://github.com/Zefau/ioBroker.hue-lights/tarball/master"
+    "raw": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master",
+    "rawSpec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master",
+    "saveSpec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master",
+    "fetchSpec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master"
   },
   "_requiredBy": [
     "#USER",
     "/"
   ],
-  "_resolved": "https://github.com/Zefau/ioBroker.hue-lights/tarball/master",
+  "_resolved": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master",
   "_shasum": "0a42f2123a965153e056cf0ab06a4645ccecbfef",
-  "_spec": "https://github.com/Zefau/ioBroker.hue-lights/tarball/master",
+  "_spec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master",
   "_where": "/opt/iobroker",
   "author": {
     "name": "zefau",
     "email": "zefau@mailbox.org"
   },
   "bugs": {
-    "url": "https://github.com/Zefau/ioBroker.hue-lights/issues"
+    "url": "https://github.com/Zefau/ioBroker.hue-extended/issues"
   },
   "bundleDependencies": false,
   "contributors": [
@@ -52,18 +52,18 @@
     "lib": "lib",
     "test": "test"
   },
-  "homepage": "https://github.com/Zefau/ioBroker.hue-lights",
+  "homepage": "https://github.com/Zefau/ioBroker.hue-extended",
   "keywords": [
     "ioBroker",
     "hue",
     "lights"
   ],
   "license": "MIT",
-  "main": "hue-lights.js",
-  "name": "iobroker.hue-lights",
+  "main": "hue-extended.js",
+  "name": "iobroker.hue-extended",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Zefau/ioBroker.hue-lights.git"
+    "url": "git+https://github.com/Zefau/ioBroker.hue-extended.git"
   },
   "scripts": {
     "test": "npm run test:package && npm run test:unit",
@@ -71,5 +71,5 @@
     "test:package": "mocha test/package --exit",
     "test:unit": "mocha test/unit --exit"
   },
-  "version": "0.3.2"
+  "version": "0.4.0"
 }
