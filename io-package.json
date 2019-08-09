@@ -2,7 +2,7 @@
     "common": {
         "name": "hue-extended",
         "version": "0.4.0",
-        "title": "Philips Hue Lights",
+        "title": "Philips Hue Extended",
         "desc": {
             "en": "Integration of your Philips Hue Lights with your ioBroker",
             "de": "Die Integration der Philips Hue Lampen mit Ihrem ioBroker",
@@ -17,8 +17,8 @@
         },
         "news": {
             "0.4.0": {
-				"en": "- Renamed adapter to hue-extended (formerly hue-lights)\n- Changed roles of some states"
-			},
+                "en": "- Renamed adapter to hue-extended (formerly hue-lights)\n- Changed roles of some states"
+            },
             "0.3.1": {
                 "en": "- When turning on a device, set level / bri to 100 if it was set to 0",
                 "de": "- Beim Einschalten des Gerätes, wird level / bri nun auf 100 gesetzt (sofern vorher 0)",
