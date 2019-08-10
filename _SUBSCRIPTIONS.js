@@ -19,6 +19,7 @@ module.exports =
 	 * Programming 0 and 65535 would mean that the light will resemble the color red, 21845 for green and 43690 for blue.
 	 */
 	'hue',
+	'hue_degrees',
 	
 	/*
 	 * Saturation of the light. 254 is the most saturated (colored) and 0 is the least saturated (white).
@@ -60,10 +61,16 @@ module.exports =
 	 * Indicates the color mode in which the light is working, this is the last command type it received.
 	 * Values are “hs” for Hue and Saturation, “xy” for XY and “ct” for Color Temperature. This parameter is only present when the light supports at least one of the values.
 	 */
-	// 'colormode',
+	'colormode',
 	
 	/*
 	 * Level
 	 */
-	'level'
+	'level',
+	
+	/*
+	 * Scene
+	 */
+	'scene',
+	'trigger'
 ];

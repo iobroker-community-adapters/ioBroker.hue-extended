@@ -43,6 +43,11 @@ tbd
 - implement user creation in interface configuration (admin panel)
 - implement bridge discovery in interface configuration (admin panel)
 
+### 0.5.0 (2019-08-11)
+- (Zefau) Added support for scenes (reorganized states and added trigger)
+- (Zefau) Fixed action `xy`
+- (Zefau) Reorganized states within tree `state` into `action` in case they are executable
+
 ### 0.4.0 (2019-08-10)
 - (Zefau) Fixed applying action on group
 

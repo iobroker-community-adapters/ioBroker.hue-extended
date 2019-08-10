@@ -1,8 +1,8 @@
 {
   "_from": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master",
-  "_id": "iobroker.hue-extended@0.4.0",
+  "_id": "iobroker.hue-extended@0.4.1",
   "_inBundle": false,
-  "_integrity": "sha512-UjC+0J5XSo69a8lSm5AKKgfv1LL5qAV5HH9T07VZUGT4x2VbWfb+Ma5RC9YUI8tDRWfeu039wTS+bynAlNQCbQ==",
+  "_integrity": "sha512-WHHZxT9hLJgnjIqOe3yV3CvcRfhE1wcBdl4I1KurKgOsr+3BLFgznLM8U81KHyqUS61q7ZvU2Y/gPHyGeQE3RQ==",
   "_location": "/iobroker.hue-extended",
   "_phantomChildren": {},
   "_requested": {
@@ -13,13 +13,12 @@
     "fetchSpec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master"
   },
   "_requiredBy": [
-    "#USER",
-    "/"
+    "#USER"
   ],
   "_resolved": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master",
-  "_shasum": "ff41f6e8516c516fdb9f77fa3acbf2923316d0dd",
+  "_shasum": "aa86743860c616735b21d9183f9246067c354a8b",
   "_spec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master",
-  "_where": "/opt/iobroker/node_modules",
+  "_where": "C:\\Users\\Zefau\\iobroker",
   "author": {
     "name": "zefau",
     "email": "zefau@mailbox.org"
@@ -71,5 +70,5 @@
     "test:package": "mocha test/package --exit",
     "test:unit": "mocha test/unit --exit"
   },
-  "version": "0.4.1"
+  "version": "0.5.0"
 }

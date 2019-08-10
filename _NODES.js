@@ -3,6 +3,23 @@ module.exports =
 	"datetime": {"description": "Datetime of last update", "role": "text", "type": "string", "device": false},
 	"timestamp": {"description": "Timestamp of last update", "role": "text", "type": "string", "device": false},
 	
+	// ACTIONS
+	"on": {"description": "Switch light on / off", "role": "switch.light", "type": "boolean"},
+	"bri": {"description": "Brightness of the light", "role": "level.dimmer", "type": "number"},
+	"hue": {"description": "Hue of the light between 0 and 65535", "role": "level.color.hue", "type": "number"},
+	"hue_degrees": {"description": "Hue of the light between 0° and 360°", "role": "level.color.hue", "type": "number"},
+	"sat": {"description": "Saturation of the light", "role": "level.color.saturation", "type": "number"},
+	"xy": {"description": "The x and y coordinates in CIE color space", "role": "level.color.xy", "type": "string", "convert": "string"},
+	"ct": {"description": "The Mired Color temperature of the light", "role": "level.color.temperature", "type": "number"},
+	"alert": {"description": "The alert effect,is a temporary change to the bulb’s state", "role": "switch", "type": "string", "common": {"states": {"none": "No alert", "select": "One breathe cycle", "lselect": "Breathe cycles for 15s"}}},
+	"effect": {"description": "The dynamic effect of the light", "role": "switch", "type": "string", "common": {"states": {"none": "No effect", "colorloop": "Cycle through all hues"}}},
+	"transitiontime": {"description": "The duration of the transition from the light’s current state to the new state. This is given as a multiple of 100ms and defaults to 4 (400ms).", "role": "value", "type": "number"},
+	"colormode": {"description": "Indicates the color mode in which the light is working", "role": "indicator.colormode", "type": "string"},
+	"level": {"description": "Level of the light between 0 and 100", "role": "level.dimmer", "type": "number"},
+	"scene": {"description": "Apply scene on group", "role": "switch", "type": "string"},
+	"trigger": {"description": "Trigger scene on group", "role": "button", "type": "boolean"},
+	
+	
 	// LIGHTS
 	"lights.capabilities.control.ct.max": {"description": "", "role": "value", "type": "number"},
 	"lights.capabilities.control.ct.min": {"description": "", "role": "value", "type": "number"},
@@ -19,20 +36,8 @@ module.exports =
 	"lights.config.direction": {"description": "", "role": "text", "type": "string"},
 	"lights.config.function": {"description": "", "role": "text", "type": "string"},
 	
-	"lights.state.alert": {"description": "The alert effect,is a temporary change to the bulb’s state", "role": "switch", "type": "string", "common": {"states": {"none": "No alert", "select": "One breathe cycle", "lselect": "Breathe cycles for 15s"}}},
-	"lights.state.bri": {"description": "Brightness of the light", "role": "level.dimmer", "type": "number"},
-	"lights.state.colormode": {"description": "Indicates the color mode in which the light is working", "role": "indicator.colormode", "type": "string"},
-	"lights.state.ct": {"description": "The Mired Color temperature of the light", "role": "level.color.temperature", "type": "number"},
-	"lights.state.effect": {"description": "The dynamic effect of the light", "role": "switch", "type": "string", "common": {"states": {"none": "No effect", "colorloop": "Cycle through all hues"}}},
-	"lights.state.transitiontime": {"description": "The duration of the transition from the light’s current state to the new state. This is given as a multiple of 100ms and defaults to 4 (400ms).", "role": "value", "type": "number"},
-	"lights.state.hue": {"description": "Hue of the light between 0 and 65535", "role": "level.color.hue", "type": "number"},
-	"lights.state.hue_degrees": {"description": "Hue of the light between 0° and 360°", "role": "level.color.hue", "type": "number"},
-	"lights.state.level": {"description": "Level of the light between 0 and 100", "role": "level.dimmer", "type": "number"},
 	"lights.state.mode": {"description": "Mode of the light", "role": "text", "type": "string"},
-	"lights.state.on": {"description": "Switch light on / off", "role": "switch.light", "type": "boolean"},
 	"lights.state.reachable": {"description": "Indicates if light can be reached by the bridge", "role": "indicator.reachable", "type": "boolean"},
-	"lights.state.sat": {"description": "Saturation of the light", "role": "level.color.saturation", "type": "number"},
-	"lights.state.xy": {"description": "The x and y coordinates in CIE color space", "role": "level.color.xy", "type": "string", "convert": "string"},
 	
 	"lights.swupdate.lastinstall": {"description": "Time of last software update", "role": "text", "type": "string"},
 	"lights.swupdate.state": {"description": "State of software update for the system", "role": "text", "type": "string"},
@@ -48,20 +53,8 @@ module.exports =
 	"lights.uid": {"description": "Unique ID of the light", "role": "value", "type": "number"},
 	"lights.uniqueid": {"description": "Unique ID of the device. The MAC address of the device with a unique endpoint id", "role": "text", "type": "string"},
 	
-	// GROUPS
-	"groups.action.alert": {"description": "The alert effect,is a temporary change to the bulb’s state", "role": "switch", "type": "string", "common": {"states": {"none": "No alert", "select": "One breathe cycle", "lselect": "Breathe cycles for 15s"}}},
-	"groups.action.bri": {"description": "Brightness of the light", "role": "level.dimmer", "type": "number"},
-	"groups.action.colormode": {"description": "Indicates the color mode in which the light is working", "role": "indicator.colormode", "type": "string"},
-	"groups.action.ct": {"description": "The Mired Color temperature of the light", "role": "level.color.temperature", "type": "number"},
-	"groups.action.effect": {"description": "The dynamic effect of the light", "role": "switch", "type": "string", "common": {"states": {"none": "No effect", "colorloop": "Cycle through all hues"}}},
-	"groups.action.transitiontime": {"description": "The duration of the transition from the light’s current state to the new state. This is given as a multiple of 100ms and defaults to 4 (400ms).", "role": "value", "type": "number"},
-	"groups.action.hue": {"description": "Hue of the light between 0 and 65535", "role": "level.color.hue", "type": "number"},
-	"groups.action.hue_degrees": {"description": "Hue of the light between 0° and 360°", "role": "level.color.hue", "type": "number"},
-	"groups.action.level": {"description": "Level of the light between 0 and 100", "role": "level.dimmer", "type": "number"},
-	"groups.action.on": {"description": "Switch light on / off", "role": "switch.light", "type": "boolean"},
-	"groups.action.sat": {"description": "Saturation of the light", "role": "level.color.saturation", "type": "number"},
-	"groups.action.xy": {"description": "The x and y coordinates in CIE color space", "role": "level.color.xy", "type": "string", "convert": "string"},
 	
+	// GROUPS
 	"groups.state.all_on": {"description": "Indicates if all lights of the group are turned on", "role": "indicator", "type": "boolean"},
 	"groups.state.any_on": {"description": "Indicates if any light of the group is turned on", "role": "indicator", "type": "boolean"},
 	
@@ -96,8 +89,22 @@ module.exports =
 	"sensors.modelid": {"description": "The hardware model of the sensor", "role": "text", "type": "string"},
 	"sensors.name": {"description": "A unique, editable name given to the sensor", "role": "text", "type": "string"},
 	"sensors.recycle": {"description": "Resource is automatically deleted when not referenced anymore", "role": "indicator", "type": "boolean"},
-	"sensors.swversion": {"description": "Software version ", "role": "text", "type": "string"},
+	"sensors.swversion": {"description": "Software version", "role": "text", "type": "string"},
 	"sensors.type": {"description": "", "role": "text", "type": "string"},
 	"sensors.uid": {"description": "Unique ID of the sensor", "role": "value", "type": "number"},
-	"sensors.uniqueid": {"description": "Unique ID of the sensor", "role": "text", "type": "string"}
+	"sensors.uniqueid": {"description": "Unique ID of the sensor", "role": "text", "type": "string"},
+	
+	// SCENES
+	"scenes.appdata.data": {"description": "App specific data (free format string)", "role": "text", "type": "string"},
+	"scenes.appdata.version": {"description": "App specific version of the data field", "role": "value", "type": "number"},
+	"scenes.group": {"description": "Group ID that a scene is linked to", "role": "value", "type": "number"},
+	"scenes.lastupdated": {"description": "UTC time the scene has been created or has been updated by a PUT", "role": "text", "type": "string"},
+	"scenes.locked": {"description": "Indicates that the scene is locked by a rule or a schedule and cannot be deleted until all resources requiring or that reference the scene are deleted.", "role": "indicator", "type": "boolean"},
+	"scenes.name": {"description": "Human readable name of the scene.", "role": "text", "type": "string"},
+	"scenes.owner": {"description": "Whitelist user that created or modified the content of the scene", "role": "text", "type": "string"},
+	"scenes.picture": {"description": "Individual scene picture", "role": "text", "type": "string"},
+	"scenes.recycle": {"description": "Indicates whether the scene can be automatically deleted by the bridge", "role": "indicator", "type": "boolean"},
+	"scenes.type": {"description": "Type of the scene (LightScene or GroupScene)", "role": "text", "type": "string"},
+	"scenes.uid": {"description": "The id of the scene being modified or created.", "role": "text", "type": "string"},
+	"scenes.version": {"description": "Version of scene document (lightstates will be empty or available)", "role": "value", "type": "number", "common": {"states": {1: "Scene created via PUT, lightstates will be empty", 2: "Scene created via POST lightstates available"}}}
 }

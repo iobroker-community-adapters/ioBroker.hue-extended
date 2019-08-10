@@ -55,11 +55,11 @@ function startAdapter(options)
 	 */
 	adapter.on('ready', function()
 	{
-		if (!adapter.config.ip || !adapter.config.user)
+		if (!adapter.config.bridgeIp || !adapter.config.bridgeUser)
 			return library.terminate('Please provide connection settings for Hue Bridge!');
 		
 		// Bridge connection
-		bridge = 'http://' + adapter.config.ip + ':' + (adapter.config.port || 80) + '/api/' + adapter.config.user + '/';
+		bridge = 'http://' + adapter.config.bridgeIp + ':' + (adapter.config.bridgePort || 80) + '/api/' + adapter.config.bridgeUser + '/';
 		
 		// retrieve from Bridge
 		['config', 'groups', 'lights', 'resourcelinks', 'rules', 'scenes', 'schedules', 'sensors'].forEach(function(channel)
@@ -92,20 +92,33 @@ function startAdapter(options)
 		// get params
 		let params = id.replace(adapterName + '.' + adapter.instance + '.', '').split('.');
 		let type = params.splice(0,1);
-		let deviceId = params.splice(0,1);
+		let deviceId = type == 'scenes' ? params.splice(0,2) : params.splice(0,1);
 		
-		let name = getDeviceState([type, deviceId, 'name']);
-		let uid = getDeviceState([type, deviceId, 'uid']);
+		// get device data
+		let name = getDeviceState([...type, ...deviceId, 'name']);
+		let uid = getDeviceState([...type, ...deviceId, 'uid']);
 		let path = type + '/' + uid + '/' + (type == 'groups' ? 'action' : 'state');
 		let action = params[params.length-1];
 		
 		if (!uid)
-		{
 			return false;
-		}
+		
+		// reset if scene was set
+		if (id.indexOf('.scene') > -1)
+			library._setValue(id, '');
 		
 		// build command
+		let service = { name: name, trigger: path };
 		let commands = { [action]: state.val };
+		
+		// handle sccene
+		if (type == 'scenes')
+		{
+			let scene = deviceId[1].substr(0, deviceId[1].indexOf('_')).split('-');
+			service.trigger = scene[0] == 'GroupScene' ? 'groups/' + scene[1] + '/action' : 'lights/' + scene[1] + '/state';
+			service.name = scene.join(' ');
+			commands = { 'scene': uid };
+		}
 		
 		// if device is turned on, make sure brightness is not 0
 		if (action == 'on' && state.val == true)
@@ -142,7 +155,7 @@ function startAdapter(options)
 		
 		// apply command
 		Object.keys(commands).forEach(command => setDeviceState([type, deviceId, command], '')); // reset stored states so that retrieved states will renew
-		sendCommand({ name: name, trigger: path }, commands);
+		sendCommand(service, commands);
 	});
 	
 	/*
@@ -226,6 +239,7 @@ function getBridgeData(channel, refresh)
 		{
 			adapter.log.warn('Error connecting to Hue Bridge when retrieving channel ' + channel + '! See debug log for details.');
 			adapter.log.debug(err.message);
+			adapter.log.debug(err.stack);
 		}
 	});
 }
@@ -272,13 +286,15 @@ function readData(key, data)
 		// create channel
 		if (Object.keys(data).length > 0)
 		{
-			// use name instead of uid
+			// use uid and name instead of only uid
 			let id = false;
-			if (data.name && key != 'config')
+			if (data.name && key.indexOf('config') == -1)
 			{
 				data.uid = key.substr(key.lastIndexOf('.')+1);
 				id = data.name.toLowerCase().replace(/ /g, '_');
-				key = key.replace('.' + data.uid, '.' + data.uid + '-' + id);
+				key = key.indexOf('scenes') == -1 ?
+					key.replace('.' + data.uid, '.' + data.uid + '-' + id) :
+					key.replace('.' + data.uid, '.' + id);
 			}
 			
 			// add level as additional state
@@ -286,11 +302,16 @@ function readData(key, data)
 			{
 				data.level = data.bri > 0 ? Math.ceil(data.bri / 254 * 100) : 0;
 				data.transitiontime = data.transitiontime || 4;
+				data.scene = '';
 			}
 			
 			// add hue degree as additional state
 			if (data.hue !== undefined)
 				data.hue_degrees = Math.round(data.hue / 65535 * 360);
+			
+			// add scene trigger button as additional state (only to scenes)
+			if (data.type == 'GroupScene' || data.type == 'LightScene')
+				data.action = { trigger: false };
 			
 			// create channel
 			library.set({
@@ -298,10 +319,25 @@ function readData(key, data)
 				role: 'channel',
 				description: id || RegExp('\.[0-9]{1-3}$').test(key.substr(-4)) ? data.name : library.ucFirst(key.substr(key.lastIndexOf('.')+1))
 			});
-		
+			
 			// read nested data
 			for (let nestedKey in data)
-				readData(key + '.' + nestedKey, data[nestedKey]);
+			{
+				let pathKey = '';
+				
+				// create sub channel for scenes
+				if (key.indexOf('scenes') > -1 && ((data.type == 'GroupScene' && data.group) || (data.type == 'LightScene' && data.lights && data.lights[0])))
+				{
+					pathKey = '.' + data.type + '-' + (data.group || data.lights[0]) + '_' + data.uid;
+					library.set({
+						node: key + pathKey,
+						role: 'channel',
+						description: data.type + ' ' + (data.group || data.lights[0])
+					});
+				}
+				
+				readData(key + pathKey + '.' + nestedKey, data[nestedKey]);
+			}
 		}
 	}
 	
@@ -321,17 +357,28 @@ function readData(key, data)
 			// index device
 			setDeviceState(key.split('.'), data);
 			
+			// remap state to action
+			if (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('state.' + action) > -1)
+			{
+				key = key.replace('.state.', '.action.');
+				library.set({
+					node: key.substr(0, key.indexOf('.action.')+7),
+					role: 'channel',
+					description: 'Action'
+				});
+			}
+			
 			// set state
 			library.set(
 				{
 					node: key,
 					type: node.type,
 					role: node.role,
-					description: (node.device !== false && device ? device + ' - ' : '') + (node.description || key),
+					description: (node.device !== false && device ? device + ' - ' : '') + (node.description || library.ucFirst(key.substr(key.lastIndexOf('.')+1))),
 					common: Object.assign(
 						node.common || {},
 						{
-							write: node.subscribe || false
+							write: (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('action.' + action) > -1)
 						}
 					)
 				},
@@ -339,7 +386,7 @@ function readData(key, data)
 			);
 			
 			// subscribe to states
-			if (_SUBSCRIPTIONS.indexOf(action) > -1 && (key.indexOf('state.' + action) > -1 || key.indexOf('action.' + action) > -1))
+			if (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('action.' + action) > -1)
 			{
 				node.subscribe = true;
 				adapter.subscribeStates(key);
@@ -352,6 +399,11 @@ function readData(key, data)
 			if (['timestamp', 'datetime', 'UTC', 'localtime', 'last_use_date'].indexOf(key.substr(key.lastIndexOf('.')+1)) == -1)
 				adapter.log.debug('Received updated value for ' + key + ': '+JSON.stringify(data));
 			
+			// remap
+			if (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('state.' + action) > -1)
+				key = key.replace('.state.', '.action.');
+			
+			// update state value
 			adapter.setState(key, { val: data, ts: Date.now(), ack: true });
 			setDeviceState(key.split('.'), data);
 		}
@@ -421,28 +473,22 @@ function get(node)
 	if (node[1] == 'timestamp' || node[1] == 'datetime') node[0] = node[1];
 	node.splice(1,1);
 	
-	return _NODES[library.clean(node.join('.'), true)] || { description: '', role: 'text', type: 'string', convert: null };
+	return _NODES[library.clean(node[node.length-1], true)] || _NODES[library.clean(node.join('.'), true)] || { description: '', role: 'text', type: 'string', convert: null };
 }
 
 /**
  *
  */
-function getDeviceState(params)
+function getDeviceState([type, name, ...params])
 {
-	let type = params.splice(0,1);
-	let name = params.splice(0,1);
-	
 	return DEVICES[type] !== undefined && DEVICES[type][name] !== undefined && DEVICES[type][name][params.join('.')] !== undefined ? DEVICES[type][name][params.join('.')] : null;
 }
 
 /**
  *
  */
-function setDeviceState(params, value)
+function setDeviceState([type, name, ...params], value)
 {
-	let type = params.splice(0,1);
-	let name = params.splice(0,1);
-	
 	if (!DEVICES[type]) DEVICES[type] = {};
 	if (!DEVICES[type][name]) DEVICES[type][name] = {};
 	DEVICES[type][name][params.join('.')] = value;
@@ -457,7 +503,7 @@ function sendCommand(device, actions)
 		uri: bridge + device.trigger,
 		method: 'PUT',
 		json: true,
-		body: actions
+		body: actions.xy ? {"xy": JSON.parse(actions.xy)} : actions
 	};
 	
 	adapter.log.debug('Send command to ' + device.name + ' (' + device.trigger + '): ' + JSON.stringify(actions) + '.');
