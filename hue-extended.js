@@ -1,6 +1,7 @@
 'use strict';
 const adapterName = require('./io-package.json').common.name;
 const utils = require('@iobroker/adapter-core'); // Get common adapter utils
+
 const _request = require('request-promise');
 
 
@@ -8,40 +9,19 @@ const _request = require('request-promise');
  * internal libraries
  */
 const Library = require(__dirname + '/lib/library.js');
-const _NODES = require(__dirname + '/NODES.json');
+const _NODES = require(__dirname + '/_NODES.js');
+const _SUBSCRIPTIONS = require(__dirname + '/_SUBSCRIPTIONS.js');
 
 
 /*
- * constants & variables initiation
+ * variables initiation
  */
 let adapter;
 let library;
 let unloaded;
-let bridge, dutyCycle, refreshCycle;
+let dutyCycle, refreshCycle;
 
-const SUBSCRIPTIONS = [ // https://developers.meethue.com/develop/hue-api/lights-api/#142_response
-	'on', // On/Off state of the light. On=true, Off=false
-	'bri', // Brightness of the light. This is a scale from the minimum brightness the light is capable of, 1, to the maximum capable brightness, 254.
-	'hue', // Hue of the light. This is a wrapping value between 0 and 65535. Note, that hue/sat values are hardware dependent which means that programming two devices with the same value does not garantuee that they will be the same color. Programming 0 and 65535 would mean that the light will resemble the color red, 21845 for green and 43690 for blue.
-	'sat', // Saturation of the light. 254 is the most saturated (colored) and 0 is the least saturated (white).
-	'xy', // The x and y coordinates of a color in CIE color space.
-				/*
-				The first entry is the x coordinate and the second entry is the y coordinate. Both x and y are between 0 and 1. Using CIE xy, the colors can be the same on all lamps if the coordinates are within every lamps gamuts (example: “xy”:[0.409,0.5179] is the same color on all lamps). If not, the lamp will calculate it’s closest color and use that. The CIE xy color is absolute, independent from the hardware.
-				*/
-	'ct', // The Mired Color temperature of the light. 2012 connected lights are capable of 153 (6500K) to 500 (2000K).
-	'alert', // The alert effect, which is a temporary change to the bulb’s state. This can take one of the following values:
-				/*
-				“none” – The light is not performing an alert effect.
-				“select” – The light is performing one breathe cycle.
-				“lselect” – The light is performing breathe cycles for 15 seconds or until an "alert": "none" command is received.Note that this contains the last alert sent to the light and not its current state. i.e. After the breathe cycle has finished the bridge does not reset the alert to “none“.
-				*/
-	'effect', // The dynamic effect of the light, can either be “none” or “colorloop”.If set to colorloop, the light will cycle through all hues using the current brightness and saturation settings.
-	'transitiontime', // The duration of the transition from the light’s current state to the new state. This is given as a multiple of 100ms and defaults to 4 (400ms). For example, setting transitiontime:10 will make the transition last 1 second.
-	// 'colormode', // Indicates the color mode in which the light is working, this is the last command type it received. Values are “hs” for Hue and Saturation, “xy” for XY and “ct” for Color Temperature. This parameter is only present when the light supports at least one of the values.
-	'level'
-];
-
-let device;
+let bridge, device;
 let DEVICES = {
 	'groups': {},
 	'lights': {},
@@ -85,7 +65,7 @@ function startAdapter(options)
 		['config', 'groups', 'lights', 'resourcelinks', 'rules', 'scenes', 'schedules', 'sensors'].forEach(function(channel)
 		{
 			if (adapter.config['sync' + library.ucFirst(channel)])
-				getBridgeData(channel, adapter.config.refresh);
+				getBridgeData(channel, adapter.config.refresh || 0);
 		});
 		
 		// delete old states (which were not updated recently)
@@ -116,7 +96,7 @@ function startAdapter(options)
 		
 		let name = getDeviceState([type, deviceId, 'name']);
 		let uid = getDeviceState([type, deviceId, 'uid']);
-		let path = type + '/' + uid + '/state';
+		let path = type + '/' + uid + '/' + (type == 'groups' ? 'action' : 'state');
 		let action = params[params.length-1];
 		
 		if (!uid)
@@ -157,7 +137,7 @@ function startAdapter(options)
 			commands = { on: false, bri: 0 };
 		
 		// check reachability
-		if (!getDeviceState([type, deviceId, 'state.reachable']))
+		if (type == 'lights' && !getDeviceState([type, deviceId, 'state.reachable']))
 			adapter.log.warn('Device ' + name + ' does not seem to be reachable! Command is sent anyway.');
 		
 		// apply command
@@ -227,11 +207,11 @@ function getBridgeData(channel, refresh)
 		// refresh interval
 		if (refresh > 0 && refresh < 10)
 		{
-			adapter.log.warn('Refresh rate should not be less than 10s, thus set to 10s.');
+			adapter.log.warn('Due to performance reasons, the refresh rate can not be set to less than 10 seconds. Using 10 seconds now.');
 			refresh = 10;
 		}
 		
-		if (refresh && !unloaded)
+		if (refresh > 0 && !unloaded)
 			refreshCycle = setTimeout(getBridgeData, refresh*1000, channel, refresh);
 		
 	}).catch(function(err)
@@ -359,7 +339,7 @@ function readData(key, data)
 			);
 			
 			// subscribe to states
-			if (SUBSCRIPTIONS.indexOf(action) > -1 && (key.indexOf('state.' + action) > -1 || key.indexOf('action.' + action) > -1))
+			if (_SUBSCRIPTIONS.indexOf(action) > -1 && (key.indexOf('state.' + action) > -1 || key.indexOf('action.' + action) > -1))
 			{
 				node.subscribe = true;
 				adapter.subscribeStates(key);
@@ -485,7 +465,7 @@ function sendCommand(device, actions)
 	{
 		if (!Array.isArray(res))
 		{
-			adapter.log.warn('Unknown error applying actions ' + JSON.stringify(actions) + ' on device ' + device.name + ' (to ' + device.trigger + ')!');
+			adapter.log.warn('Unknown error applying actions ' + JSON.stringify(actions) + ' on ' + device.name + ' (to ' + device.trigger + ')!');
 			adapter.log.debug('Response: ' + JSON.stringify(res));
 		}
 		
@@ -498,7 +478,7 @@ function sendCommand(device, actions)
 				if (type == 'error')
 					adapter.log.warn('Error setting ' + msg[type].address + ': ' + msg[type].description);
 				else
-					adapter.log.info('Successfully set ' + Object.keys(msg[type]) + ' on device ' + device.name + ' (to ' + Object.values(msg[type]) + ').');
+					adapter.log.info('Successfully set ' + Object.keys(msg[type]) + ' on ' + device.name + ' (to ' + Object.values(msg[type]) + ').');
 			});
 		}
 		

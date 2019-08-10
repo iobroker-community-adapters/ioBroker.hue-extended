@@ -43,6 +43,13 @@ tbd
 - implement user creation in interface configuration (admin panel)
 - implement bridge discovery in interface configuration (admin panel)
 
+### 0.4.0 (2019-08-10)
+- (Zefau) Fixed applying action on group
+
+### 0.4.0 (2019-08-09)
+- (Zefau) Renamed adapter to hue-extended (formerly hue-lights)
+- (Zefau) Changed roles of some states
+
 ### 0.3.2 (2019-08-07)
 - (Zefau) Refactored data retrieval and state creation
 
