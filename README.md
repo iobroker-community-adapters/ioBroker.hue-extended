@@ -2,6 +2,8 @@
 # ioBroker.hue-extended
 Connect your Philips Hue Lights with ioBroker.
 
+[![Paypal Donation](https://img.shields.io/badge/paypal-donate%20|%20spenden-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=S45U45EHXGQHN&source=url)
+
 ![Number of Installations](http://iobroker.live/badges/hue-extended-installed.svg)
 ![Stable version](http://iobroker.live/badges/hue-extended-stable.svg)
 [![NPM version](http://img.shields.io/npm/v/iobroker.hue-extended.svg)](https://www.npmjs.com/package/iobroker.hue-extended)
@@ -39,9 +41,10 @@ tbd
 
 ## Changelog
 
-### 1.0.0 (2019-xx-xx) [MILESTONES / PLANNED FEATURES FOR v1.0.0 RELEASE]
-- implement user creation in interface configuration (admin panel)
-- implement bridge discovery in interface configuration (admin panel)
+### 0.6.0 (2019-08-12)
+- (Zefau) Implemented queue for any applied actions
+- (Zefau) Implemented user creation in interface configuration (admin panel)
+- (Zefau) Added additional actions for color spaces `rgb`, `hsv`, `cmyk`, `xyz` and `hex`
 
 ### 0.5.0 (2019-08-11)
 - (Zefau) Added support for scenes (reorganized states and added trigger)

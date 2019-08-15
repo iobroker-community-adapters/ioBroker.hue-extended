@@ -5,19 +5,24 @@ module.exports =
 	
 	// ACTIONS
 	"on": {"description": "Switch light on / off", "role": "switch.light", "type": "boolean"},
-	"bri": {"description": "Brightness of the light", "role": "level.dimmer", "type": "number"},
+	"bri": {"description": "Brightness of the light between 0 and 254", "role": "level.dimmer", "type": "number"},
 	"hue": {"description": "Hue of the light between 0 and 65535", "role": "level.color.hue", "type": "number"},
 	"hue_degrees": {"description": "Hue of the light between 0° and 360°", "role": "level.color.hue", "type": "number"},
-	"sat": {"description": "Saturation of the light", "role": "level.color.saturation", "type": "number"},
+	"sat": {"description": "Saturation of the light between 0 and 254", "role": "level.color.saturation", "type": "number"},
 	"xy": {"description": "The x and y coordinates in CIE color space", "role": "level.color.xy", "type": "string", "convert": "string"},
 	"ct": {"description": "The Mired Color temperature of the light", "role": "level.color.temperature", "type": "number"},
 	"alert": {"description": "The alert effect,is a temporary change to the bulb’s state", "role": "switch", "type": "string", "common": {"states": {"none": "No alert", "select": "One breathe cycle", "lselect": "Breathe cycles for 15s"}}},
 	"effect": {"description": "The dynamic effect of the light", "role": "switch", "type": "string", "common": {"states": {"none": "No effect", "colorloop": "Cycle through all hues"}}},
 	"transitiontime": {"description": "The duration of the transition from the light’s current state to the new state. This is given as a multiple of 100ms and defaults to 4 (400ms).", "role": "value", "type": "number"},
 	"colormode": {"description": "Indicates the color mode in which the light is working", "role": "indicator.colormode", "type": "string"},
-	"level": {"description": "Level of the light between 0 and 100", "role": "level.dimmer", "type": "number"},
-	"scene": {"description": "Apply scene on group", "role": "switch", "type": "string"},
-	"trigger": {"description": "Trigger scene on group", "role": "button", "type": "boolean"},
+	"level": {"description": "Level of the light between 0% and 100%", "role": "level.dimmer", "type": "number"},
+	"scene": {"description": "Apply scene on light or group", "role": "switch", "type": "string"},
+	"trigger": {"description": "Trigger scene on light or group", "role": "button", "type": "boolean"},
+	"_rgb": {"description": "RGB (red, green, blue) color space", "role": "level.color.rgb", "type": "string"},
+	"_hsv": {"description": "HSV (hue, saturation, value / brightness) color space", "role": "level.color.hsv", "type": "string"},
+	"_cmyk": {"description": "CMYK (cyan, magenta, yellow and key / black) color space", "role": "level.color.cmyk", "type": "string"},
+	"_xyz": {"description": "XYZ / CIE color space", "role": "level.color.xyz", "type": "string"},
+	"_hex": {"description": "Hex representation of the color", "role": "level.color.hex", "type": "string"},
 	
 	
 	// LIGHTS

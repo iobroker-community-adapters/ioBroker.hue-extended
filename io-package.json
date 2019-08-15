@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "hue-extended",
-        "version": "0.5.0",
+        "version": "0.6.0",
         "title": "Philips Hue Extended",
         "desc": {
             "en": "Integration of your Philips Hue Lights with your ioBroker",
@@ -16,14 +16,53 @@
             "zh-cn": "融入你的飞利浦色灯你ioBroker"
         },
         "news": {
+            "0.6.0": {
+                "en": "- implemented queue for any applied actions\n- implemented user creation in interface configuration (admin panel)\n- added additional actions for color spaces rgb, hsv, cmyk, xyz and hex",
+                "de": "- implementiert die queue für alle angewandten Aktionen\n- implementiert die user-Kreation in der interface-Konfiguration (admin-panel)\n- zusätzliche Aktionen für die Farbräume rgb, hsv, cmyk, xyz-und hex",
+                "ru": "- реализована очередь для применения каких-либо действий\n- создание пользователей в конфигурации интерфейс (админка)\n- добавлены дополнительные действия для цветовые пространства RGB, ВПГ, модель CMYK, XYZ и наговор",
+                "pt": "- implementado fila para qualquer aplicadas ações\n- implementada a criação de usuário na interface de configuração (painel de administrador)\n- adicionado ações adicionais para espaços de cor rgb, hsv, cmyk, xyz e hexadecimal",
+                "nl": "- uitgevoerd in de rij voor de eventuele toegepaste acties\n- uitgevoerd gebruiker in de interface-configuratie (admin panel)\n- extra acties voor kleurruimte rgb, hsv, cmyk, xyz en hex",
+                "fr": "- mise en œuvre de la file d'attente pour toutes les actions appliquées\n- mise en œuvre la création d'un utilisateur dans la configuration de l'interface (panneau d'administration)\n- ajout d'actions supplémentaires pour les espaces colorimétriques rvb, hsv, cmjn, xyz et hex",
+                "it": "- implementato in coda per eventuali azioni applicate\n- implementata la creazione dell'utente nell'interfaccia di configurazione (pannello di amministrazione)\n- aggiunta di ulteriori azioni per spazi di colore rgb, hsv, cmyk, xyz e hex",
+                "es": "- implementado cola para cualquier aplicar acciones\n- implementado la creación del usuario en la configuración de la interfaz (panel de administración)\n- añadido acciones adicionales para los espacios de color rgb, hsv, cmyk, xyz y hexadecimal",
+                "pl": "- realizowane wszystkim do stosowania jakichkolwiek działań\n- tworzenie użytkowników w konfiguracji interfejs (админка)\n- dodano dodatkowe kroki, aby przestrzenie kolorów RGB, HSV, model CMYK, XYZ i наговор",
+                "zh-cn": "-实施的队列中的任何适用的行动\n实现的用户建立接口的结构(管理小组)\n-增加额外的行动rgb颜色空间，单纯疱疹病毒，cmyk,xyz和hex"
+            },
             "0.5.0": {
-                "en": "- added support for scenes (reorganized states and added trigger)\n- fixed action xy"
+                "en": "- added support for scenes (reorganized states and added trigger)\n- fixed action xy",
+                "de": "- zusätzliche Unterstützung für Szenen (reorganisiert Staaten und zusätzlichen trigger)\n- Feste Aktion xy",
+                "ru": "- добавлена поддержка для сцены (реорганизована государства и добавил триггер)\n- исправлено действие ху",
+                "pt": "- adicionado suporte para cenas (reorganizada estados e adicionado trigger)\n- corrigido ação xy",
+                "nl": "- toegevoegde ondersteuning voor alle schermen (gereorganiseerd staten en toegevoegd trigger)\n- vaste actie xy",
+                "fr": "- ajout du support pour les scènes (réorganisé états et ajouté de déclenchement)\n- correction d'action xy",
+                "it": "- aggiunto il supporto per le scene stati riorganizzati e aggiunto trigger)\n- risolto azione xy",
+                "es": "- añadido soporte para las escenas (reorganizado los estados y añadió trigger)\n- fija la acción xy",
+                "pl": "- dodano wsparcie dla sceny (reorganizacji państwa i dodał wyzwalacz)\n- poprawiono działanie hu",
+                "zh-cn": "-增加支持的场景(重组国和加入触发)\n-固定行动xy"
             },
             "0.4.1": {
-                "en": "- Fixed applying action on groups"
+                "en": "- Fixed applying action on groups",
+                "de": "- Feste Anwendung von Maßnahmen auf Gruppen",
+                "ru": "- Исправлено применение действия на группы",
+                "pt": "- Corrigido aplicando-se a ação de grupos",
+                "nl": "- Vaste toepassen actie op groepen",
+                "fr": "- Correction d'application de l'action sur les groupes",
+                "it": "- Risolto applicando azione sui gruppi",
+                "es": "- Fija la aplicación de la acción de los grupos",
+                "pl": "- Naprawiono zastosowanie działania na grupy",
+                "zh-cn": "-固定施加的行动的群体"
             },
             "0.4.0": {
-                "en": "- Renamed adapter to hue-extended (formerly hue-lights)\n- Changed roles of some states"
+                "en": "- Renamed adapter to hue-extended (formerly hue-lights)\n- Changed roles of some states",
+                "de": "- In adapter für hue-extended (ehemals hue-Lampen)\n- Veränderte Rollen in einigen Staaten",
+                "ru": "- Переименованный адаптер в Гуе-расширенная (ранее Хюэ-фонари)\n- Изменилась роль отдельных государств",
+                "pt": "- Renomeado adaptador para hue-estendido (anteriormente hue-luzes)\n- Os papéis mudaram de alguns estados",
+                "nl": "- Gewijzigd-adapter om hue-extended (voorheen hue-lampen)\n- Rol veranderd van sommige staten",
+                "fr": "- Renommé de l'adaptateur à la teinte prolongé (anciennement hue-lumières)\n- Changé les rôles de certains états",
+                "it": "- Rinominato adattatore per hue-extended (ex hue-luci)\n- Cambiati i ruoli di alcuni stati",
+                "es": "- Cambiado el nombre de adaptador de hue-extendido (anteriormente hue-luces)\n- Cambiado los roles de algunos estados",
+                "pl": "- Przemianowany adapter w Гуе-rozszerzony (wcześniej Hue-latarnie)\n- Zmieniła się rola poszczególnych państw",
+                "zh-cn": "-改名为适配器以色扩展(前色灯)\n-改变角色的一些国家"
             },
             "0.3.1": {
                 "en": "- When turning on a device, set level / bri to 100 if it was set to 0",
@@ -89,6 +128,8 @@
         "compact": true,
         "enabled": true,
         "localLink": "https://%bridgeIp%/debug/clip.html",
+        "messagebox": true,
+        "subscribe": "messagebox",
         "type": "lighting",
         "authors": [
             {
@@ -100,7 +141,8 @@
     "native": {
         "refresh": 30,
         "syncLights": true,
-        "useNames": true
+        "syncGroups": true,
+        "hueToXY": true
     },
     "objects": [],
     "instanceObjects": []

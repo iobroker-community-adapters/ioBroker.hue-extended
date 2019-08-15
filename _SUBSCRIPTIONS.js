@@ -72,5 +72,14 @@ module.exports =
 	 * Scene
 	 */
 	'scene',
-	'trigger'
+	'trigger',
+	
+	/*
+	 * Color spaces
+	 */
+	'_rgb',
+	'_hsv',
+	'_cmyk',
+	'_xyz',
+	'_hex'
 ];

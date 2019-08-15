@@ -3,6 +3,8 @@ const adapterName = require('./io-package.json').common.name;
 const utils = require('@iobroker/adapter-core'); // Get common adapter utils
 
 const _request = require('request-promise');
+const _color = require('color-convert');
+const _hueColor = require('./lib/hueColor.js');
 
 
 /*
@@ -22,15 +24,7 @@ let unloaded;
 let dutyCycle, refreshCycle;
 
 let bridge, device;
-let DEVICES = {
-	'groups': {},
-	'lights': {},
-	'resourcelinks': {},
-	'rules': {},
-	'scenes': {},
-	'schedules': {},
-	'sensors': {}
-};
+let QUEUE = {};
 
 
 /*
@@ -46,7 +40,7 @@ function startAdapter(options)
 	});
 	
 	adapter = new utils.Adapter(options);
-	library = new Library(adapter);
+	library = new Library(adapter, { updatesInLog: true });
 	unloaded = false;
 	
 	/*
@@ -61,23 +55,38 @@ function startAdapter(options)
 		// Bridge connection
 		bridge = 'http://' + adapter.config.bridgeIp + ':' + (adapter.config.bridgePort || 80) + '/api/' + adapter.config.bridgeUser + '/';
 		
-		// retrieve from Bridge
-		['config', 'groups', 'lights', 'resourcelinks', 'rules', 'scenes', 'schedules', 'sensors'].forEach(function(channel)
+		// retrieve values from states to avoid message "Unsubscribe from all states, except system's, because over 3 seconds the number of events is over 200 (in last second 0)"
+		adapter.getStates(adapterName + '.' + adapter.instance + '.*', function(err, states)
 		{
-			if (adapter.config['sync' + library.ucFirst(channel)])
-				getBridgeData(channel, adapter.config.refresh || 0);
+			if (err || !states) return;
+			
+			for (let state in states)
+				library.setDeviceState(state.replace(adapterName + '.' + adapter.instance + '.', ''), states[state] && states[state].val);
+		
+			// retrieve from Bridge
+			['config', 'groups', 'lights', 'resourcelinks', 'rules', 'scenes', 'schedules', 'sensors'].forEach(function(channel)
+			{
+				if (adapter.config['sync' + library.ucFirst(channel)])
+					getBridgeData(channel, adapter.config.refresh || 30);
+			});
 		});
 		
 		// delete old states (which were not updated recently)
 		clearTimeout(dutyCycle);
 		dutyCycle = setTimeout(function dutyCycleRun()
 		{
-			adapter.log.debug('Running Duty Cycle...');
-			library.runDutyCycle(adapterName + '.' + adapter.instance, Math.floor(Date.now()/1000));
-			adapter.log.debug('Duty Cycle finished.');
-			dutyCycle = setTimeout(dutyCycleRun, 4*60*60*1000);
+			if (!unloaded)
+			{
+				adapter.log.debug('Running Duty Cycle...');
+				library.runDutyCycle(adapterName + '.' + adapter.instance, Math.floor(Date.now()/1000));
+				adapter.log.debug('Duty Cycle finished.');
+				dutyCycle = setTimeout(dutyCycleRun, 4*60*60*1000);
+			}
 			
 		}, 60*1000);
+		
+		// start listening for events in the queue
+		queue();
 	});
 
 	/*
@@ -91,17 +100,20 @@ function startAdapter(options)
 		
 		// get params
 		let params = id.replace(adapterName + '.' + adapter.instance + '.', '').split('.');
-		let type = params.splice(0,1);
-		let deviceId = type == 'scenes' ? params.splice(0,2) : params.splice(0,1);
+		let type = params.splice(0,1).toString();
+		let deviceId = type == 'scenes' ? params.splice(0,2).join('.') : params.splice(0,1).toString();
 		
 		// get device data
-		let name = getDeviceState([...type, ...deviceId, 'name']);
-		let uid = getDeviceState([...type, ...deviceId, 'uid']);
+		let name = library.getDeviceState(type + '.' + deviceId + '.name');
+		let uid = library.getDeviceState(type + '.' + deviceId + '.uid');
 		let path = type + '/' + uid + '/' + (type == 'groups' ? 'action' : 'state');
 		let action = params[params.length-1];
 		
 		if (!uid)
+		{
+			adapter.log.warn('Command can not be send to device due to error (no UID)!');
 			return false;
+		}
 		
 		// reset if scene was set
 		if (id.indexOf('.scene') > -1)
@@ -110,6 +122,26 @@ function startAdapter(options)
 		// build command
 		let service = { name: name, trigger: path };
 		let commands = { [action]: state.val };
+		
+		// handle color spaces
+		let hsv = null;
+		if (action == '_rgb')
+			hsv = _color.rgb.hsv(state.val);
+		
+		else if (action == '_hsv')
+			hsv = state.val.split(',');
+		
+		else if (action == '_cmyk')
+			hsv = _color.cmyk.hsv(state.val);
+		
+		else if (action == '_xyz')
+			hsv = _color.xyz.hsv(state.val);
+		
+		else if (action == '_hex')
+			hsv = _color.hex.hsv(state.val);
+		
+		if (hsv !== null)
+			commands = { hue: Math.ceil(hsv[0]/360*65535), sat: Math.ceil(hsv[1]/100*254), bri: Math.ceil(hsv[2]/100*254) };
 		
 		// handle sccene
 		if (type == 'scenes')
@@ -123,7 +155,7 @@ function startAdapter(options)
 		// if device is turned on, make sure brightness is not 0
 		if (action == 'on' && state.val == true)
 		{
-			let bri = getDeviceState([type, deviceId, 'state.bri']) || getDeviceState([type, deviceId, 'action.bri']);
+			let bri = library.getDeviceState(type + '.' + deviceId + '.state.bri') || library.getDeviceState(type + '.' + deviceId + '.action.bri');
 			commands.bri = bri == 0 ? 254 : bri;
 		}
 		
@@ -149,13 +181,46 @@ function startAdapter(options)
 		if ((action == 'bri' || action == 'level') && state.val < 1)
 			commands = { on: false, bri: 0 };
 		
+		// convert HUE to RGB
+		if (commands.hue !== undefined && library.getDeviceState(type + '.' + deviceId + '.manufacturername') != 'Philips' && adapter.config.hueToXY)
+			commands = { "xy": JSON.stringify(_hueColor.convertRGBtoXY(rgb)) };
+		
+		// if .on is not off, be sure device is on
+		if (commands.on === undefined)
+			commands.on = true; // A light cannot have its hue, saturation, brightness, effect, ct or xy modified when it is turned off. Doing so will return 201 error.
+		
 		// check reachability
-		if (type == 'lights' && !getDeviceState([type, deviceId, 'state.reachable']))
+		if (type == 'lights' && !library.getDeviceState(type + '.' + deviceId + '.state.reachable'))
 			adapter.log.warn('Device ' + name + ' does not seem to be reachable! Command is sent anyway.');
 		
-		// apply command
-		Object.keys(commands).forEach(command => setDeviceState([type, deviceId, command], '')); // reset stored states so that retrieved states will renew
-		sendCommand(service, commands);
+		// queue command
+		QUEUE[service.trigger] = QUEUE[service.trigger] ? { name: service.name, type: type, deviceId: deviceId, commands: Object.assign({}, QUEUE[service.trigger].commands, commands) } : { name: service.name, type: type, deviceId: deviceId, commands: commands };
+	});
+	
+	/*
+	 * HANDLE MESSAGES
+	 *
+	 */
+	adapter.on('message', function(msg)
+	{
+		adapter.log.debug('Message: ' + JSON.stringify(msg));
+		
+		switch(msg.command)
+		{
+			case 'getUser':
+				getUser(function(username)
+				{
+					adapter.log.debug('Retrieved user from Hue Bridge: ' + JSON.stringify(username));
+					library.msg(msg.from, msg.command, {result: true, user: username}, msg.callback);
+					
+				}, function(error)
+				{
+					adapter.log.warn('Failed retrieving user (' + error + ')!');
+					library.msg(msg.from, msg.command, {result: false, error: error}, msg.callback);
+				});
+				
+				break;
+		}
 	});
 	
 	/*
@@ -169,7 +234,7 @@ function startAdapter(options)
 			adapter.log.info('Adapter stopped und unloaded.');
 			
 			unloaded = true;
-			DEVICES = undefined;
+			library.resetStates();
 			clearTimeout(refreshCycle);
 			clearTimeout(dutyCycle);
 			
@@ -231,8 +296,8 @@ function getBridgeData(channel, refresh)
 	{
 		if (err.message.substr(0, 3) == 500)
 		{
-			adapter.log.warn('Error: Hue Bridge is busy. Try again in 10s..');
-			adapter.log.debug(err.message);
+			adapter.log.debug('Error: Hue Bridge is busy. Try again in 10s..');
+			adapter.log.silly(err.message);
 			setTimeout(getBridgeData, 10*1000, channel, refresh);
 		}
 		else
@@ -297,17 +362,20 @@ function readData(key, data)
 					key.replace('.' + data.uid, '.' + id);
 			}
 			
-			// add level as additional state
-			if (data.bri !== undefined)
+			// add additional states
+			if (data.bri !== undefined && data.sat !== undefined && data.hue !== undefined)
 			{
+				data.hue_degrees = Math.round(data.hue / 65535 * 360);
 				data.level = data.bri > 0 ? Math.ceil(data.bri / 254 * 100) : 0;
 				data.transitiontime = data.transitiontime || 4;
 				data.scene = '';
+				
+				data._hsv = data.hue_degrees + ','+ (data.sat > 0 ? Math.ceil(data.sat/254*100) : 0) + ',' + data.level;
+				data._rgb = _color.hsv.rgb(data._hsv.split(',')).toString();
+				data._cmyk = _color.rgb.cmyk(data._rgb.split(',')).toString();
+				data._xyz = _color.rgb.xyz(data._rgb.split(',')).toString();
+				data._hex = _color.rgb.hex(data._rgb.split(','));
 			}
-			
-			// add hue degree as additional state
-			if (data.hue !== undefined)
-				data.hue_degrees = Math.round(data.hue / 65535 * 360);
 			
 			// add scene trigger button as additional state (only to scenes)
 			if (data.type == 'GroupScene' || data.type == 'LightScene')
@@ -348,64 +416,40 @@ function readData(key, data)
 		node.key = key;
 		data = convertNode(node, data);
 		
-		// get device from cache
-		let val = getDeviceState(key.split('.'));
+		// remap state to action
 		let action = key.substr(key.lastIndexOf('.')+1);
-		
-		if (val === null)
+		if (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('state.' + action) > -1)
 		{
-			// index device
-			setDeviceState(key.split('.'), data);
-			
-			// remap state to action
-			if (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('state.' + action) > -1)
-			{
-				key = key.replace('.state.', '.action.');
-				library.set({
-					node: key.substr(0, key.indexOf('.action.')+7),
-					role: 'channel',
-					description: 'Action'
-				});
-			}
-			
-			// set state
-			library.set(
-				{
-					node: key,
-					type: node.type,
-					role: node.role,
-					description: (node.device !== false && device ? device + ' - ' : '') + (node.description || library.ucFirst(key.substr(key.lastIndexOf('.')+1))),
-					common: Object.assign(
-						node.common || {},
-						{
-							write: (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('action.' + action) > -1)
-						}
-					)
-				},
-				data
-			);
-			
-			// subscribe to states
-			if (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('action.' + action) > -1)
-			{
-				node.subscribe = true;
-				adapter.subscribeStates(key);
-			}
+			key = key.replace('.state.', '.action.');
+			library.set({
+				node: key.substr(0, key.indexOf('.action.')+7),
+				role: 'channel',
+				description: 'Action'
+			});
 		}
 		
-		// set state (if value differs)
-		else if (val != data)
+		// set state
+		library.set(
+			{
+				node: key,
+				type: node.type,
+				role: node.role,
+				description: (node.device !== false && device ? device + ' - ' : '') + (node.description || library.ucFirst(key.substr(key.lastIndexOf('.')+1))),
+				common: Object.assign(
+					node.common || {},
+					{
+						write: (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('action.' + action) > -1)
+					}
+				)
+			},
+			data
+		);
+		
+		// subscribe to states
+		if (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('action.' + action) > -1)
 		{
-			if (['timestamp', 'datetime', 'UTC', 'localtime', 'last_use_date'].indexOf(key.substr(key.lastIndexOf('.')+1)) == -1)
-				adapter.log.debug('Received updated value for ' + key + ': '+JSON.stringify(data));
-			
-			// remap
-			if (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('state.' + action) > -1)
-				key = key.replace('.state.', '.action.');
-			
-			// update state value
-			adapter.setState(key, { val: data, ts: Date.now(), ack: true });
-			setDeviceState(key.split('.'), data);
+			node.subscribe = true;
+			adapter.subscribeStates(key);
 		}
 	}
 }
@@ -479,31 +523,13 @@ function get(node)
 /**
  *
  */
-function getDeviceState([type, name, ...params])
-{
-	return DEVICES[type] !== undefined && DEVICES[type][name] !== undefined && DEVICES[type][name][params.join('.')] !== undefined ? DEVICES[type][name][params.join('.')] : null;
-}
-
-/**
- *
- */
-function setDeviceState([type, name, ...params], value)
-{
-	if (!DEVICES[type]) DEVICES[type] = {};
-	if (!DEVICES[type][name]) DEVICES[type][name] = {};
-	DEVICES[type][name][params.join('.')] = value;
-}
-
-/**
- *
- */
 function sendCommand(device, actions)
 {
 	let options = {
 		uri: bridge + device.trigger,
 		method: 'PUT',
 		json: true,
-		body: actions.xy ? {"xy": JSON.parse(actions.xy)} : actions
+		body: actions.xy ? Object.assign({}, actions, { "xy": JSON.parse(actions.xy) } ) : actions
 	};
 	
 	adapter.log.debug('Send command to ' + device.name + ' (' + device.trigger + '): ' + JSON.stringify(actions) + '.');
@@ -532,5 +558,51 @@ function sendCommand(device, actions)
 	{
 		adapter.log.warn('Failed sending request to ' + device.trigger + '!');
 		adapter.log.debug('Error Message: ' + e);
+	});
+}
+
+/**
+ *
+ */
+function queue()
+{
+	for (let trigger in QUEUE)
+	{
+		let service = QUEUE[trigger];
+		
+		Object.keys(service.commands).forEach(command => library.setDeviceState(service.type + '.' + service.deviceId + '.' + command, '')); // reset stored states so that retrieved states will renew
+		sendCommand({ trigger: trigger, name: service.name }, service.commands);
+		delete QUEUE[trigger];
+	}
+	
+	let queueRun = setTimeout(queue, (adapter.config.queue || 3)*1000);
+}
+
+/**
+ *
+ */
+function getUser(success, failure)
+{
+	let options = {
+		uri: 'http://' + adapter.config.bridgeIp + ':' + (adapter.config.bridgePort || 80) + '/api/',
+		method: 'POST',
+		json: true,
+		body: { "devicetype": "iobroker.hue-extended#iphone peter" }
+	};
+	
+	_request(options).then(function(res)
+	{
+		if (res && res[0] && res[0].success && res[0].success.username)
+			success && success(res[0].success.username);
+		
+		else if (res && res[0] && res[0].error && res[0].error.description)
+			failure && failure(res[0].error.description);
+		
+		else
+			failure && failure('Unknown error occurred!');
+		
+	}).catch(function(err)
+	{
+		failure && failure(err.message);
 	});
 }

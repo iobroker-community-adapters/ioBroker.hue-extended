@@ -32,27 +32,50 @@
 		_save(callback, saveParams);
 	}
 	
-	// modal
-	function initModal(modal)
-	{
-        $('.modal').modal(); // initialize all modals
-		
-		if (!modal)
-		{
-			// add listener
-			$('#buttonNotAgain').on('click', function()
-			{
-				saveParams.modal = true;
-			});
-			
-			// open modal
-			$('#modal').modal('open');
-		}
-	}
-	
 	// page loaded
 	$(window).on('load', function()
 	{
+        $('.modal').modal(); // initialize all modals
+
+		var getUser = $('#button_getUser');
+		var generateUser = $('#button_generateUser');
+		
+		/*
+		 * Get User
+		 */
+		getUser.on('click', function()
+		{
+			$('#statusLog').text('');
+			$('#modal').modal('open');
+		});
+
+		/*
+		 * Generate User
+		 */
+		generateUser.on('click', function()
+		{
+			$('#log').html('');
+			_log(translateWord('message_connecting'));
+
+			// cancel
+			var timeout = setTimeout(function() {_log(translateWord('message_noconnection'), 'error');}, 7000);
+
+			// send request
+			sendTo(null, 'getUser', {}, function(res)
+			{
+				_log(translateWord('message_connected'));
+				clearTimeout(timeout);
+
+				if (res !== false && res.result !== false)
+				{
+					$('#bridgeUser').val(res.user).focus();
+					$('#bridgeUser').trigger('change');
+					$('#modal').modal('close');
+				}
+				else
+					_log(res.error !== undefined ? res.error : translateWord('message_error-user'), 'error');
+			});
+		});
 	});
 	// -->
 	</script>
@@ -68,31 +91,68 @@
 	<!-- Modal Structure -->
 	<div id="modal" class="modal">
 		<div class="modal-content">
-			<h3 class="modalTitle translate">modalTitle</h3>
-			<p class="modalMessage translate">modalMessage</p>
-			
+			<strong class="translate">button_getUser</strong><br />
+			<p class="translate">getUserInfo</p>
+
+			<div class="row">
+				<div class="col s12 m12">
+					<strong style="font-weight: bold">Status:</strong>
+					<div id="log"></div>
+				</div>
+			</div>
+
 		</div>
 		<div class="modal-footer">
-			<a href="#!" id="buttonNotAgain" class="modal-close btn waves-effect waves-green translate">buttonNotAgain</a>
-			<a href="#!" id="buttonDismiss" class="modal-close btn-flat translate">buttonDismiss</a>
+			<a href="#!" class="modal-close waves-effect waves-green btn-flat translate">button_closeModal</a>
+			<a href="#!" class="btn green translate" id="button_generateUser">button_getUser</a>
 		</div>
 	</div>
+
 
 	<div class="row">
 		
 		<!-- TABS -->
 		<div class="col s12">
 			<ul class="tabs">
-				<li class="tab col s3"><a class="translate active" href="#config">tab_config</a></li>
+				<li class="tab col s3"><a class="translate active" href="#donate">tab_donate</a></li>
+				<li class="tab col s3"><a class="translate" href="#config">tab_config</a></li>
 				<li class="tab col s3"><a target="_blank" class="translate" href="https://github.com/Zefau/ioBroker.hue-extended#smart-home--alexa-integration-using-iobrokerjavascript">tab_alexa</a></li>
 				<li class="tab col s3"><a target="_blank" class="translate" href="https://github.com/Zefau/ioBroker.hue-extended#iobrokerhue-extended">tab_info</a></li>
 			</ul>
 		</div>
 		
+		<!-- DONATE -->
+		<div id="donate" class="col s12">
+		
+			<!-- Hue Bridge -->
+			<div class="row">
+				<div class="col s12 m12">
+					<div class="row" style="margin-bottom: 0">
+						<div class="col s12 m12">
+							<p class="translate title">donateTitle</p>
+						</div>
+					</div>
+					<div class="row box">
+						<p class="subtitle translate">donateInformation</p>
+						
+						<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" style="margin: 10 0 0 30">
+							<input type="hidden" name="cmd" value="_s-xclick" />
+							<input type="hidden" name="hosted_button_id" value="DJR9PHP53L8Q2" />
+							<input type="image" src="https://www.paypalobjects.com/webstatic/de_DE/i/de-pp-logo-200px.png" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+							<img alt="" border="0" src="https://www.paypal.com/en_DE/i/scr/pixel.gif" width="1" height="1" />
+						</form>
+						
+					</div>
+					
+				</div>
+			</div>
+			
+		</div>
+		
 		<!-- CONFIG -->
 		<div id="config" class="col s12">
 			
-			<!-- Plex -->
+			<!-- Hue Bridge -->
 			<div class="row">
 				<div class="col s12 m12">
 					<div class="row" style="margin-bottom: 0">
@@ -115,7 +175,11 @@
 							<input class="value" id="bridgeUser" type="text" />
 							<label for="bridgeUser" class="translate">user</label>
 						</div>
-						<div class="input-field col s6 m6"></div>
+						<div class="input-field col s1 m1"></div>
+						<div class="input-field col s2 m2">
+							<a class="btn blue translate" id="button_getUser">button_getUser</a>
+						</div>
+						<div class="input-field col s3 m3"></div>
 					</div>
 					
 				</div>
@@ -130,14 +194,7 @@
 						</div>
 					</div>
 					<div class="row box" style="margin-bottom: 0">
-						<div class="input-field col s4 m4">
-							<p class="subtitle translate">refreshInfo</p>
-							
-							<input class="value" id="refresh" type="number" placeholder="0" />
-							<label for="refresh" class="translate" style="display: none">refresh</label>
-						</div>
-						<div class="input-field col s1 m1"></div>
-						<div class="input-field col s4 m4">
+						<div class="input-field col s3 m3">
 							<p class="subtitle translate">syncInfo</p>
 							
 							<div style="display: block">
@@ -180,7 +237,34 @@
 								<label for="syncSensors" class="translate">syncSensors</label>
 							</div>
 						</div>
-						
+						<div class="col s3 m3" style="margin: 0">
+							<div class="row">
+								<div class="input-field col s12 m12">
+									<p class="subtitle translate">refreshInfo</p>
+									
+									<input class="value" id="refresh" type="number" placeholder="30" />
+									<label for="refresh" class="translate" style="display: none">refresh</label>
+								</div>
+							</div>
+							<div class="row">
+								<div class="input-field col s12 m12">
+									<p class="subtitle translate">queueInfo</p>
+									
+									<input class="value" id="queue" type="number" placeholder="3" />
+									<label for="queue" class="translate" style="display: none">queue</label>
+								</div>
+							</div>
+						</div>
+						<div class="input-field col s1 m1"></div>
+						<div class="input-field col s5 m5">
+							<div style="display: block">
+								<p class="subtitle translate">hueToXYInfo</p>
+								
+								<input class="value" id="hueToXY" type="checkbox" />
+								<label for="hueToXY" class="translate">hueToXY</label>
+							</div>
+							
+						</div>
 					</div>
 				</div>
 			</div>

@@ -35,6 +35,7 @@
   ],
   "dependencies": {
     "@iobroker/adapter-core": "^1.0.3",
+    "color-convert": "^2.0.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.4"
   },
@@ -70,5 +71,5 @@
     "test:package": "mocha test/package --exit",
     "test:unit": "mocha test/unit --exit"
   },
-  "version": "0.5.0"
+  "version": "0.6.0"
 }
