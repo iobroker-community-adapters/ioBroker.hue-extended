@@ -14,15 +14,7 @@ Connect your Philips Hue Lights with ioBroker.
 [![NPM](https://nodei.co/npm/iobroker.hue-extended.png?downloads=true)](https://nodei.co/npm/iobroker.hue-extended/) 
 
 
-**Table of contents**
-1. [Features](#1-features)
-2. [Setup instructions](#2-setup-instructions)
-3. [Channels & States](#3-channels--states)
-4. [Changelog](#changelog)
-5. [Licence](#license)
-
-
-## 1. Features
+## Features
 - Synchronize Config
 - Synchronize Groups
 - Synchronize Lights
@@ -31,17 +23,18 @@ Connect your Philips Hue Lights with ioBroker.
 - Synchronize Scenes
 - Synchronize Schedules
 - Synchronize Sensors 
-- Trigger changes on states `on/off`, `bri` (`level`), `hue`, `sat`, `xy`, `ct`, `alert`, `effect` and `transitiontime`  
+- Trigger changes on states `on/off`, `bri` (`level`), `hue`, `sat`, `xy`, `ct`, `alert`, `effect` and `transitiontime`
+- Additional triggers based on color spaces for `rgb`, `hsv`, `xyz`, `cmyk` and `hex`
+- Run scene or apply `scene` on light or group
 
-## 2. Setup instructions
-tbd
-
-## 3. Channels & States
-tbd
 
 ## Changelog
 
-### 0.6.0 (2019-08-12)
+### 0.6.1 (2019-08-16)
+- (Zefau) Corrected German translations
+- (Zefau) Completed README
+
+### 0.6.0 (2019-08-15)
 - (Zefau) Implemented queue for any applied actions
 - (Zefau) Implemented user creation in interface configuration (admin panel)
 - (Zefau) Added additional actions for color spaces `rgb`, `hsv`, `cmyk`, `xyz` and `hex`

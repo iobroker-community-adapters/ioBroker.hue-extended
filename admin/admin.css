@@ -36,3 +36,5 @@ p.errorMessage {
 .modalMessage {
 	line-height: 20px;
 }
+
+pre {display: inline}
