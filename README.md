@@ -30,49 +30,53 @@ Connect your Philips Hue Lights with ioBroker.
 
 ## Changelog
 
+### 0.6.2 (2019-08-18)
+- (Zefau) fixed error when triggering scene (`Error setting /lights/undefined/state: resource, /lights/undefined/state, not available`)
+- (Zefau) fixed display error in adapter configuration interface
+
 ### 0.6.1 (2019-08-16)
 - (Zefau) Corrected German translations
 - (Zefau) Completed README
 
 ### 0.6.0 (2019-08-15)
-- (Zefau) Implemented queue for any applied actions
-- (Zefau) Implemented user creation in interface configuration (admin panel)
-- (Zefau) Added additional actions for color spaces `rgb`, `hsv`, `cmyk`, `xyz` and `hex`
+- (Zefau) implemented queue for any applied actions
+- (Zefau) implemented user creation in interface configuration (admin panel)
+- (Zefau) added additional actions for color spaces `rgb`, `hsv`, `cmyk`, `xyz` and `hex`
 
 ### 0.5.0 (2019-08-11)
-- (Zefau) Added support for scenes (reorganized states and added trigger)
-- (Zefau) Fixed action `xy`
-- (Zefau) Reorganized states within tree `state` into `action` in case they are executable
+- (Zefau) added support for scenes (reorganized states and added trigger)
+- (Zefau) fixed action `xy`
+- (Zefau) reorganized states within tree `state` into `action` in case they are executable
 
 ### 0.4.0 (2019-08-10)
-- (Zefau) Fixed applying action on group
+- (Zefau) fixed applying action on group
 
 ### 0.4.0 (2019-08-09)
-- (Zefau) Renamed adapter to hue-extended (formerly hue-lights)
-- (Zefau) Changed roles of some states
+- (Zefau) renamed adapter to hue-extended (formerly hue-lights)
+- (Zefau) changed roles of some states
 
 ### 0.3.2 (2019-08-07)
-- (Zefau) Refactored data retrieval and state creation
+- (Zefau) refactored data retrieval and state creation
 
 ### 0.3.1 (2019-08-03)
-- (Zefau) When turning on a device, set level / bri to 100 if it was set to 0
+- (Zefau) when turning on a device, set level / bri to 100 if it was set to 0
 
 ### 0.3.0 (2019-08-03)
 
 __REMARK: If you are coming from an earlier version, please delete all your hue-extended states before running this release!__
 
-- (Zefau) Added error message when incorrect bridge credentials are provided ([see issue description](https://forum.iobroker.net/post/287505))
-- (Zefau) When turning off a device, set level / bri to 0 ([see issue description](https://forum.iobroker.net/post/287566))
-- (Zefau) Fixed error that prevented `groups` being set / changed
-- (Zefau) Added specific role information to states under `lights`, `groups` and `sensors` ([see issue description](https://forum.iobroker.net/post/287566))
-- (Zefau) Fixed wrong value for temperature sensors ([see issue description](https://forum.iobroker.net/post/287564))
+- (Zefau) added error message when incorrect bridge credentials are provided ([see issue description](https://forum.iobroker.net/post/287505))
+- (Zefau) when turning off a device, set level / bri to 0 ([see issue description](https://forum.iobroker.net/post/287566))
+- (Zefau) fixed error that prevented `groups` being set / changed
+- (Zefau) added specific role information to states under `lights`, `groups` and `sensors` ([see issue description](https://forum.iobroker.net/post/287566))
+- (Zefau) fixed wrong value for temperature sensors ([see issue description](https://forum.iobroker.net/post/287564))
 
 ### 0.2.0 (2019-07-24)
-- (Zefau) Added support to change states _level_, _xy_, _effect_, _alert_, and _transitiontime_
+- (Zefau) added support to change states _level_, _xy_, _effect_, _alert_, and _transitiontime_
 
 ### 0.1.0 (2019-07-21)
-- (Zefau) Retrieve lights, groups, resourcelinks, rules, scenes, schedules, sensors and config from Hue Bridge
-- (Zefau) Change states (e.g. on/off, brightness, saturation)
+- (Zefau) retrieve lights, groups, resourcelinks, rules, scenes, schedules, sensors and config from Hue Bridge
+- (Zefau) change states (e.g. on/off, brightness, saturation)
 
 
 ## License

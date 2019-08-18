@@ -2,7 +2,8 @@
  * Admin styles.
  *
  * @author Zefau <zefau@mailbox.org>
- * @version 0.3.1
+ * @version 0.3.2
+ * @date 2019-08-18
  *
  */
 .m select {display: block !important}
@@ -38,3 +39,8 @@ p.errorMessage {
 }
 
 pre {display: inline}
+
+.m [type="checkbox"] + span:not(.lever) {
+	height: auto;
+	margin-bottom: 3px;
+}

@@ -146,9 +146,12 @@ function startAdapter(options)
 		// handle sccene
 		if (type == 'scenes')
 		{
-			let scene = deviceId[1].substr(0, deviceId[1].indexOf('_')).split('-');
-			service.trigger = scene[0] == 'GroupScene' ? 'groups/' + scene[1] + '/action' : 'lights/' + scene[1] + '/state';
-			service.name = scene.join(' ');
+			let scene = deviceId.split('.');
+			let appliance = scene[1].substr(0, scene[1].indexOf('_')).split('-');
+			
+			service.trigger = appliance[0] == 'GroupScene' ? 'groups/' + appliance[1] + '/action' : 'lights/' + scene[1] + '/state';
+			service.name = appliance.join(' ');
+			
 			commands = { 'scene': uid };
 		}
 		

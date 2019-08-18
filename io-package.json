@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "hue-extended",
-        "version": "0.6.1",
+        "version": "0.6.2",
         "title": "Philips Hue Extended",
         "desc": {
             "en": "Integration of your Philips Hue Lights with your ioBroker",
@@ -16,6 +16,30 @@
             "zh-cn": "融入你的飞利浦色灯你ioBroker"
         },
         "news": {
+            "0.6.2": {
+                "en": "- fixed error when triggering scene\n- fixed display error in adapter configuration interface",
+                "de": "- Fehler behoben beim Auslösen von Szenen\n- Anzeigefehler in der Adapter-Konfiguration behoben",
+                "ru": "- Исправлена ошибка при запуска сцены\n- Исправлена ошибка отображения в адаптер интерфейс конфигурации ",
+                "pt": "- corrigido erro ao desencadeamento de cena\n- corrigido o erro de exibição no adaptador de interface de configuração",
+                "nl": "- fout opgelost bij het activeren van de scène\n- vaste display fout in configuratie-interface adapter",
+                "fr": "- correction d'une erreur lors du déclenchement de la scène\n- correction de l'affichage d'erreur dans la configuration de l'adaptateur d'interface",
+                "it": "- corretto errore quando si attivano scena\n- corretto errore di visualizzazione nella scheda di interfaccia di configurazione",
+                "es": "- corregido un error al desencadenamiento de la escena\n- corregido el error en la configuración del adaptador de interfaz",
+                "pl": "- Naprawiono błąd podczas uruchamiania sceny\n- Naprawiono błąd wyświetlania w adapter interfejs konfiguracji ",
+                "zh-cn": "-固定错误时的触发的场景\n-固定显示错误配置接口适配器"
+            },
+            "0.6.1": {
+                "en": "- corrected German translations\n- completed README",
+                "de": "- korrigierte Deutsche Übersetzung\n- finalisierte README",
+                "ru": "- исправлен немецкий перевод\n- завершена ридми",
+                "pt": "- corrigido traduções em alemão\n- concluída leia-me",
+                "nl": "- gecorrigeerd duitse vertalingen\n- afgerond LEESMIJ-bestand",
+                "fr": "- correction de traductions allemandes\n- terminé README",
+                "it": "- correzione di traduzioni in tedesco\n- completato il README",
+                "es": " corrección de traducciones en alemán\n- completado LÉAME",
+                "pl": "- poprawiono tłumaczenie niemieckie\n- zakończona readme",
+                "zh-cn": "-修正的德语翻译\n-完成README"
+            },
             "0.6.0": {
                 "en": "- implemented queue for any applied actions\n- implemented user creation in interface configuration (admin panel)\n- added additional actions for color spaces rgb, hsv, cmyk, xyz and hex",
                 "de": "- implementiert die queue für alle angewandten Aktionen\n- implementiert die user-Kreation in der interface-Konfiguration (admin-panel)\n- zusätzliche Aktionen für die Farbräume rgb, hsv, cmyk, xyz-und hex",

@@ -16,7 +16,7 @@ module.exports =
 	"transitiontime": {"description": "The duration of the transition from the light’s current state to the new state. This is given as a multiple of 100ms and defaults to 4 (400ms).", "role": "value", "type": "number"},
 	"colormode": {"description": "Indicates the color mode in which the light is working", "role": "indicator.colormode", "type": "string"},
 	"level": {"description": "Level of the light between 0% and 100%", "role": "level.dimmer", "type": "number"},
-	"scene": {"description": "Apply scene on light or group", "role": "switch", "type": "string"},
+	"scene": {"description": "Apply scene on light or group", "role": "switch.scene", "type": "string"},
 	"trigger": {"description": "Trigger scene on light or group", "role": "button", "type": "boolean"},
 	"_rgb": {"description": "RGB (red, green, blue) color space", "role": "level.color.rgb", "type": "string"},
 	"_hsv": {"description": "HSV (hue, saturation, value / brightness) color space", "role": "level.color.hsv", "type": "string"},
