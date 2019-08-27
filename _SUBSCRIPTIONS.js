@@ -75,6 +75,11 @@ module.exports =
 	'trigger',
 	
 	/*
+	 * Commands
+	 */
+	'_commands',
+	
+	/*
 	 * Color spaces
 	 */
 	'_rgb',

@@ -23,6 +23,7 @@ module.exports =
 	"_cmyk": {"description": "CMYK (cyan, magenta, yellow and key / black) color space", "role": "level.color.cmyk", "type": "string"},
 	"_xyz": {"description": "XYZ / CIE color space", "role": "level.color.xyz", "type": "string"},
 	"_hex": {"description": "Hex representation of the color", "role": "level.color.hex", "type": "string"},
+	"_commands": {"description": "Apply multiple commands on the device", "role": "switch", "type": "string"},
 	
 	
 	// LIGHTS

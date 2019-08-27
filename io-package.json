@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "hue-extended",
-        "version": "0.6.2",
+        "version": "0.7.0",
         "title": "Philips Hue Extended",
         "desc": {
             "en": "Integration of your Philips Hue Lights with your ioBroker",
@@ -16,6 +16,9 @@
             "zh-cn": "融入你的飞利浦色灯你ioBroker"
         },
         "news": {
+			"0.7.0": {
+				"en": "- added 'all'-group to apply action on all groups at once\n- added commands action to apply own commands combination at once\n- lowered minimum refresh time"
+			},
             "0.6.2": {
                 "en": "- fixed error when triggering scene\n- fixed display error in adapter configuration interface",
                 "de": "- Fehler behoben beim Auslösen von Szenen\n- Anzeigefehler in der Adapter-Konfiguration behoben",

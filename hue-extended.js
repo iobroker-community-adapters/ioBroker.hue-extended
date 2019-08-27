@@ -24,6 +24,8 @@ let unloaded;
 let dutyCycle, refreshCycle;
 
 let bridge, device;
+let GLOBALS = {};
+let DEVICES = {};
 let QUEUE = {};
 
 
@@ -49,6 +51,7 @@ function startAdapter(options)
 	 */
 	adapter.on('ready', function()
 	{
+		library._setValue('info.connection', true);
 		if (!adapter.config.bridgeIp || !adapter.config.bridgeUser)
 			return library.terminate('Please provide connection settings for Hue Bridge!');
 		
@@ -56,7 +59,7 @@ function startAdapter(options)
 		bridge = 'http://' + adapter.config.bridgeIp + ':' + (adapter.config.bridgePort || 80) + '/api/' + adapter.config.bridgeUser + '/';
 		
 		// retrieve values from states to avoid message "Unsubscribe from all states, except system's, because over 3 seconds the number of events is over 200 (in last second 0)"
-		adapter.getStates(adapterName + '.' + adapter.instance + '.*', function(err, states)
+		adapter.getStates(adapterName + '.' + adapter.instance + '.*', (err, states) =>
 		{
 			if (err || !states) return;
 			
@@ -64,7 +67,7 @@ function startAdapter(options)
 				library.setDeviceState(state.replace(adapterName + '.' + adapter.instance + '.', ''), states[state] && states[state].val);
 		
 			// retrieve from Bridge
-			['config', 'groups', 'lights', 'resourcelinks', 'rules', 'scenes', 'schedules', 'sensors'].forEach(function(channel)
+			['config', 'groups', 'lights', 'resourcelinks', 'rules', 'scenes', 'schedules', 'sensors'].forEach(channel =>
 			{
 				if (adapter.config['sync' + library.ucFirst(channel)])
 					getBridgeData(channel, adapter.config.refresh || 30);
@@ -98,18 +101,20 @@ function startAdapter(options)
 		if (state === undefined || state === null || state.ack === true || state.val === undefined || state.val === null) return;
 		adapter.log.debug('State of ' + id + ' has changed ' + JSON.stringify(state) + '.');
 		
-		// get params
+		// get params & action
 		let params = id.replace(adapterName + '.' + adapter.instance + '.', '').split('.');
-		let type = params.splice(0,1).toString();
-		let deviceId = type == 'scenes' ? params.splice(0,2).join('.') : params.splice(0,1).toString();
-		
-		// get device data
-		let name = library.getDeviceState(type + '.' + deviceId + '.name');
-		let uid = library.getDeviceState(type + '.' + deviceId + '.uid');
-		let path = type + '/' + uid + '/' + (type == 'groups' ? 'action' : 'state');
 		let action = params[params.length-1];
 		
-		if (!uid)
+		// appliance data
+		let appliance = {};
+		appliance.type = params.splice(0,1).toString();
+		appliance.deviceId = appliance.type == 'scenes' ? params.splice(0,2).join('.') : params.splice(0,1).toString();
+		appliance.name = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.name');
+		appliance.uid = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.uid');
+		appliance.trigger = appliance.type + '/' + appliance.uid + '/' + (appliance.type == 'groups' ? 'action' : 'state');
+		
+		// no uid
+		if (!appliance.uid)
 		{
 			adapter.log.warn('Command can not be send to device due to error (no UID)!');
 			return false;
@@ -120,8 +125,24 @@ function startAdapter(options)
 			library._setValue(id, '');
 		
 		// build command
-		let service = { name: name, trigger: path };
 		let commands = { [action]: state.val };
+		
+		// override with provided commands
+		if (action == '_commands')
+		{
+			try
+			{
+				commands = JSON.parse(state.val);
+				library._setValue(id, '');
+			}
+			catch(err)
+			{
+				adapter.log.warn('Commands supplied in wrong format! Format shall be {"command": value}, e.g. {"on": true} (with parenthesis).');
+				adapter.log.debug(err.message);
+				return false;
+			}
+		}
+		
 		
 		// handle color spaces
 		let hsv = null;
@@ -144,21 +165,21 @@ function startAdapter(options)
 			commands = { hue: Math.ceil(hsv[0]/360*65535), sat: Math.ceil(hsv[1]/100*254), bri: Math.ceil(hsv[2]/100*254) };
 		
 		// handle sccene
-		if (type == 'scenes')
+		if (appliance.type == 'scenes')
 		{
-			let scene = deviceId.split('.');
-			let appliance = scene[1].substr(0, scene[1].indexOf('_')).split('-');
+			let scene = appliance.deviceId.split('.');
+			let light = scene[1].substr(0, scene[1].indexOf('_')).split('-');
 			
-			service.trigger = appliance[0] == 'GroupScene' ? 'groups/' + appliance[1] + '/action' : 'lights/' + scene[1] + '/state';
-			service.name = appliance.join(' ');
+			appliance.trigger = light[0] == 'GroupScene' ? 'groups/' + light[1] + '/action' : 'lights/' + light[1] + '/state';
+			appliance.name = light.join(' ');
 			
-			commands = { 'scene': uid };
+			commands = { 'scene': appliance.uid };
 		}
 		
 		// if device is turned on, make sure brightness is not 0
 		if (action == 'on' && state.val == true)
 		{
-			let bri = library.getDeviceState(type + '.' + deviceId + '.state.bri') || library.getDeviceState(type + '.' + deviceId + '.action.bri');
+			let bri = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.state.bri') || library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.bri');
 			commands.bri = bri == 0 ? 254 : bri;
 		}
 		
@@ -185,7 +206,7 @@ function startAdapter(options)
 			commands = { on: false, bri: 0 };
 		
 		// convert HUE to RGB
-		if (commands.hue !== undefined && library.getDeviceState(type + '.' + deviceId + '.manufacturername') != 'Philips' && adapter.config.hueToXY)
+		if (commands.hue !== undefined && library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.manufacturername') != 'Philips' && adapter.config.hueToXY)
 			commands = { "xy": JSON.stringify(_hueColor.convertRGBtoXY(rgb)) };
 		
 		// if .on is not off, be sure device is on
@@ -193,11 +214,26 @@ function startAdapter(options)
 			commands.on = true; // A light cannot have its hue, saturation, brightness, effect, ct or xy modified when it is turned off. Doing so will return 201 error.
 		
 		// check reachability
-		if (type == 'lights' && !library.getDeviceState(type + '.' + deviceId + '.state.reachable'))
-			adapter.log.warn('Device ' + name + ' does not seem to be reachable! Command is sent anyway.');
+		if (appliance.type == 'lights' && !library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.state.reachable'))
+			adapter.log.warn('Device ' + appliance.name + ' does not seem to be reachable! Command is sent anyway.');
 		
 		// queue command
-		QUEUE[service.trigger] = QUEUE[service.trigger] ? { name: service.name, type: type, deviceId: deviceId, commands: Object.assign({}, QUEUE[service.trigger].commands, commands) } : { name: service.name, type: type, deviceId: deviceId, commands: commands };
+		if (id.indexOf('groups.0-all_lights.') > -1)
+		{
+			Object.keys(DEVICES['groups']).forEach(groupId =>
+			{
+				let group = DEVICES['groups'][groupId];
+				
+				appliance.deviceId = groupId + '-' + group.name.toLowerCase().replace(/ /g, '_');
+				appliance.name = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.name');
+				appliance.uid = groupId;
+				appliance.trigger = 'groups/' + groupId + '/action';
+				
+				addToQueue(appliance, commands);
+			});
+		}
+		else
+			addToQueue(appliance, commands);
 	});
 	
 	/*
@@ -211,12 +247,12 @@ function startAdapter(options)
 		switch(msg.command)
 		{
 			case 'getUser':
-				getUser(function(username)
+				getUser(username =>
 				{
 					adapter.log.debug('Retrieved user from Hue Bridge: ' + JSON.stringify(username));
 					library.msg(msg.from, msg.command, {result: true, user: username}, msg.callback);
 					
-				}, function(error)
+				}, error =>
 				{
 					adapter.log.warn('Failed retrieving user (' + error + ')!');
 					library.msg(msg.from, msg.command, {result: false, error: error}, msg.callback);
@@ -270,12 +306,47 @@ else
 function getBridgeData(channel, refresh)
 {
 	//adapter.log.debug('Retrieving ' + channel + ' from Hue Bridge...');
-	_request({ uri: bridge + channel + '/', json: true }).then(function(res)
+	_request({ uri: bridge + channel + '/', json: true }).then(res =>
 	{
 		if (!res || (res[0] && res[0].error))
 		{
 			adapter.log.error('Error retrieving ' + channel + ' from Hue Bridge' + (res[0] && res[0].error ? ': ' + res[0].error.description : '!'));
 			return false;
+		}
+		
+		// index
+		DEVICES[channel] = JSON.parse(JSON.stringify(res));
+		
+		// add "all" group
+		if (channel == 'groups')
+		{
+			res[0] = {
+				"name": "All Lights",
+				"type": "LightGroup",
+				"action":{
+					"on": false,
+					"bri": 0,
+					"hue": 0,
+					"sat": 0,
+					"effect": "none",
+					"xy":[
+						0,
+						0
+					],
+					"ct": 0,
+					"alert": "lselect",
+					"colormode": "xy"
+				}
+			};
+			
+			if (DEVICES['lights'] !== undefined)
+			{
+				res[0].lights = Object.keys(DEVICES['lights']);
+				res[0].state = {
+					"all_on": GLOBALS.allOn || false,
+					"any_on": GLOBALS.anyOn || false
+				};
+			}
 		}
 		
 		// add meta data
@@ -286,16 +357,16 @@ function getBridgeData(channel, refresh)
 		addBridgeData({ [channel]: res });
 		
 		// refresh interval
-		if (refresh > 0 && refresh < 10)
+		if (refresh > 0 && refresh < 3)
 		{
-			adapter.log.warn('Due to performance reasons, the refresh rate can not be set to less than 10 seconds. Using 10 seconds now.');
-			refresh = 10;
+			adapter.log.warn('Due to performance reasons, the refresh rate can not be set to less than 3 seconds. Using 3 seconds now.');
+			refresh = 3;
 		}
 		
 		if (refresh > 0 && !unloaded)
 			refreshCycle = setTimeout(getBridgeData, refresh*1000, channel, refresh);
 		
-	}).catch(function(err)
+	}).catch(err =>
 	{
 		if (err.message.substr(0, 3) == 500)
 		{
@@ -325,20 +396,35 @@ function addBridgeData(data)
 	
 	for (let key in data)
 	{
+		// reset global states
+		if (key == 'lights')
+		{
+			GLOBALS.allOn = false;
+			GLOBALS.anyOn = false;
+		}
+		
 		// loop through payload
 		device = null;
-		readData(key, data[key]);
+		readData(key, data[key], key);
 	}
 }
 
 /**
  *
  */
-function readData(key, data)
+function readData(key, data, channel)
 {
 	// only proceed if data is given
 	if (data === undefined || data === 'undefined')
 		return false;
+	
+	// index scenes
+	if (channel == 'scenes' && data['name'])
+	{
+		if (!GLOBALS['scenes']) GLOBALS['scenes'] = [];
+		//GLOBALS['scenes'].push(data['name']);
+		//library.set();
+	}
 	
 	// set current device name
 	if (data && data.name)
@@ -372,12 +458,20 @@ function readData(key, data)
 				data.level = data.bri > 0 ? Math.ceil(data.bri / 254 * 100) : 0;
 				data.transitiontime = data.transitiontime || 4;
 				data.scene = '';
+				data._commands = '';
 				
 				data._hsv = data.hue_degrees + ','+ (data.sat > 0 ? Math.ceil(data.sat/254*100) : 0) + ',' + data.level;
 				data._rgb = _color.hsv.rgb(data._hsv.split(',')).toString();
 				data._cmyk = _color.rgb.cmyk(data._rgb.split(',')).toString();
 				data._xyz = _color.rgb.xyz(data._rgb.split(',')).toString();
 				data._hex = _color.rgb.hex(data._rgb.split(','));
+			}
+			
+			// get allOn / anyOn state
+			if (channel == 'lights' && data.on)
+			{
+				GLOBALS.allOn = GLOBALS.allOn && data.on;
+				GLOBALS.anyOn = GLOBALS.anyOn || data.on;
 			}
 			
 			// add scene trigger button as additional state (only to scenes)
@@ -407,7 +501,7 @@ function readData(key, data)
 					});
 				}
 				
-				readData(key + pathKey + '.' + nestedKey, data[nestedKey]);
+				readData(key + pathKey + '.' + nestedKey, data[nestedKey], channel);
 			}
 		}
 	}
@@ -536,7 +630,7 @@ function sendCommand(device, actions)
 	};
 	
 	adapter.log.debug('Send command to ' + device.name + ' (' + device.trigger + '): ' + JSON.stringify(actions) + '.');
-	_request(options).then(function(res)
+	_request(options).then(res =>
 	{
 		if (!Array.isArray(res))
 		{
@@ -557,11 +651,19 @@ function sendCommand(device, actions)
 			});
 		}
 		
-	}).catch(function(e)
+	}).catch(err =>
 	{
 		adapter.log.warn('Failed sending request to ' + device.trigger + '!');
-		adapter.log.debug('Error Message: ' + e);
+		adapter.log.debug('Error Message: ' + err.message);
 	});
+}
+
+/**
+ *
+ */
+function addToQueue(appliance, commands)
+{
+	QUEUE[appliance.trigger] = QUEUE[appliance.trigger] ? { ...appliance, commands: Object.assign({}, QUEUE[appliance.trigger].commands, commands) } : { ...appliance, commands: commands };
 }
 
 /**
@@ -593,7 +695,7 @@ function getUser(success, failure)
 		body: { "devicetype": "iobroker.hue-extended#iphone peter" }
 	};
 	
-	_request(options).then(function(res)
+	_request(options).then(res =>
 	{
 		if (res && res[0] && res[0].success && res[0].success.username)
 			success && success(res[0].success.username);
@@ -604,7 +706,7 @@ function getUser(success, failure)
 		else
 			failure && failure('Unknown error occurred!');
 		
-	}).catch(function(err)
+	}).catch(err =>
 	{
 		failure && failure(err.message);
 	});

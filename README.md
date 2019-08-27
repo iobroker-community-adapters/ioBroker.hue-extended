@@ -25,10 +25,17 @@ Connect your Philips Hue Lights with ioBroker.
 - Synchronize Sensors 
 - Trigger changes on states `on/off`, `bri` (`level`), `hue`, `sat`, `xy`, `ct`, `alert`, `effect` and `transitiontime`
 - Additional triggers based on color spaces for `rgb`, `hsv`, `xyz`, `cmyk` and `hex`
+- Apply own combination of commands using `commands` trigger
+- Control lights of all groups at once using `0-all` group
 - Run scene or apply `scene` on light or group
 
 
 ## Changelog
+
+### 0.7.0 (2019-08-27)
+- (Zefau) added `0-all`-group to apply action on all groups at once
+- (Zefau) added `commands` action to apply own commands combination at once
+- (Zefau) lowered minimum refresh time
 
 ### 0.6.2 (2019-08-18)
 - (Zefau) fixed error when triggering scene (`Error setting /lights/undefined/state: resource, /lights/undefined/state, not available`)
