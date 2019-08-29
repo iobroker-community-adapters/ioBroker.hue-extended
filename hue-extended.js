@@ -143,27 +143,6 @@ function startAdapter(options)
 			}
 		}
 		
-		
-		// handle color spaces
-		let hsv = null;
-		if (action == '_rgb')
-			hsv = _color.rgb.hsv(state.val);
-		
-		else if (action == '_hsv')
-			hsv = state.val.split(',');
-		
-		else if (action == '_cmyk')
-			hsv = _color.cmyk.hsv(state.val);
-		
-		else if (action == '_xyz')
-			hsv = _color.xyz.hsv(state.val);
-		
-		else if (action == '_hex')
-			hsv = _color.hex.hsv(state.val);
-		
-		if (hsv !== null)
-			commands = { hue: Math.ceil(hsv[0]/360*65535), sat: Math.ceil(hsv[1]/100*254), bri: Math.ceil(hsv[2]/100*254) };
-		
 		// handle sccene
 		if (appliance.type == 'scenes')
 		{
@@ -176,64 +155,100 @@ function startAdapter(options)
 			commands = { 'scene': appliance.uid };
 		}
 		
-		// if device is turned on, make sure brightness is not 0
-		if (action == 'on' && state.val == true)
+		// go through commands, modify if required and add to queue
+		let value;
+		for (action in commands)
 		{
-			let bri = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.state.bri') || library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.bri');
-			commands.bri = bri == 0 ? 254 : bri;
-		}
-		
-		// if device is turned off, set level / bri to 0
-		/*
-		if (action == 'on' && state.val == false)
-			commands.bri = 0;
-		*/
-		
-		// if .hue_degrees is changed, change hue
-		if (action == 'hue_degrees')
-			commands = { hue: Math.round(state.val / 360 * 65535) };
-		
-		// if .level is changed the change will be applied to .bri instead
-		if (action == 'level')
-			commands = { on: true, bri: Math.ceil(254 * state.val / 100) };
-		
-		// if .bri is changed, make sure light is on
-		if (action == 'bri')
-			commands = { on: true, bri: state.val };
-		
-		// if .bri is changed to 0, turn off
-		if ((action == 'bri' || action == 'level') && state.val < 1)
-			commands = { on: false, bri: 0 };
-		
-		// convert HUE to RGB
-		if (commands.hue !== undefined && library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.manufacturername') != 'Philips' && adapter.config.hueToXY)
-			commands = { "xy": JSON.stringify(_hueColor.convertRGBtoXY(rgb)) };
-		
-		// if .on is not off, be sure device is on
-		if (commands.on === undefined)
-			commands.on = true; // A light cannot have its hue, saturation, brightness, effect, ct or xy modified when it is turned off. Doing so will return 201 error.
-		
-		// check reachability
-		if (appliance.type == 'lights' && !library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.state.reachable'))
-			adapter.log.warn('Device ' + appliance.name + ' does not seem to be reachable! Command is sent anyway.');
-		
-		// queue command
-		if (id.indexOf('groups.0-all_lights.') > -1)
-		{
-			Object.keys(DEVICES['groups']).forEach(groupId =>
+			value = commands[action];
+			
+			// handle color spaces
+			let hsv = null;
+			if (action == '_rgb')
+				hsv = _color.rgb.hsv(value);
+			
+			else if (action == '_hsv')
+				hsv = value.split(',');
+			
+			else if (action == '_cmyk')
+				hsv = _color.cmyk.hsv(value);
+			
+			else if (action == '_xyz')
+				hsv = _color.xyz.hsv(value);
+			
+			else if (action == '_hex')
+				hsv = _color.hex.hsv(value);
+			
+			if (hsv !== null)
 			{
-				let group = DEVICES['groups'][groupId];
-				
-				appliance.deviceId = groupId + '-' + group.name.toLowerCase().replace(/ /g, '_');
-				appliance.name = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.name');
-				appliance.uid = groupId;
-				appliance.trigger = 'groups/' + groupId + '/action';
-				
+				delete commands[action];
+				Object.assign(commands, { hue: Math.ceil(hsv[0]/360*65535), sat: Math.ceil(hsv[1]/100*254), bri: Math.ceil(hsv[2]/100*254) });
+			}
+			
+			// if device is turned on, make sure brightness is not 0
+			if (action == 'on' && value == true)
+			{
+				let bri = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.state.bri') || library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.bri');
+				commands.bri = bri == 0 ? 254 : bri;
+			}
+			
+			// if device is turned off, set level / bri to 0
+			/*
+			if (action == 'on' && value == false)
+				commands.bri = 0;
+			*/
+			
+			// if .hue_degrees is changed, change hue
+			if (action == 'hue_degrees')
+			{
+				delete commands[action];
+				commands.hue = Math.round(value / 360 * 65535);
+			}
+			
+			// if .level is changed the change will be applied to .bri instead
+			if (action == 'level')
+			{
+				delete commands[action];
+				Object.assign(commands, { on: true, bri: Math.ceil(254 * value / 100) });
+			}
+		
+			// if .bri is changed, make sure light is on
+			if (action == 'bri')
+				Object.assign(commands, { on: true, bri: value });
+			
+			// if .bri is changed to 0, turn off
+			if ((action == 'bri' || action == 'level') && value < 1)
+				Object.assign(commands, { on: false, bri: 0 });
+			
+			// convert HUE to RGB
+			if (commands.hue !== undefined && library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.manufacturername') != 'Philips' && adapter.config.hueToXY)
+				Object.assign(commands, { "xy": JSON.stringify(_hueColor.convertRGBtoXY(rgb)) });
+			
+			// if .on is not off, be sure device is on
+			if (commands.on === undefined)
+				commands.on = true; // A light cannot have its hue, saturation, brightness, effect, ct or xy modified when it is turned off. Doing so will return 201 error.
+			
+			// check reachability
+			if (appliance.type == 'lights' && !library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.state.reachable'))
+				adapter.log.warn('Device ' + appliance.name + ' does not seem to be reachable! Command is sent anyway.');
+			
+			// queue command
+			if (id.indexOf('groups.0-all_lights.') > -1)
+			{
+				Object.keys(DEVICES['groups']).forEach(groupId =>
+				{
+					let group = DEVICES['groups'][groupId];
+					
+					appliance.deviceId = groupId + '-' + group.name.toLowerCase().replace(/ /g, '_');
+					appliance.name = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.name');
+					appliance.uid = groupId;
+					appliance.trigger = 'groups/' + groupId + '/action';
+					
+					addToQueue(appliance, commands);
+				});
+			}
+			else
 				addToQueue(appliance, commands);
-			});
 		}
-		else
-			addToQueue(appliance, commands);
 	});
 	
 	/*
