@@ -132,8 +132,8 @@ function startAdapter(options)
 		{
 			try
 			{
-				commands = JSON.parse(state.val);
 				library._setValue(id, '');
+				commands = JSON.parse(state.val);
 			}
 			catch(err)
 			{
@@ -217,7 +217,10 @@ function startAdapter(options)
 			
 			// if .bri is changed to 0, turn off
 			if ((action == 'bri' || action == 'level') && value < 1)
+			{
+				delete commands['level'];
 				Object.assign(commands, { on: false, bri: 0 });
+			}
 			
 			// convert HUE to RGB
 			if (commands.hue !== undefined && library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.manufacturername') != 'Philips' && adapter.config.hueToXY)
@@ -226,29 +229,29 @@ function startAdapter(options)
 			// if .on is not off, be sure device is on
 			if (commands.on === undefined)
 				commands.on = true; // A light cannot have its hue, saturation, brightness, effect, ct or xy modified when it is turned off. Doing so will return 201 error.
-			
-			// check reachability
-			if (appliance.type == 'lights' && !library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.state.reachable'))
-				adapter.log.warn('Device ' + appliance.name + ' does not seem to be reachable! Command is sent anyway.');
-			
-			// queue command
-			if (id.indexOf('groups.0-all_lights.') > -1)
-			{
-				Object.keys(DEVICES['groups']).forEach(groupId =>
-				{
-					let group = DEVICES['groups'][groupId];
-					
-					appliance.deviceId = groupId + '-' + group.name.toLowerCase().replace(/ /g, '_');
-					appliance.name = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.name');
-					appliance.uid = groupId;
-					appliance.trigger = 'groups/' + groupId + '/action';
-					
-					addToQueue(appliance, commands);
-				});
-			}
-			else
-				addToQueue(appliance, commands);
 		}
+		
+		// check reachability
+		if (appliance.type == 'lights' && !library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.state.reachable'))
+			adapter.log.warn('Device ' + appliance.name + ' does not seem to be reachable! Command is sent anyway.');
+		
+		// queue command
+		if (id.indexOf('groups.0-all_lights.') > -1)
+		{
+			Object.keys(DEVICES['groups']).forEach(groupId =>
+			{
+				let group = DEVICES['groups'][groupId];
+				
+				appliance.deviceId = groupId + '-' + group.name.toLowerCase().replace(/ /g, '_');
+				appliance.name = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.name');
+				appliance.uid = groupId;
+				appliance.trigger = 'groups/' + groupId + '/action';
+				
+				addToQueue(appliance, commands);
+			});
+		}
+		else
+			addToQueue(appliance, commands);
 	});
 	
 	/*
@@ -678,6 +681,7 @@ function sendCommand(device, actions)
  */
 function addToQueue(appliance, commands)
 {
+	adapter.log.debug('Add to queue (' + JSON.stringify(appliance) + ') commands: ' + JSON.stringify(commands));
 	QUEUE[appliance.trigger] = QUEUE[appliance.trigger] ? { ...appliance, commands: Object.assign({}, QUEUE[appliance.trigger].commands, commands) } : { ...appliance, commands: commands };
 }
 
