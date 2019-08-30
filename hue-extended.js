@@ -164,19 +164,19 @@ function startAdapter(options)
 			// handle color spaces
 			let hsv = null;
 			if (action == '_rgb')
-				hsv = _color.rgb.hsv(value);
+				hsv = _color.rgb.hsv(value.split(','));
 			
 			else if (action == '_hsv')
 				hsv = value.split(',');
 			
 			else if (action == '_cmyk')
-				hsv = _color.cmyk.hsv(value);
+				hsv = _color.cmyk.hsv(value.split(','));
 			
 			else if (action == '_xyz')
-				hsv = _color.xyz.hsv(value);
+				hsv = _color.xyz.hsv(value.split(','));
 			
 			else if (action == '_hex')
-				hsv = _color.hex.hsv(value);
+				hsv = _color.hex.hsv(value.split(','));
 			
 			if (hsv !== null)
 			{
@@ -640,13 +640,29 @@ function get(node)
  */
 function sendCommand(device, actions)
 {
+	// align command xy
+	if (actions.xy)
+	{
+		try
+		{
+			Object.assign(actions, { "xy": JSON.parse(actions.xy) });
+		}
+		catch(err)
+		{
+			adapter.log.warn('Error converting xy!');
+			return false;
+		}
+	}
+	
+	// set options
 	let options = {
 		uri: bridge + device.trigger,
 		method: 'PUT',
 		json: true,
-		body: actions.xy ? Object.assign({}, actions, { "xy": JSON.parse(actions.xy) } ) : actions
+		body: actions
 	};
 	
+	// send command
 	adapter.log.debug('Send command to ' + device.name + ' (' + device.trigger + '): ' + JSON.stringify(actions) + '.');
 	_request(options).then(res =>
 	{
