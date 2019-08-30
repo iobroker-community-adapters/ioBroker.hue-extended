@@ -386,12 +386,23 @@ function getBridgeData(channel, refresh)
 		
 	}).catch(err =>
 	{
+		// ERROR: HTTP 500
 		if (err.message.substr(0, 3) == 500)
 		{
 			adapter.log.debug('Error: Hue Bridge is busy. Try again in 10s..');
 			adapter.log.silly(err.message);
 			setTimeout(getBridgeData, 10*1000, channel, refresh);
 		}
+		
+		// ERROR: SOCKET HANG UP
+		else if (err.message.indexOf('socket hang up') > -1)
+		{
+			adapter.log.debug('Error: Socket hang up. Try again in 10s..');
+			adapter.log.silly(err.message);
+			setTimeout(getBridgeData, 10*1000, channel, refresh);
+		}
+		
+		// ANY OTHER ERROR
 		else
 		{
 			adapter.log.warn('Error connecting to Hue Bridge when retrieving channel ' + channel + '! See debug log for details.');
