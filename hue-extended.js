@@ -224,7 +224,7 @@ function startAdapter(options)
 			
 			// convert HUE to RGB
 			if (commands.hue !== undefined && library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.manufacturername') != 'Philips' && adapter.config.hueToXY)
-				Object.assign(commands, { "xy": JSON.stringify(_hueColor.convertRGBtoXY(rgb)) });
+				Object.assign(commands, { "xy": JSON.stringify(_hueColor.convertRGBtoXY(_color.hsv.rgb(hsv))) });
 			
 			// if .on is not off, be sure device is on
 			if (commands.on === undefined)
