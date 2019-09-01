@@ -187,7 +187,7 @@ function startAdapter(options)
 			// if device is turned on, make sure brightness is not 0
 			if (action == 'on' && value == true)
 			{
-				let bri = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.state.bri') || library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.bri');
+				let bri = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.bri');
 				commands.bri = bri == 0 ? 254 : bri;
 			}
 			
@@ -222,9 +222,16 @@ function startAdapter(options)
 				Object.assign(commands, { on: false, bri: 0 });
 			}
 			
-			// convert HUE to RGB
-			if (commands.hue !== undefined && library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.manufacturername') != 'Philips' && adapter.config.hueToXY)
-				Object.assign(commands, { "xy": JSON.stringify(_hueColor.convertRGBtoXY(_color.hsv.rgb(hsv))) });
+			// convert HUE to XY
+			if (commands.hue !== undefined && adapter.config.hueToXY && library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.manufacturername') != 'Philips')
+			{
+				let rgb = hsv ? _color.hsv.rgb(hsv) : _color.hsv.rgb([commands.hue, (commands.sat || library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.sat')), commands.bri || library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.bri')]);
+				if (rgb === null || rgb[0] === undefined || rgb[0] === null)
+					adapter.log.warn('Invalid RGB given (' + JSON.stringify(rgb) + ')!');
+				
+				else
+					Object.assign(commands, { "xy": JSON.stringify(_hueColor.convertRGBtoXY(rgb)) });
+			}
 			
 			// if .on is not off, be sure device is on
 			if (commands.on === undefined)
