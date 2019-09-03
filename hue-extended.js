@@ -162,9 +162,12 @@ function startAdapter(options)
 			value = commands[action];
 			
 			// handle color spaces
-			let hsv = null;
+			let rgb = null, hsv = null;
 			if (action == '_rgb')
-				hsv = _color.rgb.hsv(value.split(','));
+			{
+				rgb = value.split(',');
+				hsv = _color.rgb.hsv(rgb);
+			}
 			
 			else if (action == '_hsv')
 				hsv = value.split(',');
@@ -225,7 +228,8 @@ function startAdapter(options)
 			// convert HUE to XY
 			if (commands.hue !== undefined && adapter.config.hueToXY && library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.manufacturername') != 'Philips')
 			{
-				let rgb = hsv ? _color.hsv.rgb(hsv) : _color.hsv.rgb([commands.hue, (commands.sat || library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.sat')), commands.bri || library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.bri')]);
+				if (!rgb) rgb = hsv ? _color.hsv.rgb(hsv) : _color.hsv.rgb([commands.hue, (commands.sat || library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.sat')), commands.bri || library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.bri')]);
+				
 				if (rgb === null || rgb[0] === undefined || rgb[0] === null)
 					adapter.log.warn('Invalid RGB given (' + JSON.stringify(rgb) + ')!');
 				
