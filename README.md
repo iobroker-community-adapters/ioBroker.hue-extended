@@ -32,6 +32,12 @@ Connect your Philips Hue Lights with ioBroker.
 
 ## Changelog
 
+### 0.8.0 (2019-09-08)
+- (Zefau) reworked triggering scenes
+- (Zefau) fixed missing level state on non-Philips lights
+- (Zefau) changed data retrieval from Hue Bridge to reduce parallel connection attemps
+- (Zefau) added connection retry when Hue Bridge returns error
+
 ### 0.7.0 (2019-08-27)
 - (Zefau) added `0-all`-group to apply action on all groups at once
 - (Zefau) added `commands` action to apply own commands combination at once

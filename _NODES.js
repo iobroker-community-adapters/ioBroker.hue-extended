@@ -1,7 +1,8 @@
 module.exports =
 {
 	"datetime": {"description": "Datetime of last update", "role": "text", "type": "string", "device": false},
-	"timestamp": {"description": "Timestamp of last update", "role": "text", "type": "string", "device": false},
+	"timestamp": {"description": "Timestamp of last update", "role": "value", "type": "number", "device": false},
+	"syncing": {"description": "Indicates whether object tree will be synchronized", "role": "indicator", "type": "boolean", "device": false},
 	
 	// ACTIONS
 	"on": {"description": "Switch light on / off", "role": "switch.light", "type": "boolean"},
