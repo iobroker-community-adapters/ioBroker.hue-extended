@@ -9,7 +9,6 @@ Connect your Philips Hue Lights with ioBroker.
 [![NPM version](http://img.shields.io/npm/v/iobroker.hue-extended.svg)](https://www.npmjs.com/package/iobroker.hue-extended)
 [![Travis CI](https://travis-ci.org/Zefau/ioBroker.hue-extended.svg?branch=master)](https://travis-ci.org/Zefau/ioBroker.hue-extended)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.hue-extended.svg)](https://www.npmjs.com/package/iobroker.hue-extended)
-[![Greenkeeper badge](https://badges.greenkeeper.io/Zefau/ioBroker.hue-extended.svg)](https://greenkeeper.io/)
 
 [![NPM](https://nodei.co/npm/iobroker.hue-extended.png?downloads=true)](https://nodei.co/npm/iobroker.hue-extended/) 
 
