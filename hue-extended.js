@@ -426,13 +426,13 @@ function getPayload(refresh)
 		// TRY AGAIN OR STOP ADAPTER
 		if (retry < 10)
 		{
-			adapter.log.warn('Error connecting to Hue Brdige: ' + error + '. Retried ' + retry + 'x so far. Try again in 10 seconds..');
+			adapter.log.debug('Error connecting to Hue Bridge: ' + error + '. ' + (retry > 0 ? 'Retried ' + retry + 'x so far. ' : '') + 'Try again in 10 seconds..');
 			retry++;
 			setTimeout(getPayload, 10*1000, refresh);
 		}
 		else
 		{
-			library.terminate('Error connecting to Hue Brdige: ' + error + '. Retried ' + retry + 'x already, thus connection closed now. See debug log for details.');
+			library.terminate('Error connecting to Hue Bridge: ' + error + '. ' + (retry > 0 ? 'Retried ' + retry + 'x already, thus connection closed now.' : 'Connection closed.') + ' See debug log for details.');
 			adapter.log.debug(err.message);
 			adapter.log.debug(JSON.stringify(err.stack));
 		}
@@ -658,42 +658,6 @@ function convertNode(node, data)
 		case "temperature":
 			data = data / 100;
 			break;
-			
-		/*
-		case "date-timestamp":
-			
-			// convert timestamp to date
-			let date;
-			if (data.toString().indexOf('-') > -1)
-			{
-				date = data
-				data = Math.floor(new Date(data).getTime()/1000)
-			}
-			
-			// or keep date if that is given
-			else
-			{
-				let ts = new Date(data*1000);
-				date = ts.getFullYear() + '-' + ('0'+ts.getMonth()).substr(-2) + '-' + ('0'+ts.getDate()).substr(-2);
-			}
-			
-			// set date
-			library.set(
-				{
-					node: node.key + 'Date',
-					type: 'string',
-					role: 'text',
-					description: node.description.replace('Timestamp', 'Date')
-				},
-				date
-			);
-			break;
-		
-		case "ms-min":
-			let duration = data/1000/60;
-			return duration < 1 ? data : Math.floor(duration);
-			break;
-		*/
 	}
 	
 	return data;
