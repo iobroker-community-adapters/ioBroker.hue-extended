@@ -51,6 +51,12 @@ function startAdapter(options)
 	 */
 	adapter.on('ready', function()
 	{
+		// Check Node.js Version
+		let version = parseInt(process.version.substr(1, process.version.indexOf('.')-1));
+		if (version <= 6)
+			return library.terminate('This Adapter is not compatible with your Node.js Version ' + process.version + ' (must be >= Node.js v7).', true);
+		
+		// Check Configuration
 		library._setValue('info.connection', true);
 		if (!adapter.config.bridgeIp || !adapter.config.bridgeUser)
 			return library.terminate('Please provide connection settings for Hue Bridge!');
@@ -372,9 +378,9 @@ function getPayload(refresh)
 		retry = 0;
 		
 		// add meta data
-		library.set(Object.assign({},_NODES.datetime, { 'node': 'datetime' }), library.getDateTime(Date.now()));
-		library.set(Object.assign({},__NODES.timestamp, { 'node': 'timestamp' }), Math.floor(Date.now()/1000));
-		library.set(Object.assign({},__NODES.syncing, { 'node': 'syncing' }), true);
+		library.set({ ...library.getNode('datetime'), 'node': 'datetime' }, library.getDateTime(Date.now()));
+		library.set({ ...library.getNode('timestamp'), 'node': 'timestamp' }, Math.floor(Date.now()/1000));
+		library.set({ ...library.getNode('syncing'), 'node': 'syncing' }, true);
 		
 		// go through channels
 		for (let channel in payload)
@@ -390,7 +396,7 @@ function getPayload(refresh)
 				addBridgeData(channel, payload[channel]);
 			
 			else
-				library.set(Object.assign({},__NODES.syncing, { 'node': channel + '.syncing' }), false);
+				library.set({ ...library.getNode('syncing'), 'node': channel + '.syncing' }, false);
 		}
 		
 		// refresh interval
@@ -406,7 +412,7 @@ function getPayload(refresh)
 	}).catch(err =>
 	{
 		// Indicate that tree is not synchronized anymore
-		library.set(Object.assign({},__NODES.syncing, { 'node': 'syncing' }), false);
+		library.set({ ...library.getNode('syncing'), 'node': 'syncing' }, false);
 		
 		// ERROR
 		let error = err.message;
@@ -488,9 +494,9 @@ function addBridgeData(channel, data)
 	}
 	
 	// add meta data
-	library.set(Object.assign({},_NODES.datetime, { 'node': channel + '.datetime' }), library.getDateTime(Date.now()));
-	library.set(Object.assign({},__NODES.timestamp, { 'node': channel + '.timestamp' }), Math.floor(Date.now()/1000));
-	library.set(Object.assign({},__NODES.syncing, { 'node': channel + '.syncing' }), true);
+	library.set({ ...library.getNode('datetime'), 'node': channel + '.datetime' }, library.getDateTime(Date.now()));
+	library.set({ ...library.getNode('timestamp'), 'node': channel + '.timestamp' }, Math.floor(Date.now()/1000));
+	library.set({ ...library.getNode('syncing'), 'node': channel + '.syncing' }, true);
 	
 	// loop through payload
 	device = null;
@@ -735,7 +741,7 @@ function sendCommand(device, actions)
 function addToQueue(appliance, commands)
 {
 	adapter.log.debug('Add to queue (' + JSON.stringify(appliance) + ') commands: ' + JSON.stringify(commands));
-	QUEUE[appliance.trigger] = QUEUE[appliance.trigger] ? Object.assign({}, appliance, { commands: Object.assign({}, QUEUE[appliance.trigger].commands, commands) }) : Object.assign({}, appliance, { commands: commands });
+	QUEUE[appliance.trigger] = QUEUE[appliance.trigger] ? { ...appliance, commands: Object.assign({}, QUEUE[appliance.trigger].commands, commands) } : { ...appliance, commands: commands };
 }
 
 /**
