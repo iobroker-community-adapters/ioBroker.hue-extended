@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "hue-extended",
-        "version": "0.8.1",
+        "version": "0.8.2",
         "title": "Philips Hue Extended",
         "desc": {
             "en": "Integration of your Philips Hue Lights with your ioBroker",
@@ -16,6 +16,12 @@
             "zh-cn": "融入你的飞利浦色灯你ioBroker"
         },
         "news": {
+			"0.8.2": {
+				"en": "- Node.js v6 compatibility\n- fixed error retrieving a new user from Hue Bridge"
+			},
+			"0.8.1": {
+				"en": "- fixed incorrect Version in ioBroker"
+			},
 			"0.8.0": {
 				"en": "- reworked triggering scenes\n- fixed missing level state on non-Philips lights\n- changed data retrieval from Hue Bridge to reduce parallel connection attemps\n- added connection retry when Hue Bridge returns error"
 			},

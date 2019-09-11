@@ -372,9 +372,9 @@ function getPayload(refresh)
 		retry = 0;
 		
 		// add meta data
-		library.set({ ..._NODES.datetime, 'node': 'datetime' }, library.getDateTime(Date.now()));
-		library.set({ ..._NODES.timestamp, 'node': 'timestamp' }, Math.floor(Date.now()/1000));
-		library.set({ ..._NODES.syncing, 'node': 'syncing' }, true);
+		library.set(Object.assign({},_NODES.datetime, { 'node': 'datetime' }), library.getDateTime(Date.now()));
+		library.set(Object.assign({},__NODES.timestamp, { 'node': 'timestamp' }), Math.floor(Date.now()/1000));
+		library.set(Object.assign({},__NODES.syncing, { 'node': 'syncing' }), true);
 		
 		// go through channels
 		for (let channel in payload)
@@ -390,7 +390,7 @@ function getPayload(refresh)
 				addBridgeData(channel, payload[channel]);
 			
 			else
-				library.set({ ..._NODES.syncing, 'node': channel + '.syncing' }, false);
+				library.set(Object.assign({},__NODES.syncing, { 'node': channel + '.syncing' }), false);
 		}
 		
 		// refresh interval
@@ -406,7 +406,7 @@ function getPayload(refresh)
 	}).catch(err =>
 	{
 		// Indicate that tree is not synchronized anymore
-		library.set({ ..._NODES.syncing, 'node': 'syncing' }, false);
+		library.set(Object.assign({},__NODES.syncing, { 'node': 'syncing' }), false);
 		
 		// ERROR
 		let error = err.message;
@@ -488,9 +488,9 @@ function addBridgeData(channel, data)
 	}
 	
 	// add meta data
-	library.set({ ..._NODES.datetime, 'node': channel + '.datetime' }, library.getDateTime(Date.now()));
-	library.set({ ..._NODES.timestamp, 'node': channel + '.timestamp' }, Math.floor(Date.now()/1000));
-	library.set({ ..._NODES.syncing, 'node': channel + '.syncing' }, true);
+	library.set(Object.assign({},_NODES.datetime, { 'node': channel + '.datetime' }), library.getDateTime(Date.now()));
+	library.set(Object.assign({},__NODES.timestamp, { 'node': channel + '.timestamp' }), Math.floor(Date.now()/1000));
+	library.set(Object.assign({},__NODES.syncing, { 'node': channel + '.syncing' }), true);
 	
 	// loop through payload
 	device = null;
@@ -735,7 +735,7 @@ function sendCommand(device, actions)
 function addToQueue(appliance, commands)
 {
 	adapter.log.debug('Add to queue (' + JSON.stringify(appliance) + ') commands: ' + JSON.stringify(commands));
-	QUEUE[appliance.trigger] = QUEUE[appliance.trigger] ? { ...appliance, commands: Object.assign({}, QUEUE[appliance.trigger].commands, commands) } : { ...appliance, commands: commands };
+	QUEUE[appliance.trigger] = QUEUE[appliance.trigger] ? Object.assign({}, appliance, { commands: Object.assign({}, QUEUE[appliance.trigger].commands, commands) }) : Object.assign({}, appliance, { commands: commands });
 }
 
 /**

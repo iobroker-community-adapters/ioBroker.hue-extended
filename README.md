@@ -31,6 +31,13 @@ Connect your Philips Hue Lights with ioBroker.
 
 ## Changelog
 
+### 0.8.2 (2019-09-11)
+- (Zefau) Node.js v6 compatibility
+- (Zefau) fixed error retrieving a new user from Hue Bridge
+
+### 0.8.1 (2019-09-09)
+- (Zefau) fixed incorrect Version in ioBroker
+
 ### 0.8.0 (2019-09-08)
 - (Zefau) reworked triggering scenes
 - (Zefau) fixed missing level state on non-Philips lights
