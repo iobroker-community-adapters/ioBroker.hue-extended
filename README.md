@@ -31,6 +31,11 @@ Connect your Philips Hue Lights with ioBroker.
 
 ## Changelog
 
+### 0.8.3 (2019-09-13)
+- (Zefau) added `lastAction` channel (with states `lastCommand`, `lastResult`, `error`, `timestamp` and `datetime`) to each light and group as well as for all lights / groups in `info` channel
+- (Zefau) fixed error retrieving and setting state `xy`
+- (Zefau) moved `syncing`, `timestamp`, `datetime` to `info` channel
+
 ### 0.8.2 (2019-09-11)
 - (Zefau) ~~Node.js v6 compatibility~~ Node.js v6 compatibility not possible due to a package dependency, thus added warning on adapter start.
 - (Zefau) fixed error retrieving a new user from Hue Bridge

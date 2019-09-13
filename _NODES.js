@@ -3,6 +3,11 @@ module.exports =
 	"datetime": {"description": "Datetime of last update", "role": "text", "type": "string", "device": false},
 	"timestamp": {"description": "Timestamp of last update", "role": "value", "type": "number", "device": false},
 	"syncing": {"description": "Indicates whether object tree will be synchronized", "role": "indicator", "type": "boolean", "device": false},
+	"info.lastAction.datetime": {"description": "Datetime of last action applied", "role": "text", "type": "string"},
+	"info.lastAction.timestamp": {"description": "Timestamp of last action applied", "role": "value", "type": "number"},
+	"info.lastAction.lastCommand": {"description": "Last action applied to any device", "role": "text", "type": "string"},
+	"info.lastAction.lastResult": {"description": "Last result of last action applied", "role": "text", "type": "string"},
+	"info.lastAction.error": {"description": "Indicates if error occured on last action", "role": "indicator", "type": "boolean"},
 	
 	// ACTIONS
 	"on": {"description": "Switch light on / off", "role": "switch.light", "type": "boolean"},
@@ -10,7 +15,7 @@ module.exports =
 	"hue": {"description": "Hue of the light between 0 and 65535", "role": "level.color.hue", "type": "number"},
 	"hue_degrees": {"description": "Hue of the light between 0° and 360°", "role": "level.color.hue", "type": "number"},
 	"sat": {"description": "Saturation of the light between 0 and 254", "role": "level.color.saturation", "type": "number"},
-	"xy": {"description": "The x and y coordinates in CIE color space", "role": "level.color.xy", "type": "string", "convert": "string"},
+	"xy": {"description": "The x and y coordinates in CIE color space", "role": "level.color.xy", "type": "string"},
 	"ct": {"description": "The Mired Color temperature of the light", "role": "level.color.temperature", "type": "number"},
 	"alert": {"description": "The alert effect,is a temporary change to the bulb’s state", "role": "switch", "type": "string", "common": {"states": {"none": "No alert", "select": "One breathe cycle", "lselect": "Breathe cycles for 15s"}}},
 	"effect": {"description": "The dynamic effect of the light", "role": "switch", "type": "string", "common": {"states": {"none": "No effect", "colorloop": "Cycle through all hues"}}},
@@ -28,6 +33,12 @@ module.exports =
 	
 	
 	// LIGHTS
+	"lights.action.lastAction.datetime": {"description": "Datetime of last action applied", "role": "text", "type": "string"},
+	"lights.action.lastAction.timestamp": {"description": "Timestamp of last action applied", "role": "value", "type": "number"},
+	"lights.action.lastAction.lastCommand": {"description": "Last action applied to light", "role": "text", "type": "string"},
+	"lights.action.lastAction.lastResult": {"description": "Last result of last action applied", "role": "text", "type": "string"},
+	"lights.action.lastAction.error": {"description": "Indicates if error occured on last action", "role": "indicator", "type": "boolean"},
+	
 	"lights.capabilities.control.ct.max": {"description": "", "role": "value", "type": "number"},
 	"lights.capabilities.control.ct.min": {"description": "", "role": "value", "type": "number"},
 	"lights.capabilities.control.colorgamuttype": {"description": "", "role": "text", "type": "string"},
@@ -62,6 +73,12 @@ module.exports =
 	
 	
 	// GROUPS
+	"groups.action.lastAction.datetime": {"description": "Datetime of last action applied", "role": "text", "type": "string"},
+	"groups.action.lastAction.timestamp": {"description": "Timestamp of last action applied", "role": "value", "type": "number"},
+	"groups.action.lastAction.lastCommand": {"description": "Last action applied to group", "role": "text", "type": "string"},
+	"groups.action.lastAction.lastResult": {"description": "Last result of last action applied", "role": "text", "type": "string"},
+	"groups.action.lastAction.error": {"description": "Indicates if error occured on last action", "role": "indicator", "type": "boolean"},
+	
 	"groups.state.all_on": {"description": "Indicates if all lights of the group are turned on", "role": "indicator", "type": "boolean"},
 	"groups.state.any_on": {"description": "Indicates if any light of the group is turned on", "role": "indicator", "type": "boolean"},
 	

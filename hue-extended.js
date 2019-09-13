@@ -42,7 +42,7 @@ function startAdapter(options)
 	});
 	
 	adapter = new utils.Adapter(options);
-	library = new Library(adapter, { updatesInLog: true });
+	library = new Library(adapter, { nodes: _NODES, updatesInLog: true });
 	unloaded = false;
 	
 	/*
@@ -57,7 +57,7 @@ function startAdapter(options)
 			return library.terminate('This Adapter is not compatible with your Node.js Version ' + process.version + ' (must be >= Node.js v7).', true);
 		
 		// Check Configuration
-		library._setValue('info.connection', true);
+		library.set(Library.CONNECTION, true);
 		if (!adapter.config.bridgeIp || !adapter.config.bridgeUser)
 			return library.terminate('Please provide connection settings for Hue Bridge!');
 		
@@ -106,9 +106,11 @@ function startAdapter(options)
 		// get params & action
 		let params = id.replace(adapterName + '.' + adapter.instance + '.', '').split('.');
 		let action = params[params.length-1];
+		let path = params.join('.');
 		
 		// appliance data
 		let appliance = {};
+		appliance.path = path.substr(0, path.lastIndexOf('.'));
 		appliance.type = params.splice(0,1).toString();
 		appliance.deviceId = appliance.type == 'scenes' ? params.splice(0,2).join('.') : params.splice(0,1).toString();
 		appliance.name = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.name');
@@ -378,9 +380,24 @@ function getPayload(refresh)
 		retry = 0;
 		
 		// add meta data
-		library.set({ ...library.getNode('datetime'), 'node': 'datetime' }, library.getDateTime(Date.now()));
-		library.set({ ...library.getNode('timestamp'), 'node': 'timestamp' }, Math.floor(Date.now()/1000));
-		library.set({ ...library.getNode('syncing'), 'node': 'syncing' }, true);
+		library.set({ ...library.getNode('datetime'), 'node': 'info.datetime' }, library.getDateTime(Date.now()));
+		library.set({ ...library.getNode('timestamp'), 'node': 'info.timestamp' }, Math.floor(Date.now()/1000));
+		library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' }, true);
+		
+		// add states for last action
+		readData(
+			'info',
+			{
+				'lastAction': {
+					'timestamp': library.getDeviceState('info.lastAction.timestamp'),
+					'datetime': library.getDeviceState('info.lastAction.datetime'),
+					'lastCommand': library.getDeviceState('info.lastAction.lastCommand'),
+					'lastResult': library.getDeviceState('info.lastAction.lastResult'),
+					'error': library.getDeviceState('info.lastAction.error')
+				}
+			},
+			''
+		);
 		
 		// go through channels
 		for (let channel in payload)
@@ -412,7 +429,7 @@ function getPayload(refresh)
 	}).catch(err =>
 	{
 		// Indicate that tree is not synchronized anymore
-		library.set({ ...library.getNode('syncing'), 'node': 'syncing' }, false);
+		library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' }, false);
 		
 		// ERROR
 		let error = err.message;
@@ -526,7 +543,7 @@ function readData(key, data, channel)
 	
 	// get node details
 	key = key.replace(/ /g, '_');
-	let node = get(key.split('.')); // lights.<NAME/ID>.folder
+	let node = get(key.split('.'));
 	
 	// loop nested data
 	if (data !== null && typeof data == 'object' && !(Array.isArray(data) && (key.substr(-2) == 'xy' || key.substr(-6) == 'lights')))
@@ -547,14 +564,32 @@ function readData(key, data, channel)
 			
 			// add additional states
 			if (data.bri !== undefined)
+			{
 				data.level = data.bri > 0 ? Math.ceil(data.bri / 254 * 100) : 0;
+				data.scene = '';
+				data._commands = '';
+				
+				// add states for last action
+				readData(
+					key.replace('.state', '.action'),
+					{
+						'lastAction': {
+							'timestamp': library.getDeviceState(key.replace('.state', '.action') + '.lastAction.timestamp'),
+							'datetime': library.getDeviceState(key.replace('.state', '.action') + '.lastAction.datetime'),
+							'lastCommand': library.getDeviceState(key.replace('.state', '.action') + '.lastAction.lastCommand'),
+							'lastResult': library.getDeviceState(key.replace('.state', '.action') + '.lastAction.lastResult'),
+							'error': library.getDeviceState(key.replace('.state', '.action') + '.lastAction.error')
+						}
+					},
+					channel
+				);
+			}
 			
+			// add additional color spaces
 			if (data.bri !== undefined && data.sat !== undefined && data.hue !== undefined)
 			{
 				data.hue_degrees = Math.round(data.hue / 65535 * 360);
 				data.transitiontime = data.transitiontime || 4;
-				data.scene = '';
-				data._commands = '';
 				
 				data._hsv = data.hue_degrees + ','+ (data.sat > 0 ? Math.ceil(data.sat/254*100) : 0) + ',' + data.level;
 				data._rgb = _color.hsv.rgb(data._hsv.split(',')).toString();
@@ -597,6 +632,7 @@ function readData(key, data, channel)
 					});
 				}
 				
+				// read data
 				readData(key + pathKey + '.' + nestedKey, data[nestedKey], channel);
 			}
 		}
@@ -657,10 +693,6 @@ function convertNode(node, data)
 	
 	switch(node.convert)
 	{
-		case "string":
-			data = JSON.stringify(data);
-			break;
-			
 		case "temperature":
 			data = data / 100;
 			break;
@@ -674,8 +706,10 @@ function convertNode(node, data)
  */
 function get(node)
 {
+	let path = node.join('.');
 	node.splice(1,1);
-	return _NODES[library.clean(node[node.length-1], true)] || _NODES[library.clean(node.join('.'), true)] || { description: '', role: 'text', type: 'string', convert: null };
+	
+	return _NODES[library.clean(path)] || _NODES[library.clean(node.join('.'))] || _NODES[library.clean(node[node.length-1])] || { 'description': '(no description given)', 'role': 'text', 'type': 'string', 'convert': null };
 }
 
 /**
@@ -684,18 +718,8 @@ function get(node)
 function sendCommand(device, actions)
 {
 	// align command xy
-	if (actions.xy)
-	{
-		try
-		{
-			Object.assign(actions, { "xy": JSON.parse(actions.xy) });
-		}
-		catch(err)
-		{
-			adapter.log.warn('Error converting xy!');
-			return false;
-		}
-	}
+	if (actions.xy && !Array.isArray(actions.xy))
+		actions.xy = actions.xy.split(',').map(val => Number.parseFloat(val));
 	
 	// set options
 	let options = {
@@ -706,17 +730,27 @@ function sendCommand(device, actions)
 	};
 	
 	// send command
+	let lastAction = null;
 	adapter.log.debug('Send command to ' + device.name + ' (' + device.trigger + '): ' + JSON.stringify(actions) + '.');
+	
 	_request(options).then(res =>
 	{
 		if (!Array.isArray(res))
 		{
 			adapter.log.warn('Unknown error applying actions ' + JSON.stringify(actions) + ' on ' + device.name + ' (to ' + device.trigger + ')!');
 			adapter.log.debug('Response: ' + JSON.stringify(res));
+			
+			lastAction = {'lastAction': { 'timestamp': Math.floor(Date.now()/1000), 'datetime': library.getDateTime(Date.now()), 'lastCommand': JSON.stringify(actions), 'lastResult': JSON.stringify(res), 'error': true }};
+			readData(device.path, lastAction);
+			readData('info', lastAction);
 		}
 		
 		else
 		{
+			lastAction = {'lastAction': { 'timestamp': Math.floor(Date.now()/1000), 'datetime': library.getDateTime(Date.now()), 'lastCommand': JSON.stringify(actions), 'lastResult': JSON.stringify(res), 'error': (JSON.stringify(res).indexOf('error') > -1) }};
+			readData(device.path, lastAction);
+			readData('info', lastAction);
+			
 			let type;
 			res.forEach(msg =>
 			{
@@ -732,6 +766,10 @@ function sendCommand(device, actions)
 	{
 		adapter.log.warn('Failed sending request to ' + device.trigger + '!');
 		adapter.log.debug('Error Message: ' + err.message);
+		
+		lastAction = {'lastAction': { 'timestamp': Math.floor(Date.now()/1000), 'datetime': library.getDateTime(Date.now()), 'lastCommand': JSON.stringify(actions), 'lastResult': '[{ "error": { "type": "unknown", "address": "' + device.trigger + '", "description": "' + err.message + '" } }]', 'error': true }};
+		readData(device.path, lastAction);
+		readData('info', lastAction);
 	});
 }
 
@@ -751,10 +789,10 @@ function queue()
 {
 	for (let trigger in QUEUE)
 	{
-		let service = QUEUE[trigger];
+		let appliance = QUEUE[trigger];
 		
-		Object.keys(service.commands).forEach(command => library.setDeviceState(service.type + '.' + service.deviceId + '.' + command, '')); // reset stored states so that retrieved states will renew
-		sendCommand({ trigger: trigger, name: service.name }, service.commands);
+		Object.keys(appliance.commands).forEach(command => library.setDeviceState(appliance.type + '.' + appliance.deviceId + '.' + command, '')); // reset stored states so that retrieved states will renew
+		sendCommand({ ...appliance, trigger: trigger }, appliance.commands);
 		delete QUEUE[trigger];
 	}
 	
@@ -770,7 +808,7 @@ function getUser(success, failure)
 		uri: 'http://' + adapter.config.bridgeIp + ':' + (adapter.config.bridgePort || 80) + '/api/',
 		method: 'POST',
 		json: true,
-		body: { "devicetype": "iobroker.hue-extended#iphone peter" }
+		body: { 'devicetype': 'iobroker.hue-extended' }
 	};
 	
 	_request(options).then(res =>
