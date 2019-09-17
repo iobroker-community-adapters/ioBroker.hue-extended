@@ -32,6 +32,7 @@ Connect your Philips Hue Lights with ioBroker.
 ## Changelog
 
 ### 0.8.4 (2019-09-17)
+- (Zefau) added option to either `prepend` or `append` unique ID of a device before / after device name (additionally, prepended IDs are filled up with leading zeros)
 - (Zefau) fixed bug `Cannot read property getObject of undefined` on adapter start
 - (Zefau) fixed replacement of specials characters (`['<', '>', ' ', ',', ';', '!', '?', '[', ']', '*', '\'', '"', '\\', '&', '^', '$', '(', ')', '/']`) within device names
 - (Zefau) added object definitions for `bri`, `level`, `ct`, `hue`, `hue_degrees` and `sat` (see https://github.com/Zefau/ioBroker.hue-extended/issues/1)
