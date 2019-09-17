@@ -2,8 +2,8 @@
  * Admin functions.
  *
  * @author Zefau <zefau@mailbox.org>
- * @version 0.3.1
- * @date 2019-05-16
+ * @version 0.4.1
+ * @date 2019-09-17
  *
  */
 
@@ -62,19 +62,22 @@ function _load(settings, onChange)
 	
 	$('.value').each(function()
 	{            
-		var $key = $(this);
-		var id = $key.attr('id');
+		var $this = $(this);
+		var id = $this.attr('id');
 		
 		// load certificates
-		if ($key.attr('data-select') === "certificate")
-			fillSelectCertificates('#'+id,  $key.attr('data-type') || '', settings[id]);
+		if ($this.attr('data-select') === "certificate")
+			fillSelectCertificates('#'+id,  $this.attr('data-type') || '', settings[id]);
 		
 		// load settings
-		if ($key.attr('type') === 'checkbox')
-			$key.prop('checked', settings[id]).trigger('change').on('change', function() {onChange();});
+		if ($this.attr('type') === 'checkbox')
+			$this.prop('checked', settings[id]).trigger('change').on('change', function() {onChange();});
+		
+		else if ($this.attr('type') === 'radio')
+			$this.prop('checked', settings[$this.attr('name')] == $this.val()).trigger('change').on('change', function() {onChange();});
 		
 		else
-			$key.val(settings[id]).on('change', function() {onChange();}).on('keyup', function() {onChange();});
+			$this.val(settings[id]).on('change', function() {onChange();}).on('keyup', function() {onChange();});
 	});
 	
 	onChange(false);
@@ -92,11 +95,14 @@ function _save(callback, obj)
 	$('.value').each(function()
 	{
 		var $this = $(this);
-		var key = $this.attr('id');
+		var id = $this.attr('id');
 		
 		// save checkboxes
 		if ($this.attr('type') === 'checkbox')
-			obj[key] = $this.prop('checked');
+			obj[id] = $this.prop('checked');
+		
+		else if ($this.attr('type') === 'radio' && $this.prop('checked'))
+			obj[$this.attr('name')] = $this.val();
 		
 		// save certificates
 		else if ($this.attr('data-select') === "certificate")
@@ -104,15 +110,15 @@ function _save(callback, obj)
 			socket.emit('getObject', 'system.certificates', function (err, res) {
 				if (res.native.certificates !== undefined)
 				{
-					obj[key] = $this.val();
-					obj[key + 'Val'] = res.native.certificates[$this.val()];
+					obj[id] = $this.val();
+					obj[id + 'Val'] = res.native.certificates[$this.val()];
 				}
 			});
 		}
 		
 		// save settings
 		else
-			obj[key] = obj[key] ? obj[key] : $this.val();
+			obj[id] = obj[id] ? obj[id] : $this.val();
 	});
 	
 	callback(obj);

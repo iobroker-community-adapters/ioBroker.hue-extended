@@ -36,14 +36,7 @@ let QUEUE = {};
 function startAdapter(options)
 {
 	options = options || {};
-	Object.assign(options,
-	{
-		name: adapterName
-	});
-	
-	adapter = new utils.Adapter(options);
-	library = new Library(adapter, { nodes: _NODES, updatesInLog: true });
-	unloaded = false;
+	adapter = new utils.Adapter({ ...options, name: adapterName });
 	
 	/*
 	 * ADAPTER READY
@@ -51,6 +44,9 @@ function startAdapter(options)
 	 */
 	adapter.on('ready', function()
 	{
+		unloaded = false;
+		library = new Library(adapter, { nodes: _NODES, updatesInLog: true });
+		
 		// Check Node.js Version
 		let version = parseInt(process.version.substr(1, process.version.indexOf('.')-1));
 		if (version <= 6)
@@ -287,7 +283,7 @@ function startAdapter(options)
 			{
 				let group = DEVICES['groups'][groupId];
 				
-				appliance.deviceId = groupId + '-' + group.name.toLowerCase().replace(/ /g, '_');
+				appliance.deviceId = groupId + '-' + library.clean(group.name, true, '_');
 				appliance.name = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.name');
 				appliance.uid = groupId;
 				appliance.trigger = 'groups/' + groupId + '/action';
@@ -556,10 +552,20 @@ function readData(key, data, channel)
 			if (data.name && key.indexOf('config') == -1)
 			{
 				data.uid = key.substr(key.lastIndexOf('.')+1);
-				id = data.name.toLowerCase().replace(/ /g, '_');
-				key = key.indexOf('scenes') == -1 ?
-					key.replace('.' + data.uid, '.' + data.uid + '-' + id) :
-					key.replace('.' + data.uid, '.' + id);
+				id = library.clean(data.name, true, '_');
+				let uid = ('00' + data.uid).substr(-3);
+				
+				// Scenes
+				if (key.indexOf('scenes') > -1)
+					key = key.replace('.' + data.uid, '.' + id);
+				
+				// append UID
+				else if (adapter.config.nameId == 'append')
+					key = key.replace('.' + data.uid, '.' + id + '-' + data.uid);
+					
+				// prepend UID
+				else
+					key = key.replace('.' + data.uid, '.' + uid + '-' + id);
 			}
 			
 			// add additional states
@@ -660,14 +666,14 @@ function readData(key, data, channel)
 		// set state
 		library.set(
 			{
-				node: key,
-				type: node.type,
-				role: node.role,
-				description: (node.device !== false && device ? device + ' - ' : '') + (node.description || library.ucFirst(key.substr(key.lastIndexOf('.')+1))),
-				common: Object.assign(
+				'node': key,
+				'type': node.type,
+				'role': node.role,
+				'description': (node.device !== false && device ? device + ' - ' : '') + (node.description || library.ucFirst(key.substr(key.lastIndexOf('.')+1))),
+				'common': Object.assign(
 					node.common || {},
 					{
-						write: (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('action.' + action) > -1)
+						'write': (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('action.' + action) > -1)
 					}
 				)
 			},
@@ -688,9 +694,11 @@ function readData(key, data, channel)
  */
 function convertNode(node, data)
 {
+	// flatten Array
 	if (Array.isArray(data))
 		data = data.join(',');
 	
+	// convert
 	switch(node.convert)
 	{
 		case "temperature":

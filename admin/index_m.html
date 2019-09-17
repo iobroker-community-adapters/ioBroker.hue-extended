@@ -22,6 +22,10 @@
 	function load(settings, onChange)
 	{
 		//initModal(settings.modal);
+		console.log(settings.nameId);
+		
+		if (!settings.nameId) settings.nameId = 'prepend';
+		
 		_load(settings, onChange);
 		globalParams = settings;
 	}
@@ -256,12 +260,36 @@
 							</div>
 						</div>
 						<div class="input-field col s1 m1"></div>
-						<div class="input-field col s5 m5">
-							<div style="display: block">
-								<p class="subtitle translate">hueToXYInfo</p>
-								
-								<input class="value" id="hueToXY" type="checkbox" />
-								<label for="hueToXY" class="translate">hueToXY</label>
+						<div class="col s5 m5">
+							<div class="row">
+								<div class="input-field col s12 m12">
+									<div style="display: block">
+										<p class="subtitle translate">nameIdInfo</p>
+										
+										<label>
+											<input name="nameId" id="nameIdPrepend" class="value" value="prepend" type="radio" />
+											<span class="translate">nameIdPrepend</span>
+										</label>
+										
+										<label>
+											<input name="nameId" id="nameIdAppend" class="value" value="append" type="radio" />
+											<span class="translate">nameIdAppend</span>
+										</label>
+										
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="input-field col s12 m12">
+									<div style="display: block">
+										<p class="subtitle translate">hueToXYInfo</p>
+										
+										<label>
+											<input class="value" id="hueToXY" type="checkbox" />
+											<span class="translate">hueToXY</span>
+										</label>
+									</div>
+								</div>
 							</div>
 							
 						</div>

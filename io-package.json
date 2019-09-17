@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "hue-extended",
-        "version": "0.8.3",
+        "version": "0.8.4",
         "title": "Philips Hue Extended",
         "desc": {
             "en": "Integration of your Philips Hue Lights with your ioBroker",
@@ -16,21 +16,69 @@
             "zh-cn": "融入你的飞利浦色灯你ioBroker"
         },
         "news": {
-			"0.8.3": {
-				"en": "- added lastAction channel (with states lastCommand, lastResult, error, timestamp and datetime) to each light and group as well as for all lights / groups in info channel\n- fixed error retrieving and setting state xy\n- moved syncing, timestamp, datetime to info channel"
+            "0.8.4": {
+				"en": "- fixed bug -Cannot read property getObject of undefined- on adapter start\n- fixed replacement of specials characters within device names\n- added object definitions for bri, level, ct, hue, hue_degrees and sat"
 			},
-			"0.8.2": {
-				"en": "- Node.js v6 compatibility\n- fixed error retrieving a new user from Hue Bridge"
-			},
-			"0.8.1": {
-				"en": "- fixed incorrect Version in ioBroker"
-			},
-			"0.8.0": {
-				"en": "- reworked triggering scenes\n- fixed missing level state on non-Philips lights\n- changed data retrieval from Hue Bridge to reduce parallel connection attemps\n- added connection retry when Hue Bridge returns error"
-			},
-			"0.7.0": {
-				"en": "- added 'all'-group to apply action on all groups at once\n- added commands action to apply own commands combination at once\n- lowered minimum refresh time"
-			},
+            "0.8.3": {
+                "en": "- added lastAction channel (with states lastCommand, lastResult, error, timestamp and datetime) to each light and group as well as for all lights / groups in info channel\n- fixed error retrieving and setting state xy\n- moved syncing, timestamp, datetime to info channel",
+                "de": "- Hinzugefügt lastAction Kanal (mit den Staaten lastCommand, lastResult, Fehler, timestamp und datetime) jeder Licht-und Gruppe, sowie für alle Leuchten / Gruppen im info-Kanal\n- Fehler behoben, abrufen und festlegen von Staat xy\n- verschoben Synchronisation, timestamp, datetime-info-Kanal",
+                "ru": "- добавлено канал lastAction (с lastCommand государств, lastResult, ошибки, timestamp и datetime) в светлые и группы, а также для всех огни / групп в информационный канал\n- Исправлена ошибка извлечения и установки государства ху\n- переехал синхронизации, метки, дата информационный канал",
+                "pt": "- adicionado lastAction canal (com os estados lastCommand, lastResult, erro, carimbo de data / hora e data / hora) para cada luz e de grupo, bem como para luzes / grupos de informações do canal\n- corrigido erro ao recuperar e definir o estado de dispersão\n- mudou-se de sincronizar, carimbo de data / hora data / hora para info de canal",
+                "nl": "- toegevoegd lastAction kanaal (met staten lastCommand, lastResult, fout, timestamp en datum en tijd) op elke licht en de groep als alle lichten / - groepen in het info kanaal\n- vaste fout opgetreden bij het ophalen en instellen van state xy\n- verplaatst synchroniseren, tijdstempel datetime naar info kanaal",
+                "fr": " ajoutée lastAction canal (avec les états lastCommand, lastResult, d'erreur, d'horodatage et datetime) pour chaque lumière et de groupe ainsi que tous les lumières ou les groupes dans des canaux d'information\n- correction d'erreur lors de la récupération et de l'état xy\n- déplacement de la synchronisation, timestamp, date / heure d'info de canal",
+                "it": "- aggiunto lastAction canale (con gli stati lastCommand, lastResult, errore, timestamp e datetime) per ogni luce e di gruppo, nonché per tutte le luci / gruppi nel canale di informazioni\n- corretto errore durante il recupero e l'impostazione dello stato xy\n- spostato la sincronizzazione, \"timestamp\", \" datetime per info canale",
+                "es": "- añadido lastAction canal (con los estados lastCommand, lastResult, error, marca de hora y fecha y hora) para cada luz y de grupo, así como de todas las luces / grupos en el canal de información\n- corregido un error al recuperar y establecer el estado de xy\n- movió la sincronización de la hora, datetime para canal de información",
+                "pl": "- dodano kanał lastAction (z lastCommand państw, lastResult, błędy, timestamp i datetime) w jasne i grupy, a także dla wszystkich świateł / grup w kanał informacyjny\n- Naprawiono błąd podczas pobierania i instalowania państwa hu\n- przeniósł synchronizacji, etykieta, data kanał informacyjny",
+                "zh-cn": "-增加lastAction道(与国lastCommand,.lastResult、错误的时间戳和datetime)每个光团以及为所有的灯/团体在信息通道\n-固定的错误检索和设置状态xy\n-移动同步、时间戳、datetime到信息的通道"
+            },
+            "0.8.2": {
+                "en": "- Node.js v6 compatibility\n- fixed error retrieving a new user from Hue Bridge",
+                "de": "- Node.js v6-Kompatibilität\n- Fehler beim abrufen eines neuen Benutzer aus Hue Bridge",
+                "ru": "- Node.js совместимость В6 \n- Исправлена ошибка при получении нового пользователя из Хюэ мост",
+                "pt": "- Node.js v6 de compatibilidade\n- corrigido erro ao recuperar um novo usuário de Tonalidade Ponte",
+                "nl": "- Node.js v6 compatibiliteit\n- vaste fout bij het ophalen van een nieuwe gebruiker van Hue Bridge",
+                "fr": "- Node.js v6 de compatibilité\n- correction d'une erreur de la récupération d'un nouvel utilisateur à partir de la Teinte Pont",
+                "it": "- Node.js v6 compatibilità\n- corretto errore durante il recupero di un nuovo utente da Tonalità Ponte",
+                "es": "- Node.js v6 de compatibilidad\n- corregido un error al recuperar un nuevo usuario de Hue Bridge",
+                "pl": "- Node.js zgodność B6 \n- Naprawiono błąd podczas pobierania nowego użytkownika z Hue bridge",
+                "zh-cn": "-Node.js v6兼容性\n-固定的错误检索的新的用户顺桥"
+            },
+            "0.8.1": {
+                "en": "- fixed incorrect Version in ioBroker",
+                "de": "- fixed falsche Version in ioBroker",
+                "ru": "- исправлена некорректная версия в ioBroker",
+                "pt": "- corrigido Versão incorreta em ioBroker",
+                "nl": "- vaste onjuiste Versie in ioBroker",
+                "fr": "- correction d'une mauvaise Version de ioBroker",
+                "it": "- corretto errore in Versione ioBroker",
+                "es": "- fija Versión incorrecta en ioBroker",
+                "pl": "- poprawiono nieprawidłowe wersja w ioBroker",
+                "zh-cn": "-固定不正确的版本在ioBroker"
+            },
+            "0.8.0": {
+                "en": "- reworked triggering scenes\n- fixed missing level state on non-Philips lights\n- changed data retrieval from Hue Bridge to reduce parallel connection attemps\n- added connection retry when Hue Bridge returns error",
+                "de": "- überarbeitet das auslösen von Szenen\n- Feste fehlende level-Status auf nicht-Philips-Leuchten\n- geändert abrufen von Daten aus Hue-Bridge zu reduzieren Parallelschaltung versucht\n- Hinzugefügt Zusammenhang wiederholen, wenn Hue Bridge gibt Fehler",
+                "ru": "- переделан запуск сцены\n- исправлено отсутствие на государственном уровне не-огней Philips\n- изменен извлечения данных из Хюэ моста, чтобы уменьшить параллельное соединение попытки\n- добавлена подключения повторного при Hue мост возвращает ошибку",
+                "pt": "- reformulado provocando cenas\n- corrigido a falta de nível de estado não-Philips luzes\n- mudou de recuperação de dados a partir de Tonalidade Ponte para reduzir conexão paralela tentativas\n- adicionado novas tentativas de conexão quando Tonalidade Ponte retorna erro",
+                "nl": "- herwerkte triggering schermen\n- vaste ontbrekende niveau staat op non-Philips lampen\n- gewijzigd gegevens ophalen van de Hue Bridge te verminderen parallelle verbinding pogingen\n- toegevoegd verbinding opnieuw Hue Bridge retourneert fout",
+                "fr": "- retravaillé le déclenchement de scènes\n- correction d'un manque au niveau de l'état sur la non-Philips lumières\n- changé la récupération de données à partir de la Teinte Pont de réduire parallèle tentatives de connexion\n- ajout de tentatives de connexion lorsque la Teinte Pont renvoie l'erreur",
+                "it": "- rielaborato attivazione scene\n- fisso mancante a livello di stato di non-Philips luci\n- cambiato il recupero dei dati da Tonalità Ponte per ridurre il collegamento in parallelo tentativi\n- aggiunto un nuovo tentativo di connessione quando la Tonalità Ponte restituisce l'errore",
+                "es": "- reelaborado activación de escenas\n- falta fijos a nivel de estado sobre la no-Philips luces\n- se ha modificado de recuperación de datos de Hue Bridge para reducir la posibilidad de conexión en paralelo intentos\n- añadido de reintento de conexión cuando Hue Bridge devuelve el error",
+                "pl": "- przerobiony uruchomienie sceny\n- naprawiono brak na szczeblu państwowym nie-światła Philips\n- zmieniony pobierania danych z Hue bridge, aby zmniejszyć połączenie równoległe próby\n- dodano ponownego połączenia w Hue bridge zwraca błąd",
+                "zh-cn": "-重新触发的场景\n-缺少固定等级的状态在非飞利浦路灯\n变化的数据检索色的桥梁，以减少平行的尝试连接\n-增加连接试的时候顺桥返回的错误"
+            },
+            "0.7.0": {
+                "en": "- added 'all'-group to apply action on all groups at once\n- added commands action to apply own commands combination at once\n- lowered minimum refresh time",
+                "de": "- Hinzugefügt \"alle\" -Gruppe anwenden der Aktion auf alle Gruppen auf einmal\n- einige Befehle Hinzugefügt, die Aktion für eigene Befehle Kombination auf einmal\n- tiefergelegtes minimale refresh-Zeit",
+                "ru": "- добавлены \" все \" -группы, чтобы применить действие на все группы сразу\n- добавлены команды действия, чтобы применить собственную комбинацию команд сразу\n- снижены минимальные сроки обновления ",
+                "pt": "- adicionado \"todos\" -grupo para aplicar a acção em todos os grupos de uma vez\n- adicionados os comandos de ação para aplicar comandos, combinação de uma vez\n- baixou o mínimo de tempo de atualização",
+                "nl": "- toegevoegd 'alle'-groep van toepassing zijn actie op alle groepen tegelijk\n- toegevoegd opdrachten maatregelen voor de toepassing van eigen opdrachten combinatie in een keer\n- verlaagde minimum vernieuwingstijd",
+                "fr": "- ajout de 'tous'-groupe pour appliquer l'action à tous les groupes à la fois\n- ajout de commandes d'action pour appliquer propres commandes combinaison à la fois\n- baissé minimum le temps de rafraîchissement de",
+                "it": "- aggiunto \"tutti\" -gruppo per applicare l'azione su tutti i gruppi in una sola volta\n- aggiunti i comandi di azione per applicare i propri comandi combinazione in una volta\n- abbassato il minimo tempo di refresh",
+                "es": "- añadido \"todos\" -grupo de acción de aplicación en todos los grupos a la vez\n- añadido los comandos de acción para aplicar propios comandos combinación de una vez\n- bajó mínimo el tiempo de actualización",
+                "pl": "- dodano \"wszystko\" -grupy, aby wykonać działanie na wszystkie grupy <url>\n- dodano polecenia czynności, aby zastosować własną kombinację poleceń <url>\n- obniżone minimalne terminy aktualizacji ",
+                "zh-cn": "-添加\"所有\"组申请的行动的所有团体一次\n-增加的命令行动适用自己的命令合在一旦\n-降低最低刷新时间"
+            },
             "0.6.2": {
                 "en": "- fixed error when triggering scene\n- fixed display error in adapter configuration interface",
                 "de": "- Fehler behoben beim Auslösen von Szenen\n- Anzeigefehler in der Adapter-Konfiguration behoben",
