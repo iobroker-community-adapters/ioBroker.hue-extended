@@ -185,90 +185,94 @@ function startAdapter(options)
 			}
 		}
 		
-		// go through commands, modify if required and add to queue
-		let value;
-		for (action in commands)
+		// handle lights or groups
+		else if (appliance.type == 'lights' || (appliance.type == 'groups'))
 		{
-			value = commands[action];
-			
-			// handle color spaces
-			let rgb = null, hsv = null;
-			if (action == '_rgb')
+			// go through commands, modify if required and add to queue
+			let value;
+			for (action in commands)
 			{
-				rgb = value.split(',');
-				hsv = _color.rgb.hsv(rgb);
-			}
-			
-			else if (action == '_hsv')
-				hsv = value.split(',');
-			
-			else if (action == '_cmyk')
-				hsv = _color.cmyk.hsv(value.split(','));
-			
-			else if (action == '_xyz')
-				hsv = _color.xyz.hsv(value.split(','));
-			
-			else if (action == '_hex')
-				hsv = _color.hex.hsv(value.split(','));
-			
-			if (hsv !== null)
-			{
-				delete commands[action];
-				Object.assign(commands, { hue: Math.ceil(hsv[0]/360*65535), sat: Math.ceil(hsv[1]/100*254), bri: Math.ceil(hsv[2]/100*254) });
-			}
-			
-			// if device is turned on, make sure brightness is not 0
-			if (action == 'on' && value == true)
-			{
-				let bri = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.bri');
-				commands.bri = bri == 0 ? 254 : bri;
-			}
-			
-			// if .hue_degrees is changed, change hue
-			if (action == 'hue_degrees')
-			{
-				delete commands[action];
-				commands.hue = Math.round(value / 360 * 65535);
-			}
-			
-			// if .level is changed the change will be applied to .bri instead
-			if (action == 'level')
-			{
-				delete commands[action];
-				Object.assign(commands, { on: true, bri: Math.ceil(254 * value / 100) });
-			}
-		
-			// if .bri is changed, make sure light is on
-			if (action == 'bri')
-				Object.assign(commands, { on: true, bri: value });
-			
-			// if .bri is changed to 0, turn off
-			if ((action == 'bri' || action == 'level') && value < 1)
-			{
-				delete commands['level'];
-				Object.assign(commands, { on: false, bri: 0 });
-			}
-			
-			// convert HUE to XY
-			if (commands.hue !== undefined && adapter.config.hueToXY && library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.manufacturername') != 'Philips')
-			{
-				if (!rgb) rgb = hsv ? _color.hsv.rgb(hsv) : _color.hsv.rgb([commands.hue, (commands.sat || library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.sat')), commands.bri || library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.bri')]);
+				value = commands[action];
 				
-				if (rgb === null || rgb[0] === undefined || rgb[0] === null)
-					adapter.log.warn('Invalid RGB given (' + JSON.stringify(rgb) + ')!');
+				// handle color spaces
+				let rgb = null, hsv = null;
+				if (action == '_rgb')
+				{
+					rgb = value.split(',');
+					hsv = _color.rgb.hsv(rgb);
+				}
 				
-				else
-					Object.assign(commands, { "xy": JSON.stringify(_hueColor.convertRGBtoXY(rgb)) });
+				else if (action == '_hsv')
+					hsv = value.split(',');
+				
+				else if (action == '_cmyk')
+					hsv = _color.cmyk.hsv(value.split(','));
+				
+				else if (action == '_xyz')
+					hsv = _color.xyz.hsv(value.split(','));
+				
+				else if (action == '_hex')
+					hsv = _color.hex.hsv(value.split(','));
+				
+				if (hsv !== null)
+				{
+					delete commands[action];
+					Object.assign(commands, { hue: Math.ceil(hsv[0]/360*65535), sat: Math.ceil(hsv[1]/100*254), bri: Math.ceil(hsv[2]/100*254) });
+				}
+				
+				// if device is turned on, make sure brightness is not 0
+				if (action == 'on' && value == true)
+				{
+					let bri = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.bri');
+					commands.bri = bri == 0 ? 254 : bri;
+				}
+				
+				// if .hue_degrees is changed, change hue
+				if (action == 'hue_degrees')
+				{
+					delete commands[action];
+					commands.hue = Math.round(value / 360 * 65535);
+				}
+				
+				// if .level is changed the change will be applied to .bri instead
+				if (action == 'level')
+				{
+					delete commands[action];
+					Object.assign(commands, { on: true, bri: Math.ceil(254 * value / 100) });
+				}
+			
+				// if .bri is changed, make sure light is on
+				if (action == 'bri')
+					Object.assign(commands, { on: true, bri: value });
+				
+				// if .bri is changed to 0, turn off
+				if ((action == 'bri' || action == 'level') && value < 1)
+				{
+					delete commands['level'];
+					Object.assign(commands, { on: false, bri: 0 });
+				}
+				
+				// convert HUE to XY
+				if (commands.hue !== undefined && adapter.config.hueToXY && library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.manufacturername') != 'Philips')
+				{
+					if (!rgb) rgb = hsv ? _color.hsv.rgb(hsv) : _color.hsv.rgb([commands.hue, (commands.sat || library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.sat')), commands.bri || library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.bri')]);
+					
+					if (rgb === null || rgb[0] === undefined || rgb[0] === null)
+						adapter.log.warn('Invalid RGB given (' + JSON.stringify(rgb) + ')!');
+					
+					else
+						Object.assign(commands, { "xy": JSON.stringify(_hueColor.convertRGBtoXY(rgb)) });
+				}
+				
+				// if .on is not off, be sure device is on
+				if (commands.on === undefined)
+					commands.on = true; // A light cannot have its hue, saturation, brightness, effect, ct or xy modified when it is turned off. Doing so will return 201 error.
 			}
 			
-			// if .on is not off, be sure device is on
-			if (commands.on === undefined)
-				commands.on = true; // A light cannot have its hue, saturation, brightness, effect, ct or xy modified when it is turned off. Doing so will return 201 error.
+			// check reachability
+			if (appliance.type == 'lights' && !library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.state.reachable'))
+				adapter.log.warn('Device ' + appliance.name + ' does not seem to be reachable! Command is sent anyway.');
 		}
-		
-		// check reachability
-		if (appliance.type == 'lights' && !library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.state.reachable'))
-			adapter.log.warn('Device ' + appliance.name + ' does not seem to be reachable! Command is sent anyway.');
 		
 		// queue command
 		if (id.indexOf('groups.0-all_lights.') > -1)
