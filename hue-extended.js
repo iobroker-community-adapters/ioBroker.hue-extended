@@ -111,7 +111,7 @@ function startAdapter(options)
 		appliance.deviceId = appliance.type == 'scenes' ? params.splice(0,2).join('.') : params.splice(0,1).toString();
 		appliance.name = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.name');
 		appliance.uid = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.uid');
-		appliance.trigger = appliance.type + '/' + appliance.uid + '/' + (appliance.type == 'groups' ? 'action' : 'state');
+		appliance.trigger = appliance.type + '/' + appliance.uid + '/' + (appliance.type == 'groups' ? 'action' : (appliance.type == 'sensors' ? 'config' : 'state'));
 		
 		// no uid
 		if (!appliance.uid)
@@ -223,12 +223,6 @@ function startAdapter(options)
 				let bri = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.bri');
 				commands.bri = bri == 0 ? 254 : bri;
 			}
-			
-			// if device is turned off, set level / bri to 0
-			/*
-			if (action == 'on' && value == false)
-				commands.bri = 0;
-			*/
 			
 			// if .hue_degrees is changed, change hue
 			if (action == 'hue_degrees')
@@ -653,9 +647,9 @@ function readData(key, data, channel)
 		
 		// remap state to action
 		let action = key.substr(key.lastIndexOf('.')+1);
-		if (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('state.' + action) > -1)
+		if (_SUBSCRIPTIONS.indexOf(action) > -1 && (key.indexOf('state.' + action) > -1 || key.indexOf('config.' + action) > -1))
 		{
-			key = key.replace('.state.', '.action.');
+			key = key.replace('.state.', '.action.').replace('.config.', '.action.');
 			library.set({
 				node: key.substr(0, key.indexOf('.action.')+7),
 				role: 'channel',

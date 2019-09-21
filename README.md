@@ -31,6 +31,9 @@ Connect your Philips Hue Lights with ioBroker.
 
 ## Changelog
 
+### 0.8.5 (2019-09-21)
+- (Zefau) added trigger for sensors with state `config.on` (moved and mapped as `action.on`)
+
 ### 0.8.4 (2019-09-17)
 - (Zefau) added option to either `prepend` or `append` unique ID of a device before / after device name (additionally, prepended IDs are filled up with leading zeros)
 - (Zefau) fixed bug `Cannot read property getObject of undefined` on adapter start
