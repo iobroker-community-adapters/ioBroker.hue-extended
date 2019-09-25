@@ -147,6 +147,7 @@ function startAdapter(options)
 		if (appliance.type == 'scenes')
 		{
 			let scene = {
+				name: library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.name'),
 				type: library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.type'),
 				groupId: library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.group'),
 				lights: library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.lights')
@@ -156,31 +157,42 @@ function startAdapter(options)
 			if (scene.type == 'GroupScene')
 			{
 				appliance.trigger = 'groups/' + scene.groupId + '/action';
-				appliance.name = DEVICES['groups'][scene.groupId].name;
+				appliance.name = DEVICES['groups'][scene.groupId].name + ' (' + scene.name + ')';
 				commands = { 'scene': appliance.uid };
 			}
 			
 			// LightScene
 			else if (scene.type == 'LightScene')
 			{
-				// trigger LightScene on each device independently
-				/*
-				scene.lights.split(',').forEach(light =>
-				{
-					adapter.setState('lights.' + light + '-' + DEVICES['lights'][light].name.toLowerCase().replace(/ /g, '_') + '.action.scene', appliance.uid, false);
-				});
-				
-				return true;
-				*/
-				
-				adapter.log.warn('LightScene currently not supported!');
-				return false;
+				appliance.trigger = 'groups/0/action';
+				appliance.name = 'lights (' + scene.name + ')';
+				commands = { 'scene': appliance.uid };
 			}
 			
 			// Error
 			else
 			{
 				adapter.log.warn('Invalid scene type given! Must bei either GroupScene or LightScene.');
+				return false;
+			}
+		}
+		
+		// handle schedules
+		else if (appliance.type == 'schedules' || appliance.type == 'rules')
+		{
+			let options = null;
+			try
+			{
+				options = JSON.parse(library.getDeviceState(appliance.path + '.options'));
+				
+				appliance.method = options.method;
+				appliance.trigger = options.address;
+				commands = options.body;
+			}
+			catch(err)
+			{
+				adapter.log.warn('Invalid schedules data given!');
+				adapter.log.debug(err.message);
 				return false;
 			}
 		}
@@ -217,7 +229,7 @@ function startAdapter(options)
 				if (hsv !== null)
 				{
 					delete commands[action];
-					Object.assign(commands, { hue: Math.ceil(hsv[0]/360*65535), sat: Math.ceil(hsv[1]/100*254), bri: Math.ceil(hsv[2]/100*254) });
+					Object.assign(commands, { hue: Math.ceil(hsv[0]/360*65535), sat: Math.max(Math.min(Math.round(hsv[1]/2.54), 100), 0), bri: Math.max(Math.min(Math.round(hsv[2]/2.54), 100), 0) });
 				}
 				
 				// if device is turned on, make sure brightness is not 0
@@ -238,7 +250,7 @@ function startAdapter(options)
 				if (action == 'level')
 				{
 					delete commands[action];
-					Object.assign(commands, { on: true, bri: Math.ceil(254 * value / 100) });
+					Object.assign(commands, { on: true, bri: Math.max(Math.min(Math.round(value*2.54), 254), 0) });
 				}
 			
 				// if .bri is changed, make sure light is on
@@ -275,22 +287,7 @@ function startAdapter(options)
 		}
 		
 		// queue command
-		if (id.indexOf('groups.0-all_lights.') > -1)
-		{
-			Object.keys(DEVICES['groups']).forEach(groupId =>
-			{
-				let group = DEVICES['groups'][groupId];
-				
-				appliance.deviceId = groupId + '-' + library.clean(group.name, true, '_');
-				appliance.name = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.name');
-				appliance.uid = groupId;
-				appliance.trigger = 'groups/' + groupId + '/action';
-				
-				addToQueue(appliance, commands);
-			});
-		}
-		else
-			addToQueue(appliance, commands);
+		addToQueue(appliance, commands);
 	});
 	
 	/*
@@ -523,12 +520,11 @@ function readData(key, data, channel)
 	if (data === undefined || data === 'undefined')
 		return false;
 	
-	// index scenes
-	if (channel == 'scenes' && data['name'])
+	// skip recycled
+	if (channel && !adapter.config['sync' + library.ucFirst(channel) + 'Recycled'] && data && data['recycle'] === true)
 	{
-		if (!GLOBALS['scenes']) GLOBALS['scenes'] = [];
-		//GLOBALS['scenes'].push(data['name']);
-		//library.set();
+		adapter.log.silly('Skipping device ' + data['name'] + ' in channel ' + channel + '.');
+		return false;
 	}
 	
 	// set current device name
@@ -566,10 +562,35 @@ function readData(key, data, channel)
 					key = key.replace('.' + data.uid, '.' + uid + '-' + id);
 			}
 			
+			// change state for schedules
+			if (channel == 'rules' && key.substr(-7) == 'actions')
+			{
+				key = key.replace('.actions', '.action');
+				let states = {};
+				let action;
+				
+				data.forEach(trigger =>
+				{
+					action = Object.keys(trigger.body).join('-');
+					states[library.clean(action, true, '-')] = { 'trigger': false, 'options': JSON.stringify(trigger) };
+				});
+				
+				data = states;
+			}
+			
+			// change state for schedules
+			if (channel == 'schedules' && key.substr(-7) == 'command')
+			{
+				key = key.replace('.command', '') + '.action';
+				
+				data.address = data.address.substr(data.address.indexOf('/', 5)+1, data.address.length);
+				data = { 'trigger': false, 'options': JSON.stringify(data) };
+			}
+			
 			// add additional states
 			if (data.bri !== undefined)
 			{
-				data.level = data.bri > 0 ? Math.ceil(data.bri / 254 * 100) : 0;
+				data.level = data.bri > 0 ? Math.max(Math.min(Math.round(data.bri/2.54), 100), 0) : 0;
 				data.scene = '';
 				data._commands = '';
 				
@@ -595,7 +616,7 @@ function readData(key, data, channel)
 				data.hue_degrees = Math.round(data.hue / 65535 * 360);
 				data.transitiontime = data.transitiontime || 4;
 				
-				data._hsv = data.hue_degrees + ','+ (data.sat > 0 ? Math.ceil(data.sat/254*100) : 0) + ',' + data.level;
+				data._hsv = data.hue_degrees + ','+ (data.sat > 0 ? Math.max(Math.min(Math.round(data.sat/2.54), 100), 0) : 0) + ',' + data.level;
 				data._rgb = _color.hsv.rgb(data._hsv.split(',')).toString();
 				data._cmyk = _color.rgb.cmyk(data._rgb.split(',')).toString();
 				data._xyz = _color.rgb.xyz(data._rgb.split(',')).toString();
@@ -611,7 +632,7 @@ function readData(key, data, channel)
 			
 			// add scene trigger button as additional state (only to scenes)
 			if (data.type == 'GroupScene' || data.type == 'LightScene')
-				data.action = { trigger: false };
+				data.action = { 'trigger': false };
 			
 			// create channel
 			library.set({
@@ -679,7 +700,7 @@ function readData(key, data, channel)
 		);
 		
 		// subscribe to states
-		if (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('action.' + action) > -1)
+		if (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('.action.') > -1 && key.indexOf('.' + action) > -1)
 		{
 			node.subscribe = true;
 			adapter.subscribeStates(key);
@@ -727,10 +748,13 @@ function sendCommand(device, actions)
 	if (actions.xy && !Array.isArray(actions.xy))
 		actions.xy = actions.xy.split(',').map(val => Number.parseFloat(val));
 	
+	// clean trigger
+	device.trigger = device.trigger.substr(0, 1) == '/' ? device.trigger.substr(1, device.trigger.length) : device.trigger;
+	
 	// set options
 	let options = {
 		uri: bridge + device.trigger,
-		method: 'PUT',
+		method: device.method || 'PUT',
 		json: true,
 		body: actions
 	};

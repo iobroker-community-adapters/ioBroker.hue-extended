@@ -17,7 +17,7 @@ module.exports =
 	"hue_degrees": {"description": "Hue of the light between 0° and 360°", "role": "level.color.hue", "type": "number", "common": { "min": 0, "max": 360, "unit": "°" }},
 	"sat": {"description": "Saturation of the light between 0 and 254", "role": "level.color.saturation", "type": "number", "common": { "min": 0, "max": 254 }},
 	"xy": {"description": "The x and y coordinates in CIE color space", "role": "level.color.xy", "type": "string"},
-	"ct": {"description": "The Mired Color temperature of the light", "role": "level.color.temperature", "type": "number", "common": { "min": 0, "max": 8000 }},
+	"ct": {"description": "The Mired Color temperature of the light", "role": "level.color.temperature", "type": "number", "common": { "min": 2200, "max": 6500, "unit": "°K" }},
 	"alert": {"description": "The alert effect,is a temporary change to the bulb’s state", "role": "switch", "type": "string", "common": {"states": {"none": "No alert", "select": "One breathe cycle", "lselect": "Breathe cycles for 15s"}}},
 	"effect": {"description": "The dynamic effect of the light", "role": "switch", "type": "string", "common": {"states": {"none": "No effect", "colorloop": "Cycle through all hues"}}},
 	"transitiontime": {"description": "The duration of the transition from the light’s current state to the new state. This is given as a multiple of 100ms and defaults to 4 (400ms).", "role": "value", "type": "number"},

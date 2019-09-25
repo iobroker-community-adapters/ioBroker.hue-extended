@@ -31,6 +31,7 @@
     "syncGroups": "Synchronize Groups",
     "syncInfo": "Select items to be synchronized",
     "syncLights": "Synchronize Lights",
+    "syncRecycled": "Synchronize deleted / recycled items",
     "syncResources": "Synchronize Resources",
     "syncRules": "Synchronize Rules",
     "syncScenes": "Synchronize Scenes",

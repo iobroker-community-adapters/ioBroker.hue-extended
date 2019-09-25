@@ -31,6 +31,7 @@
     "syncGroups": "Synchronisation der Gruppen",
     "syncInfo": "Wähle die Elemente aus, die synchronisiert werden sollen",
     "syncLights": "Synchronisation der Lichter",
+    "syncRecycled": "Synchronisiere gelöschte (recycled) Elemente",
     "syncResources": "Synchronisation der Ressourcen",
     "syncRules": "Synchronisation der Regeln",
     "syncScenes": "Synchronisation der Szenen",

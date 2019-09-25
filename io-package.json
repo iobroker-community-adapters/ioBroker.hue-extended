@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "hue-extended",
-        "version": "0.8.5",
+        "version": "0.8.6",
         "title": "Philips Hue Extended",
         "desc": {
             "en": "Integration of your Philips Hue Lights with your ioBroker",
@@ -16,9 +16,42 @@
             "zh-cn": "融入你的飞利浦色灯你ioBroker"
         },
         "news": {
+            "0.8.6": {
+                "en": "- added support for LightScenes\n- added option to hide deleted devices\n- added support to trigger schedules\n- added support to trigger rules\n- fixed incorrect conversion between bri and level",
+                "de": "- zusätzliche Unterstützung für LightScenes",
+                "ru": "- добавлена поддержка для LightScenes",
+                "pt": "- adicionado suporte para LightScenes",
+                "nl": "- toegevoegde ondersteuning voor LightScenes",
+                "fr": "- ajout du support pour LightScenes",
+                "it": "- aggiunto il supporto per LightScenes",
+                "es": "- añadido soporte para los LightScenes",
+                "pl": "- dodano wsparcie dla LightScenes",
+                "zh-cn": "-增加支持LightScenes"
+            },
+            "0.8.5": {
+                "en": "- added trigger for sensors with state config.on (moved and mapped as action.on)",
+                "de": "- Hinzugefügt Auslöser für sensoren mit Status config.auf (verschoben und zugeordnet als Aktion.auf)",
+                "ru": "- добавлен триггер для датчиков с состоянием конфигурации.на (перемещать и сопоставляются действий.о)",
+                "pt": "- adicionado gatilho para sensores com o estado de configuração.em (deslocado e mapeada como a ação.em)",
+                "nl": "- toegevoegd trigger voor sensoren met state config.op (verplaatst en toegewezen actie.op)",
+                "fr": "- ajout de déclenchement pour les capteurs de l'état de config.sur (déplacé et cartographiés comme action.sur)",
+                "it": "- aggiunto il trigger per sensori con config.a (spostato e mappati in azione.a)",
+                "es": "- añadido gatillo para sensores con el estado de configuración.en (desplazado y se asigna como acción.a)",
+                "pl": "- dodano wyzwalacz dla czujników stanu konfiguracji.na (przenosić i są mapowane działań.o)",
+                "zh-cn": "-加入触发的传感器与国家配置。在(移动和映射为行动。上)"
+            },
             "0.8.4": {
-				"en": "- fixed bug -Cannot read property getObject of undefined- on adapter start\n- fixed replacement of specials characters within device names\n- added object definitions for bri, level, ct, hue, hue_degrees and sat"
-			},
+                "en": "- fixed bug -Cannot read property getObject of undefined- on adapter start\n- fixed replacement of specials characters within device names\n- added object definitions for bri, level, ct, hue, hue_degrees and sat",
+                "de": "- behoben: Fehler -kann Nicht Lesen-Eigenschaft getObject undefined - adapter starten\n- Festnetz-Ersatz-Angebote von Zeichen im Gerätenamen\n- zusätzliche Objekt-Definitionen für bri -, level -, ct -, Farbton -, hue_degrees und setzte sich",
+                "ru": "- Исправлена ошибка -не удается прочитать свойство функции getobject неопределен - пуск адаптера \n- исправлено заменой спец символы в имена устройств \n- добавлены определения объекта Бри, уровень, КТ, оттенок, hue_degrees и сел",
+                "pt": "- corrigido o erro -não é Possível ler a propriedade getObject de indefinido - adaptador para iniciar\n- substituição fixo de caracteres especiais dentro nomes de dispositivos\n- adicionado definições de objeto para bri, nível, ct, matiz, hue_degrees e sentou-se",
+                "nl": "- bug opgelost -Niet kan lezen eigendom getObject undefined adapter - start\n- vaste vervanging van specials tekens in namen van het apparaat\nde toegevoegde object-definities voor bri, niveau, ct, hue, hue_degrees en zat",
+                "fr": "- correction d'un bug, Impossible de lire la propriété getObject de undefined adaptateur commencer\n- remplacement fixe de caractères spéciaux dans les noms de périphériques\n- ajout des définitions d'objet pour la bri, le niveau, le ct, la teinte, hue_degrees et sat",
+                "it": "- corretto il bug -Impossibile leggere la proprietà getObject undefined adattatore di iniziare\n- fissa la sostituzione di caratteri speciali all'interno di nomi di periferica\naggiunto oggetto definizioni per bri, livello, ct, tonalità, hue_degrees e sat",
+                "es": "- corregido el error -No se puede leer la propiedad getObject de indefinido - en el adaptador de inicio\n- reemplazo fijo de caracteres especiales en los nombres de dispositivo\n- añadido definiciones de objeto de bri, el nivel, el ct, el tono, la hue_degrees y se sentó",
+                "pl": "- Naprawiono błąd -nie można odczytać właściwość funkcji getobject неопределен - start zasilacza \n- naprawiono wymianą specjalne znaki do nazwy urządzeń \n- dodano definicji obiektu Bree, poziom, CT, barwa, hue_degrees i usiadł",
+                "zh-cn": "-修正错误不能读取财产的许未定义的适配器开始\n-固定替代的特色人物内的设备名称\n-增加对象的定义bri,一级，ct，顺化，hue_degrees坐"
+            },
             "0.8.3": {
                 "en": "- added lastAction channel (with states lastCommand, lastResult, error, timestamp and datetime) to each light and group as well as for all lights / groups in info channel\n- fixed error retrieving and setting state xy\n- moved syncing, timestamp, datetime to info channel",
                 "de": "- Hinzugefügt lastAction Kanal (mit den Staaten lastCommand, lastResult, Fehler, timestamp und datetime) jeder Licht-und Gruppe, sowie für alle Leuchten / Gruppen im info-Kanal\n- Fehler behoben, abrufen und festlegen von Staat xy\n- verschoben Synchronisation, timestamp, datetime-info-Kanal",

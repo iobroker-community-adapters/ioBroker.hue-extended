@@ -31,6 +31,13 @@ Connect your Philips Hue Lights with ioBroker.
 
 ## Changelog
 
+### 0.8.6 (2019-09-25)
+- (Zefau) added support for LightScenes
+- (Zefau) added option to hide deleted devices (if `recycle` is `true`)
+- (Zefau) added support to trigger schedules
+- (Zefau) added support to trigger rules
+- (Zefau) fixed incorrect conversion between `bri` and `level`
+
 ### 0.8.5 (2019-09-21)
 - (Zefau) added trigger for sensors with state `config.on` (moved and mapped as `action.on`)
 

@@ -22,9 +22,18 @@
 	function load(settings, onChange)
 	{
 		//initModal(settings.modal);
-		console.log(settings.nameId);
-		
 		if (!settings.nameId) settings.nameId = 'prepend';
+		
+		['Groups', 'Resourcelinks', 'Scenes', 'Schedules', 'Rules', 'Sensors'].forEach(function(item)
+		{
+			$('body').on('change', '#sync' + item, function()
+			{
+				$('#show' + $(this).attr('id').replace('sync', '') + 'Recycled').css('display', $(this).prop('checked') ? 'block' : 'none');
+			});
+			
+			if (settings['sync' + item])
+				$('#show' + item + 'Recycled').css('display', 'block');
+		});
 		
 		_load(settings, onChange);
 		globalParams = settings;
@@ -207,38 +216,68 @@
 							</div>
 							
 							<div style="display: block">
-								<input class="value" id="syncGroups" type="checkbox" />
-								<label for="syncGroups" class="translate">syncGroups</label>
-							</div>
-							
-							<div style="display: block">
 								<input class="value" id="syncLights" type="checkbox" />
 								<label for="syncLights" class="translate">syncLights</label>
 							</div>
 							
 							<div style="display: block">
+								<input class="value" id="syncGroups" type="checkbox" />
+								<label for="syncGroups" class="translate">syncGroups</label>
+							
+								<div style="display: none; margin-left: 35px" id="showGroupsRecycled">
+									<input class="value" id="syncGroupsRecycled" type="checkbox" />
+									<label for="syncGroupsRecycled" class="translate">syncRecycled</label>
+								</div>
+							</div>
+							
+							<div style="display: block">
 								<input class="value" id="syncResourcelinks" type="checkbox" />
 								<label for="syncResourcelinks" class="translate">syncResources</label>
+								
+								<div style="display: none; margin-left: 35px" id="showResourcelinksRecycled">
+									<input class="value" id="syncResourcelinksRecycled" type="checkbox" />
+									<label for="syncResourcelinksRecycled" class="translate">syncRecycled</label>
+								</div>
 							</div>
 							
 							<div style="display: block">
 								<input class="value" id="syncRules" type="checkbox" />
 								<label for="syncRules" class="translate">syncRules</label>
+								
+								<div style="display: none; margin-left: 35px" id="showRulesRecycled">
+									<input class="value" id="syncRulesRecycled" type="checkbox" />
+									<label for="syncRulesRecycled" class="translate">syncRecycled</label>
+								</div>
 							</div>
 							
 							<div style="display: block">
 								<input class="value" id="syncScenes" type="checkbox" />
 								<label for="syncScenes" class="translate">syncScenes</label>
+								
+								<div style="display: none; margin-left: 35px" id="showScenesRecycled">
+									<input class="value" id="syncScenesRecycled" type="checkbox" />
+									<label for="syncScenesRecycled" class="translate">syncRecycled</label>
+								</div>
 							</div>
 							
 							<div style="display: block">
 								<input class="value" id="syncSchedules" type="checkbox" />
 								<label for="syncSchedules" class="translate">syncSchedules</label>
+								
+								<div style="display: none; margin-left: 35px" id="showSchedulesRecycled">
+									<input class="value" id="syncSchedulesRecycled" type="checkbox" />
+									<label for="syncSchedulesRecycled" class="translate">syncRecycled</label>
+								</div>
 							</div>
 							
 							<div style="display: block">
 								<input class="value" id="syncSensors" type="checkbox" />
 								<label for="syncSensors" class="translate">syncSensors</label>
+								
+								<div style="display: none; margin-left: 35px" id="showSensorsRecycled">
+									<input class="value" id="syncSensorsRecycled" type="checkbox" />
+									<label for="syncSensorsRecycled" class="translate">syncRecycled</label>
+								</div>
 							</div>
 						</div>
 						<div class="col s3 m3" style="margin: 0">
