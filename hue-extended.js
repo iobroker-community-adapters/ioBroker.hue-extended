@@ -233,7 +233,7 @@ function startAdapter(options)
 				}
 				
 				// if device is turned on, make sure brightness is not 0
-				if (action == 'on' && value == true)
+				if (action == 'on' && value == true && commands.bri === undefined)
 				{
 					let bri = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.bri');
 					commands.bri = bri == 0 ? 254 : bri;
