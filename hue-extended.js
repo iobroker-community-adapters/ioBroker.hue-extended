@@ -239,13 +239,6 @@ function startAdapter(options)
 					commands.bri = bri == 0 ? 254 : bri;
 				}
 				
-				// if .hue_degrees is changed, change hue
-				if (action == 'hue_degrees')
-				{
-					delete commands[action];
-					commands.hue = Math.round(value / 360 * 65535);
-				}
-				
 				// if .level is changed the change will be applied to .bri instead
 				if (action == 'level')
 				{
@@ -262,6 +255,13 @@ function startAdapter(options)
 				{
 					delete commands['level'];
 					Object.assign(commands, { on: false, bri: 0 });
+				}
+				
+				// if .hue_degrees is changed, change hue
+				if (action == 'hue_degrees')
+				{
+					delete commands[action];
+					commands.hue = Math.round(value / 360 * 65535);
 				}
 				
 				// convert HUE to XY
@@ -287,7 +287,10 @@ function startAdapter(options)
 		}
 		
 		// queue command
-		addToQueue(appliance, commands);
+		if (adapter.config.useQueue)
+			addToQueue(appliance, commands);
+		else
+			sendCommand(appliance, commands)
 	});
 	
 	/*
@@ -742,8 +745,19 @@ function get(node)
 /**
  *
  */
+function runCommand()
+{
+	
+}
+
+/**
+ *
+ */
 function sendCommand(device, actions)
 {
+	// reset stored states so that retrieved states will renew
+	Object.keys(actions).forEach(action => library.setDeviceState(device.type + '.' + device.deviceId + '.' + action, ''));
+	
 	// align command xy
 	if (actions.xy && !Array.isArray(actions.xy))
 		actions.xy = actions.xy.split(',').map(val => Number.parseFloat(val));
@@ -820,8 +834,6 @@ function queue()
 	for (let trigger in QUEUE)
 	{
 		let appliance = QUEUE[trigger];
-		
-		Object.keys(appliance.commands).forEach(command => library.setDeviceState(appliance.type + '.' + appliance.deviceId + '.' + command, '')); // reset stored states so that retrieved states will renew
 		sendCommand({ ...appliance, trigger: trigger }, appliance.commands);
 		delete QUEUE[trigger];
 	}

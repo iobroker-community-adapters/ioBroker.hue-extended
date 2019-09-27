@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "hue-extended",
-        "version": "0.8.6",
+        "version": "0.8.7",
         "title": "Philips Hue Extended",
         "desc": {
             "en": "Integration of your Philips Hue Lights with your ioBroker",
@@ -16,6 +16,9 @@
             "zh-cn": "融入你的飞利浦色灯你ioBroker"
         },
         "news": {
+            "0.8.7": {
+				"en": "- added option to use Queue optionally (or sending commands directly)\n- fixed bug sending incomplete commands when commands include bri (#2)\n- fixed bug not being able to deactivate / unset option -using xy instead of hue-"
+			},
             "0.8.6": {
                 "en": "- added support for LightScenes\n- added option to hide deleted devices\n- added support to trigger schedules\n- added support to trigger rules\n- fixed incorrect conversion between bri and level",
                 "de": "- zusätzliche Unterstützung für LightScenes",
@@ -262,7 +265,8 @@
         "refresh": 30,
         "syncLights": true,
         "syncGroups": true,
-        "hueToXY": true
+        "hueToXY": true,
+        "useQueue": true
     },
     "objects": [],
     "instanceObjects": []

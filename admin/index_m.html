@@ -176,7 +176,7 @@
 					<div class="row box">
 						<p class="subtitle translate">connectionInformation</p>
 						
-						<div class="input-field col s2 m2">
+						<div class="input-field col s3 m3">
 							<input class="value" id="bridgeIp" type="text" />
 							<label for="bridgeIp" class="translate">ip</label>
 						</div>
@@ -188,7 +188,6 @@
 							<input class="value" id="bridgeUser" type="text" />
 							<label for="bridgeUser" class="translate">user</label>
 						</div>
-						<div class="input-field col s1 m1"></div>
 						<div class="input-field col s2 m2">
 							<a class="btn blue translate" id="button_getUser">button_getUser</a>
 						</div>
@@ -207,7 +206,7 @@
 						</div>
 					</div>
 					<div class="row box" style="margin-bottom: 0">
-						<div class="input-field col s3 m3">
+						<div class="input-field col s4 m4">
 							<p class="subtitle translate">syncInfo</p>
 							
 							<div style="display: block">
@@ -293,12 +292,18 @@
 								<div class="input-field col s12 m12">
 									<p class="subtitle translate">queueInfo</p>
 									
-									<input class="value" id="queue" type="number" placeholder="3" />
-									<label for="queue" class="translate" style="display: none">queue</label>
+									<p>
+										<input class="value" id="useQueue" type="checkbox" />
+										<label for="useQueue" class="translate">useQueue</label>
+									</p>
+									
+									<p>
+										<input class="value" id="queue" type="number" placeholder="3" />
+										<label for="queue" class="translate" style="display: none">queue</label>
+									</p>
 								</div>
 							</div>
 						</div>
-						<div class="input-field col s1 m1"></div>
 						<div class="col s5 m5">
 							<div class="row">
 								<div class="input-field col s12 m12">
@@ -323,10 +328,8 @@
 									<div style="display: block">
 										<p class="subtitle translate">hueToXYInfo</p>
 										
-										<label>
-											<input class="value" id="hueToXY" type="checkbox" />
-											<span class="translate">hueToXY</span>
-										</label>
+										<input class="value" id="hueToXY" type="checkbox" />
+										<label for="hueToXY" class="translate">hueToXY</label>
 									</div>
 								</div>
 							</div>

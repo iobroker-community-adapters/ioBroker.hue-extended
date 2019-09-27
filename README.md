@@ -31,6 +31,11 @@ Connect your Philips Hue Lights with ioBroker.
 
 ## Changelog
 
+### 0.8.7 (2019-09-27)
+- (Zefau) added option to use Queue optionally (or sending commands directly)
+- (Zefau) fixed bug sending incomplete commands when commands include `bri` ([#2](https://github.com/Zefau/ioBroker.hue-extended/issues/2))
+- (Zefau) fixed bug not being able to deactivate / unset option `using xy instead of hue`
+
 ### 0.8.6 (2019-09-25)
 - (Zefau) added support for LightScenes
 - (Zefau) added option to hide deleted devices (if `recycle` is `true`)
