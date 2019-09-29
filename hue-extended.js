@@ -229,32 +229,37 @@ function startAdapter(options)
 				if (hsv !== null)
 				{
 					delete commands[action];
-					Object.assign(commands, { hue: Math.ceil(hsv[0]/360*65535), sat: Math.max(Math.min(Math.round(hsv[1]/2.54), 100), 0), bri: Math.max(Math.min(Math.round(hsv[2]/2.54), 100), 0) });
+					Object.assign(commands,
+					{
+						hue: Math.round(hsv[0]/360*65535),
+						sat: Math.max(Math.min(Math.round(hsv[1]/2.54), 100), 0),
+						bri: Math.max(Math.min(Math.round(hsv[2]/2.54), 100), 0)
+					});
 				}
 				
 				// if device is turned on, make sure brightness is not 0
-				if (action == 'on' && value == true && commands.bri === undefined)
+				if (action == 'on' && value == true && commands.level === undefined && commands.bri === undefined)
 				{
 					let bri = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.bri');
 					commands.bri = bri == 0 ? 254 : bri;
 				}
 				
 				// if .level is changed the change will be applied to .bri instead
-				if (action == 'level')
+				if (action == 'level' && value > 0)
 				{
 					delete commands[action];
 					Object.assign(commands, { on: true, bri: Math.max(Math.min(Math.round(value*2.54), 254), 0) });
 				}
 			
 				// if .bri is changed, make sure light is on
-				if (action == 'bri')
+				if (action == 'bri' && value > 0)
 					Object.assign(commands, { on: true, bri: value });
 				
 				// if .bri is changed to 0, turn off
-				if ((action == 'bri' || action == 'level') && value < 1)
+				if ((action == 'bri' || action == 'level') && value <= 0)
 				{
 					delete commands['level'];
-					Object.assign(commands, { on: false, bri: 0 });
+					Object.assign(commands, { on: false }); // , bri: 0
 				}
 				
 				// if .hue_degrees is changed, change hue
