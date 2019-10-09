@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "hue-extended",
-        "version": "0.8.7",
+        "version": "0.8.8",
         "title": "Philips Hue Extended",
         "desc": {
             "en": "Integration of your Philips Hue Lights with your ioBroker",
@@ -17,8 +17,17 @@
         },
         "news": {
             "0.8.7": {
-				"en": "- added option to use Queue optionally (or sending commands directly)\n- fixed bug sending incomplete commands when commands include bri (#2)\n- fixed bug not being able to deactivate / unset option -using xy instead of hue-"
-			},
+                "en": "- added option to use Queue optionally (or sending commands directly)\n- fixed bug sending incomplete commands when commands include bri (#2)\n- fixed bug not being able to deactivate / unset option -using xy instead of hue-",
+                "de": "- option Hinzugefügt, um die Verwendung der Warteschlange Optional (oder das senden von Kommandos)\n- behoben: Fehler senden unvollständige Befehle als Befehle enthalten bri (#2)\n- behoben: Fehler, die nicht in der Lage zu deaktivieren / unset option -mit xy statt der Farbton-",
+                "ru": "- добавлена возможность использовать очереди по желанию (или отправки команд напрямую)\n- Исправлена ошибка отправки неполных команд, когда команды включают Брай (#2)\n- Исправлена ошибка, не будучи в состоянии отключить опцию-Использовать / отменить ху вместо Гуе-",
+                "pt": "- adicionada opção para usar Fila, opcionalmente, (ou enviar comandos diretamente)\n- corrigido o erro de envio incompleto comandos quando comandos incluem bri (#2)\n- corrigido o bug de não ser capaz de desativar / remover a opção -usando o gráfico de dispersão, em vez de hue-",
+                "nl": "- optie toegevoegd om het gebruik van de Wachtrij optioneel (of het verzenden van commando ' s direct)\n- bug opgelost verzenden van onvolledige opdrachten als opdrachten zijn bri (#2)\n- bug niet kunnen uitschakelen in - / uitschakelen optie -via xy in plaats van hue-",
+                "fr": "- ajout d'une option pour l'utilisation de la File d'attente en option (ou d'envoyer directement des commandes)\n- correction d'un bug d'envoi incomplet des commandes lorsque les commandes sont bri (#2)\n- correction d'un bug de ne pas être en mesure de désactiver / unset option à l'aide de xy au lieu de hue-",
+                "it": "- aggiunta l'opzione per utilizzare la Coda di scelta (o l'invio di comandi direttamente)\n- corretto il bug di invio incompleto comandi quando i comandi includono la bri (#2)\n- corretto il bug di non essere in grado di disattivare / deseleziona l'opzione-usando xy invece di tonalità-",
+                "es": "- añadida la opción de utilizar Cola opcionalmente (o el envío de comandos directamente)\n- corregido el error de enviar incompleta comandos cuando los comandos se incluyen bri (#2)\n- corregido el bug de no poder desactivar / desactivar la opción de utilizar xy en lugar de hue-",
+                "pl": "- dodano możliwość korzystania z kolejki na życzenie (lub wysyłania poleceń bezpośrednio)\n- Naprawiono błąd wysyłania niepełnych poleceń, gdy drużyny zawierają Bry (#2)\n- Naprawiono błąd, nie będąc w stanie wyłączyć opcję-Użyć / anulować hu zamiast Гуе-",
+                "zh-cn": "-增加的选择使用排队任选(或发送命令直接)\n-修正不完整发送命令时命令包括bri(#2)\n-修正错误不能够停/取消的选择-使用x-y而不是顺化"
+            },
             "0.8.6": {
                 "en": "- added support for LightScenes\n- added option to hide deleted devices\n- added support to trigger schedules\n- added support to trigger rules\n- fixed incorrect conversion between bri and level",
                 "de": "- zusätzliche Unterstützung für LightScenes",

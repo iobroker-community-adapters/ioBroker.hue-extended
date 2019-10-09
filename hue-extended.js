@@ -237,11 +237,15 @@ function startAdapter(options)
 					});
 				}
 				
+				// if device is turned off, set brightness to 0
+				if (action == 'on' && value == false && commands.level === undefined && commands.bri === undefined && adapter.config.briWhenOff)
+					Object.assign(commands, { on: false, bri: 0 });
+				
 				// if device is turned on, make sure brightness is not 0
 				if (action == 'on' && value == true && commands.level === undefined && commands.bri === undefined)
 				{
-					let bri = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.bri');
-					commands.bri = bri == 0 ? 254 : bri;
+					let level = library.getDeviceState(appliance.path + '.level');
+					commands.bri = level == 0 ? 254 : Math.max(Math.min(Math.round(level*2.54), 254), 0);
 				}
 				
 				// if .level is changed the change will be applied to .bri instead
@@ -779,7 +783,7 @@ function sendCommand(device, actions)
 	};
 	
 	// send command
-	let lastAction = null;
+	let error = false, lastAction = null;
 	adapter.log.debug('Send command to ' + device.name + ' (' + device.trigger + '): ' + JSON.stringify(actions) + '.');
 	
 	_request(options).then(res =>
@@ -796,7 +800,8 @@ function sendCommand(device, actions)
 		
 		else
 		{
-			lastAction = {'lastAction': { 'timestamp': Math.floor(Date.now()/1000), 'datetime': library.getDateTime(Date.now()), 'lastCommand': JSON.stringify(actions), 'lastResult': JSON.stringify(res), 'error': (JSON.stringify(res).indexOf('error') > -1) }};
+			error = JSON.stringify(res).indexOf('error') > -1;
+			lastAction = {'lastAction': { 'timestamp': Math.floor(Date.now()/1000), 'datetime': library.getDateTime(Date.now()), 'lastCommand': JSON.stringify(actions), 'lastResult': JSON.stringify(res), 'error': error }};
 			readData(device.path, lastAction);
 			readData('info', lastAction);
 			
@@ -807,8 +812,11 @@ function sendCommand(device, actions)
 				if (type == 'error')
 					adapter.log.warn('Error setting ' + msg[type].address + ': ' + msg[type].description);
 				else
-					adapter.log.info('Successfully set ' + Object.keys(msg[type]) + ' on ' + device.name + ' (to ' + Object.values(msg[type]) + ').');
+					adapter.log.debug('Successfully set ' + Object.keys(msg[type]) + ' on ' + device.name + ' (to ' + Object.values(msg[type]) + ').');
 			});
+			
+			if (!error)
+				adapter.log.info('Successfully set ' + device.name + '.');
 		}
 		
 	}).catch(err =>
