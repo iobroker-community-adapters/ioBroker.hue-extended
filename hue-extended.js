@@ -238,14 +238,19 @@ function startAdapter(options)
 				}
 				
 				// if device is turned off, set brightness to 0
+				// NOTE: Brightness is a scale from 1 (the minimum the light is capable of) to 254 (the maximum).
 				if (action == 'on' && value == false && commands.level === undefined && commands.bri === undefined && adapter.config.briWhenOff)
-					Object.assign(commands, { on: false, bri: 0 });
+				{
+					library.setDeviceState(appliance.path + '.real_bri', library.getDeviceState(appliance.path + '.bri'));
+					library._setValue(appliance.path + '.bri', 0);
+					library._setValue(appliance.path + '.level', 0);
+				}
 				
 				// if device is turned on, make sure brightness is not 0
 				if (action == 'on' && value == true && commands.level === undefined && commands.bri === undefined)
 				{
-					let level = library.getDeviceState(appliance.path + '.level');
-					commands.bri = level == 0 ? 254 : Math.max(Math.min(Math.round(level*2.54), 254), 0);
+					let bri = library.getDeviceState(appliance.path + '.real_bri');
+					commands.bri = bri == 0 ? 254 : bri;
 				}
 				
 				// if .level is changed the change will be applied to .bri instead
@@ -634,6 +639,15 @@ function readData(key, data, channel)
 				data._xyz = _color.rgb.xyz(data._rgb.split(',')).toString();
 				data._hex = _color.rgb.hex(data._rgb.split(','));
 			}
+			
+			// set brightness to 0 when device is off
+			if (data.bri !== undefined && data.on == false && adapter.config.briWhenOff)
+			{
+				data.bri = 0;
+				data.level = 0;
+			}
+			else if (data.bri !== undefined && data.on == true && adapter.config.briWhenOff)
+				library.setDeviceState(key.replace('.state', '.action') + '.real_bri', data.bri);
 			
 			// get allOn / anyOn state
 			if (channel == 'lights' && data.on)
