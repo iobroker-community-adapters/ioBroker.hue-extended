@@ -198,7 +198,7 @@ function startAdapter(options)
 		}
 		
 		// handle lights or groups
-		else if (appliance.type == 'lights' || (appliance.type == 'groups'))
+		else if (appliance.type == 'lights' || appliance.type == 'groups')
 		{
 			// go through commands, modify if required and add to queue
 			let value;
@@ -241,7 +241,7 @@ function startAdapter(options)
 				// NOTE: Brightness is a scale from 1 (the minimum the light is capable of) to 254 (the maximum).
 				if (action == 'on' && value == false && commands.level === undefined && commands.bri === undefined && adapter.config.briWhenOff)
 				{
-					library.setDeviceState(appliance.path + '.real_bri', library.getDeviceState(appliance.path + '.bri'));
+					library.setDeviceState(appliance.path + '.real_bri', library.getDeviceState(appliance.path + '.bri') || 0);
 					library._setValue(appliance.path + '.bri', 0);
 					library._setValue(appliance.path + '.level', 0);
 				}
@@ -249,7 +249,7 @@ function startAdapter(options)
 				// if device is turned on, make sure brightness is not 0
 				if (action == 'on' && value == true && commands.level === undefined && commands.bri === undefined)
 				{
-					let bri = library.getDeviceState(appliance.path + '.real_bri');
+					let bri = library.getDeviceState(appliance.path + '.real_bri') || 0;
 					commands.bri = bri == 0 ? 254 : bri;
 				}
 				
