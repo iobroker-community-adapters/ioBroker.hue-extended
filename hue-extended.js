@@ -11,8 +11,9 @@ const _hueColor = require('./lib/hueColor.js');
  * internal libraries
  */
 const Library = require(__dirname + '/lib/library.js');
-const _NODES = require(__dirname + '/_NODES.js');
-const _SUBSCRIPTIONS = require(__dirname + '/_SUBSCRIPTIONS.js');
+const _NODES = require(__dirname + '/_NODES.js').STATES;
+const _MAPPING = require(__dirname + '/_NODES.js').MAPPING;
+const _SUBSCRIPTIONS = require(__dirname + '/_NODES.js').SUBSCRIPTIONS;
 
 
 /*
@@ -230,41 +231,51 @@ function startAdapter(options)
 		// handle lights or groups
 		else if (appliance.type == 'lights' || appliance.type == 'groups')
 		{
+			// handle color spaces
+			let value = commands[action];
+			let rgb = null, hsv = null;
+			if (action == 'rgb')
+			{
+				rgb = value.split(',');
+				hsv = _color.rgb.hsv(rgb);
+			}
+			
+			else if (action == 'hsv')
+				hsv = value.split(',');
+			
+			else if (action == 'cmyk')
+				hsv = _color.cmyk.hsv(value.split(','));
+			
+			else if (action == 'xyz')
+				hsv = _color.xyz.hsv(value.split(','));
+			
+			else if (action == 'hex')
+				hsv = _color.hex.hsv(value.split(','));
+			
+			if (hsv !== null)
+			{
+				delete commands[action];
+				commands = {
+					'hue': hsv[0],
+					'sat': Math.max(Math.min(Math.round(hsv[1]*2.54), 254), 0),
+					'bri': Math.max(Math.min(Math.round(hsv[2]*2.54), 254), 0),
+					...commands
+				};
+			}
+			
 			// go through commands, modify if required and add to queue
-			let value;
 			for (action in commands)
 			{
 				value = commands[action];
 				
-				// handle color spaces
-				let rgb = null, hsv = null;
-				if (action == '_rgb')
+				// remap states back due to standardization
+				let remapped = Object.values(_MAPPING).indexOf(action);
+				if (remapped > -1)
 				{
-					rgb = value.split(',');
-					hsv = _color.rgb.hsv(rgb);
-				}
-				
-				else if (action == '_hsv')
-					hsv = value.split(',');
-				
-				else if (action == '_cmyk')
-					hsv = _color.cmyk.hsv(value.split(','));
-				
-				else if (action == '_xyz')
-					hsv = _color.xyz.hsv(value.split(','));
-				
-				else if (action == '_hex')
-					hsv = _color.hex.hsv(value.split(','));
-				
-				if (hsv !== null)
-				{
+					let key = Object.keys(_MAPPING)[remapped];
+					commands[key] = commands[action];
 					delete commands[action];
-					Object.assign(commands,
-					{
-						hue: Math.round(hsv[0]/360*65535),
-						sat: Math.max(Math.min(Math.round(hsv[1]/2.54), 100), 0),
-						bri: Math.max(Math.min(Math.round(hsv[2]/2.54), 100), 0)
-					});
+					action = key;
 				}
 				
 				// if device is turned off, set brightness to 0
@@ -283,7 +294,7 @@ function startAdapter(options)
 					commands.bri = bri == 0 ? 254 : bri;
 				}
 				
-				// if .level is changed the change will be applied to .bri instead
+				// if .level is changed the change will be applied to .brightness instead
 				if (action == 'level' && value > 0)
 				{
 					delete commands[action];
@@ -301,12 +312,12 @@ function startAdapter(options)
 					Object.assign(commands, { on: false }); // , bri: 0
 				}
 				
-				// if .hue_degrees is changed, change hue
-				if (action == 'hue_degrees')
-				{
-					delete commands[action];
-					commands.hue = Math.round(value / 360 * 65535);
-				}
+				// convert value ranges
+				if (action == 'hue' && value <= 360)
+					commands.hue = Math.max(Math.min(Math.round(value / 360 * 65535), 65535), 0);
+				
+				if (action == 'ct')
+					commands.ct = Math.max(Math.min(Math.round(1 / value * 1000000), 500), 153);
 				
 				// convert HUE to XY
 				if (commands.hue !== undefined && adapter.config.hueToXY && library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.manufacturername') != 'Philips')
@@ -602,7 +613,7 @@ function readData(key, data, channel)
 				data = { 'trigger': false, 'options': JSON.stringify(data) };
 			}
 			
-			// add additional states
+			// add additional states level, scene, _commands and lastAction
 			if (data.bri !== undefined)
 			{
 				data.level = data.bri > 0 ? Math.max(Math.min(Math.round(data.bri/2.54), 100), 0) : 0;
@@ -625,17 +636,22 @@ function readData(key, data, channel)
 				);
 			}
 			
+			// convert value ranges
+			if (data.hue !== undefined)
+				data.hue = Math.max(Math.min(Math.round(data.hue / 65535 * 360), 360), 0);
+			
+			if (data.ct !== undefined)
+				data.ct = Math.max(Math.min(Math.round(1 / data.ct * 1000000), 6500), 2000);
+			
 			// add additional color spaces
 			if (data.bri !== undefined && data.sat !== undefined && data.hue !== undefined)
 			{
-				data.hue_degrees = Math.round(data.hue / 65535 * 360);
 				data.transitiontime = data.transitiontime || 4;
-				
-				data._hsv = data.hue_degrees + ','+ (data.sat > 0 ? Math.max(Math.min(Math.round(data.sat/2.54), 100), 0) : 0) + ',' + data.level;
-				data._rgb = _color.hsv.rgb(data._hsv.split(',')).toString();
-				data._cmyk = _color.rgb.cmyk(data._rgb.split(',')).toString();
-				data._xyz = _color.rgb.xyz(data._rgb.split(',')).toString();
-				data._hex = _color.rgb.hex(data._rgb.split(','));
+				data.hsv = data.hue + ','+ (data.sat > 0 ? Math.max(Math.min(Math.round(data.sat/2.54), 100), 0) : 0) + ',' + data.level;
+				data.rgb = _color.hsv.rgb(data.hsv.split(',')).toString();
+				//data.cmyk = _color.rgb.cmyk(data.rgb.split(',')).toString();
+				//data.xyz = _color.rgb.xyz(data.rgb.split(',')).toString();
+				data.hex = _color.rgb.hex(data.rgb.split(','));
 			}
 			
 			// set brightness to 0 when device is off
@@ -653,6 +669,16 @@ function readData(key, data, channel)
 			{
 				data.action = { 'trigger': false };
 				data.uid = key.substr(key.lastIndexOf('.')+1);
+			}
+			
+			// remap states for standardization (see https://github.com/Zefau/ioBroker.hue-extended/issues/1 and https://forum.iobroker.net/post/298019)
+			for (let state in _MAPPING)
+			{
+				if (data[state] !== undefined)
+				{
+					data[_MAPPING[state]] = data[state];
+					delete data[state];
+				}
 			}
 			
 			// read nested data

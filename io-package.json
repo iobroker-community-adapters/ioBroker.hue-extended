@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "hue-extended",
-        "version": "0.9.0",
+        "version": "1.0.0-rc.1",
         "title": "Philips Hue Extended",
         "desc": {
             "en": "Integration of all your Philips Hue Devices with your ioBroker",
@@ -16,8 +16,11 @@
             "zh-cn": "一体化的所有飞利浦色调设备与你ioBroker"
         },
         "news": {
+            "1.0.0": {
+                "en": "- BREAKING CHANGE: changed certain objects due to standardization\n- fixed incorrect conversion between color spaces (rgb, hex, etc.)"
+            },
             "0.9.0": {
-                "en": ""
+                "en": "- BREAKING CHANGE: changed grouping of scenes and added option to choose how objects are mapping (either scenes.<group>.<scene>.objects or scenes.<scene>.<group>.objects)\n- retrieving group for all-lights directly from Hue Bridge API (instead of assembling through states)\n- added option to delete outdated devices (gargabe collector)"
             },
             "0.8.8": {
                 "en": "- added option to set level to 0 when device is turned off\n- fix {\"on\":true,\"bri\":null} when device is turned on\n- reduced log messages for successful applied actions",
