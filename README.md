@@ -31,6 +31,11 @@ Connect your Philips Hue Lights with ioBroker.
 
 ## Changelog
 
+### 0.9.0 (2019-10-13)
+- (Zefau) __BREAKING CHANGE__ changed grouping of scenes and added option to choose how objects are mapping (either `scenes.<group>.<scene>.objects` or `scenes.<scene>.<group>.objects`)
+- (Zefau) retrieving group for all-lights directly from Hue Bridge API (instead of assembling through states)
+- (Zefau) added option to delete outdated devices (gargabe collector)
+
 ### 0.8.8 (2019-10-09)
 - (Zefau) added option to set level to 0 when device is turned off
 - (Zefau) fix `{"on":true,"bri":null}` when device is turned on

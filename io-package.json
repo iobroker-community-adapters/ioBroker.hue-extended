@@ -1,21 +1,36 @@
 {
     "common": {
         "name": "hue-extended",
-        "version": "0.8.8",
+        "version": "0.9.0",
         "title": "Philips Hue Extended",
         "desc": {
-            "en": "Integration of your Philips Hue Lights with your ioBroker",
-            "de": "Die Integration der Philips Hue Lampen mit Ihrem ioBroker",
-            "ru": "Интеграция вашего Philips оттенок света с ioBroker",
-            "pt": "A integração de suas Philips Hue Luzes com seu ioBroker",
-            "nl": "Integratie van je Philips Hue-Lampen met uw ioBroker",
-            "fr": "L'intégration de votre Philips Hue Lumières avec votre ioBroker",
-            "it": "L'integrazione di Hue di Philips illumina con il tuo ioBroker",
-            "es": "Integración de tu Philips Hue Luces con su ioBroker",
-            "pl": "Integracja twojej firmy Philips barwa światła z ioBroker",
-            "zh-cn": "融入你的飞利浦色灯你ioBroker"
+            "en": "Integration of all your Philips Hue Devices with your ioBroker",
+            "de": "Integration aller Philips Hue Geräte mit Ihrem ioBroker",
+            "ru": "Интеграция всех ваших устройств Philips Хюэ с ioBroker",
+            "pt": "A integração de todos os seus Philips Hue Dispositivos com a sua ioBroker",
+            "nl": "Integratie van al uw Philips Hue-Apparaten met uw ioBroker",
+            "fr": "L'intégration de l'ensemble de votre Philips Hue Appareils avec votre ioBroker",
+            "it": "L'integrazione di tutte le Philips Hue Dispositivi con il ioBroker",
+            "es": "La integración de todos sus Philips Hue Dispositivos con la ioBroker",
+            "pl": "Integracja wszystkich urządzeń Philips Hue z ioBroker",
+            "zh-cn": "一体化的所有飞利浦色调设备与你ioBroker"
         },
         "news": {
+            "0.9.0": {
+                "en": ""
+            },
+            "0.8.8": {
+                "en": "- added option to set level to 0 when device is turned off\n- fix {\"on\":true,\"bri\":null} when device is turned on\n- reduced log messages for successful applied actions",
+                "de": "- Hinzugefügt: option zum setzen der level auf 0, wenn das Gerät ausgeschaltet ist\n- fix {\"on\":true,\"bri\":null}, wenn das Gerät eingeschaltet ist\n- reduziert die log Nachrichten für erfolgreich angewandte Maßnahmen",
+                "ru": "- добавлена опция для установки уровня 0, когда устройство выключено\n- исправить {\"о\":правда,\"Брай\":нуль}, когда устройство включено\n- уменьшена сообщения журнала для успешных прикладных действий",
+                "pt": "- adicionada opção para definir o nível para 0 quando o dispositivo está desligado\n- correção {\"on\":true,\"bri\":null} quando o dispositivo for ligado\n- redução de mensagens de log para o sucesso das ações aplicadas",
+                "nl": "- optie toegevoegd om het niveau op 0 wanneer het apparaat is uitgeschakeld\n- fix {\"on\":true,\"bri\":null} wanneer het apparaat is ingeschakeld\n- verminderde berichten in het logboek voor succesvol toegepast acties",
+                "fr": "- ajout d'une option pour définir le niveau à 0 lorsque l'appareil est éteint\n- fix {\"à\":true,\"bri\":null} lorsque l'appareil est allumé\n- réduit les messages de journal pour la réussite des actions appliquées",
+                "it": "- aggiunta l'opzione per impostare il livello a 0 quando il dispositivo è spento\n- fix {\"a\":true,\"bri\":null} quando il dispositivo è acceso\n- ridotti i messaggi di log per il successo delle azioni applicate",
+                "es": "- añadida la opción para ajustar el nivel a 0 cuando el dispositivo está apagado\n- revisión {\"a\":true,\"bri\":null} cuando el dispositivo está encendido\n- reducción de los mensajes de registro para el éxito de las medidas aplicadas",
+                "pl": "- dodano opcję, aby ustawić poziom 0, gdy urządzenie jest wyłączone\n- naprawić {\"o\":true,\"Bry\":null}, gdy urządzenie jest włączone\n- zmniejszona wiadomości dziennika do udanych stosowanych działań",
+                "zh-cn": "-增加选择来设定的水平为0时装置被关闭\n-修复{\"在\":true,\"bri\":null}当设备开机\n-减少的日志信息对于成功应用的行动"
+            },
             "0.8.7": {
                 "en": "- added option to use Queue optionally (or sending commands directly)\n- fixed bug sending incomplete commands when commands include bri (#2)\n- fixed bug not being able to deactivate / unset option -using xy instead of hue-",
                 "de": "- option Hinzugefügt, um die Verwendung der Warteschlange Optional (oder das senden von Kommandos)\n- behoben: Fehler senden unvollständige Befehle als Befehle enthalten bri (#2)\n- behoben: Fehler, die nicht in der Lage zu deaktivieren / unset option -mit xy statt der Farbton-",
@@ -275,7 +290,8 @@
         "syncLights": true,
         "syncGroups": true,
         "hueToXY": true,
-        "useQueue": true
+        "useQueue": true,
+		"sceneNaming": "room"
     },
     "objects": [],
     "instanceObjects": []

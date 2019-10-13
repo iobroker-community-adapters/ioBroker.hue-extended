@@ -20,11 +20,10 @@ const _SUBSCRIPTIONS = require(__dirname + '/_SUBSCRIPTIONS.js');
  */
 let adapter;
 let library;
-let unloaded, retry = 0;
-let dutyCycle, refreshCycle;
+let unloaded, delay = 0, retry = {};
+let garbageCollector, refreshCycle;
 
 let bridge, device;
-let GLOBALS = {};
 let DEVICES = {};
 let QUEUE = {};
 
@@ -63,25 +62,56 @@ function startAdapter(options)
 		// retrieve all values from states to avoid message "Unsubscribe from all states, except system's, because over 3 seconds the number of events is over 200 (in last second 0)"
 		adapter.getStates(adapterName + '.' + adapter.instance + '.*', (err, states) =>
 		{
-			if (err || !states) return;
+			library.set(Library.CONNECTION, true);
 			
+			// set current states from objects
 			for (let state in states)
 				library.setDeviceState(state.replace(adapterName + '.' + adapter.instance + '.', ''), states[state] && states[state].val);
-		
+			
 			// retrieve payload from Hue Bridge
-			getPayload(adapter.config.refresh || 30);
+			['groups', 'lights', 'config', 'resourcelinks', 'rules', 'scenes', 'schedules', 'sensors'].forEach(channel =>
+			{
+				// create channel
+				library.set({
+					'node': channel,
+					'role': 'channel',
+					'description': library.ucFirst(channel.substr(channel.lastIndexOf('.')+1))
+				});
+				
+				// syncing info for channel
+				library.set({ ...library.getNode('syncing'), 'node': channel + '.syncing' }, false);
+				library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' + library.ucFirst(channel) }, false);
+				
+				// get payload
+				getPayload(channel, adapter.config.refresh || 30);
+			});
+			
+			// add states for last action
+			readData(
+				'info',
+				{
+					'lastAction': {
+						'timestamp': library.getDeviceState('info.lastAction.timestamp'),
+						'datetime': library.getDeviceState('info.lastAction.datetime'),
+						'lastCommand': library.getDeviceState('info.lastAction.lastCommand'),
+						'lastResult': library.getDeviceState('info.lastAction.lastResult'),
+						'error': library.getDeviceState('info.lastAction.error')
+					}
+				},
+				''
+			);
 		});
 		
 		// delete old states (which were not updated recently)
-		clearTimeout(dutyCycle);
-		dutyCycle = setTimeout(function dutyCycleRun()
+		clearTimeout(garbageCollector);
+		garbageCollector = setTimeout(function runGarbageCollector()
 		{
-			if (!unloaded)
+			if (!unloaded && adapter.config.garbageCollector)
 			{
-				adapter.log.debug('Running Duty Cycle...');
-				library.runDutyCycle(adapterName + '.' + adapter.instance, Math.floor(Date.now()/1000));
-				adapter.log.debug('Duty Cycle finished.');
-				dutyCycle = setTimeout(dutyCycleRun, 4*60*60*1000);
+				adapter.log.debug('Running Garbage Collector...');
+				library.runGarbageCollector('device', true, Date.now(), true, 24*60*60);
+				adapter.log.debug('Garbage Collector finished.');
+				garbageCollector = setTimeout(runGarbageCollector, 4*60*60*1000); // run every 4h
 			}
 			
 		}, 60*1000);
@@ -346,7 +376,7 @@ function startAdapter(options)
 			unloaded = true;
 			library.resetStates();
 			clearTimeout(refreshCycle);
-			clearTimeout(dutyCycle);
+			clearTimeout(garbageCollector);
 			
 			callback();
 		}
@@ -375,56 +405,60 @@ else
  *
  *
  */
-function getPayload(refresh)
+function getPayload(channel, refresh)
 {
-	_request({ uri: bridge, json: true }).then(payload =>
+	// retrieve only initially and if syncing is on
+	if (DEVICES[channel] && !adapter.config['sync' + library.ucFirst(channel)])
+		return false;
+	
+	// add little delay (in ms) for each channel so not all pull at once
+	delay = (delay + 100)%800;
+	
+	// get data from bridge
+	_request({ uri: bridge + channel, json: true }).then(payload =>
 	{
 		if (!payload || (payload[0] && payload[0].error))
 		{
-			adapter.log.error('Error retrieving data from Hue Bridge' + (payload[0] && payload[0].error ? ': ' + payload[0].error.description : '!'));
+			adapter.log.error('Error retrieving channel ' + channel + ' from Hue Bridge' + (payload[0] && payload[0].error ? ': ' + payload[0].error.description : '!'));
 			return false;
 		}
 		
-		retry = 0;
-		
-		// add meta data
-		library.set({ ...library.getNode('datetime'), 'node': 'info.datetime' }, library.getDateTime(Date.now()));
-		library.set({ ...library.getNode('timestamp'), 'node': 'info.timestamp' }, Math.floor(Date.now()/1000));
-		library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' }, true);
-		
-		// add states for last action
-		readData(
-			'info',
-			{
-				'lastAction': {
-					'timestamp': library.getDeviceState('info.lastAction.timestamp'),
-					'datetime': library.getDeviceState('info.lastAction.datetime'),
-					'lastCommand': library.getDeviceState('info.lastAction.lastCommand'),
-					'lastResult': library.getDeviceState('info.lastAction.lastResult'),
-					'error': library.getDeviceState('info.lastAction.error')
-				}
-			},
-			''
-		);
-		
-		// go through channels
-		for (let channel in payload)
+		// sync all groups
+		if (channel == 'groups')
 		{
-			// create channel
-			library.set({
-				node: channel,
-				role: 'channel',
-				description: library.ucFirst(channel.substr(channel.lastIndexOf('.')+1))
+			_request({ uri: bridge + channel + '/0', json: true }).then(pl =>
+			{
+				pl.name = 'All Lights';
+				
+				// index
+				DEVICES[channel] = JSON.parse(JSON.stringify(payload));
+				DEVICES[channel][0] = JSON.parse(JSON.stringify(pl));
+				
+				// only write if syncing is on
+				if (adapter.config['sync' + library.ucFirst(channel)])
+					addBridgeData(channel, { '0': pl });
 			});
+		}
+		else
+			DEVICES[channel] = JSON.parse(JSON.stringify(payload)); // copy and index payload
+		
+		// only write if syncing is on
+		if (adapter.config['sync' + library.ucFirst(channel)])
+		{
+			// update overall syncing information
+			library.set({ ...library.getNode('datetime'), 'node': 'info.datetime' }, library.getDateTime(Date.now()));
+			library.set({ ...library.getNode('timestamp'), 'node': 'info.timestamp' }, Math.floor(Date.now()/1000));
+			library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' }, true);
+			library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' + library.ucFirst(channel) }, true);
+			library.set({ ...library.getNode('syncing'), 'node': channel + '.syncing' }, true);
 			
-			if (adapter.config['sync' + library.ucFirst(channel)])
-				addBridgeData(channel, payload[channel]);
-			
-			else
-				library.set({ ...library.getNode('syncing'), 'node': channel + '.syncing' }, false);
+			// add to states
+			addBridgeData(channel, payload);
 		}
 		
 		// refresh interval
+		retry[channel] = 0;
+		
 		if (refresh > 0 && refresh < 3)
 		{
 			adapter.log.warn('Due to performance reasons, the refresh rate can not be set to less than 3 seconds. Using 3 seconds now.');
@@ -432,12 +466,14 @@ function getPayload(refresh)
 		}
 		
 		if (refresh > 0 && !unloaded)
-			refreshCycle = setTimeout(getPayload, refresh*1000, refresh);
+			refreshCycle = setTimeout(getPayload, refresh*1000+delay, channel, refresh);
 		
 	}).catch(err =>
 	{
 		// Indicate that tree is not synchronized anymore
 		library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' }, false);
+		library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' + library.ucFirst(channel) }, false);
+		library.set({ ...library.getNode('syncing'), 'node': channel + '.syncing' }, false);
 		
 		// ERROR
 		let error = err.message;
@@ -455,15 +491,17 @@ function getPayload(refresh)
 			error = 'Socket hang up';
 		
 		// TRY AGAIN OR STOP ADAPTER
-		if (retry < 10)
+		if (!retry[channel] || retry[channel] < 10)
 		{
-			adapter.log.debug('Error connecting to Hue Bridge: ' + error + '. ' + (retry > 0 ? 'Retried ' + retry + 'x so far. ' : '') + 'Try again in 10 seconds..');
-			retry++;
-			setTimeout(getPayload, 10*1000, refresh);
+			adapter.log.debug('Error connecting while retrieving channel ' + channel + ': ' + error + '. ' + (retry[channel] > 0 ? 'Already retried ' + retry[channel] + 'x so far. ' : '') + 'Try again in 10 seconds..');
+			//adapter.log.debug(err.message);
+			//adapter.log.debug(JSON.stringify(err.stack));
+			retry[channel] = !retry[channel] ? 1 : retry[channel]+1;
+			refreshCycle = setTimeout(getPayload, 10*1000+delay, channel, refresh);
 		}
 		else
 		{
-			library.terminate('Error connecting to Hue Bridge: ' + error + '. ' + (retry > 0 ? 'Retried ' + retry + 'x already, thus connection closed now.' : 'Connection closed.') + ' See debug log for details.');
+			library.terminate('Error connecting while retrieving channel ' + channel + ': ' + error + '. ' + (retry[channel] > 0 ? 'Already retried ' + retry[channel] + 'x in total, thus connection closed now.' : 'Connection closed.') + ' See debug log for details.');
 			adapter.log.debug(err.message);
 			adapter.log.debug(JSON.stringify(err.stack));
 		}
@@ -476,48 +514,6 @@ function getPayload(refresh)
  */
 function addBridgeData(channel, data)
 {
-	// index
-	DEVICES[channel] = JSON.parse(JSON.stringify(data));
-	
-	// reset global states
-	if (channel == 'lights')
-	{
-		GLOBALS.allOn = false;
-		GLOBALS.anyOn = false;
-	}
-	
-	// add "all" group
-	else if (channel == 'groups')
-	{
-		data[0] = {
-			"name": "All Lights",
-			"type": "LightGroup",
-			"action":{
-				"on": false,
-				"bri": 0,
-				"hue": 0,
-				"sat": 0,
-				"effect": "none",
-				"xy":[
-					0,
-					0
-				],
-				"ct": 0,
-				"alert": "lselect",
-				"colormode": "xy"
-			}
-		};
-		
-		if (DEVICES['lights'] !== undefined)
-		{
-			data[0].lights = Object.keys(DEVICES['lights']);
-			data[0].state = {
-				"all_on": GLOBALS.allOn || false,
-				"any_on": GLOBALS.anyOn || false
-			};
-		}
-	}
-	
 	// add meta data
 	library.set({ ...library.getNode('datetime'), 'node': channel + '.datetime' }, library.getDateTime(Date.now()));
 	library.set({ ...library.getNode('timestamp'), 'node': channel + '.timestamp' }, Math.floor(Date.now()/1000));
@@ -553,25 +549,27 @@ function readData(key, data, channel)
 	let node = get(key.split('.'));
 	
 	// loop nested data
-	if (data !== null && typeof data == 'object' && !(Array.isArray(data) && (key.substr(-2) == 'xy' || key.substr(-6) == 'lights')))
+	if (data !== null && typeof data == 'object' && !(Array.isArray(data) && (key.substr(-2) == 'xy' || key.substr(-6) == 'lights' || key.substr(-7) == 'sensors')))
 	{
 		// create channel
 		if (Object.keys(data).length > 0)
 		{
+			let description = false;
+			
+			// add last seen date
+			if (data.name)
+				data.lastSeen = library.getDateTime(Date.now());
+			
 			// use uid and name instead of only uid
 			let id = false;
-			if (data.name && key.indexOf('config') == -1)
+			if (data.name && key.indexOf('config') == -1 && key.indexOf('scenes') == -1)
 			{
 				data.uid = key.substr(key.lastIndexOf('.')+1);
 				id = library.clean(data.name, true, '_');
 				let uid = ('00' + data.uid).substr(-3);
 				
-				// Scenes
-				if (key.indexOf('scenes') > -1)
-					key = key.replace('.' + data.uid, '.' + id);
-				
 				// append UID
-				else if (adapter.config.nameId == 'append')
+				if (adapter.config.nameId == 'append')
 					key = key.replace('.' + data.uid, '.' + id + '-' + data.uid);
 					
 				// prepend UID
@@ -579,7 +577,7 @@ function readData(key, data, channel)
 					key = key.replace('.' + data.uid, '.' + uid + '-' + id);
 			}
 			
-			// change state for schedules
+			// change state for rules
 			if (channel == 'rules' && key.substr(-7) == 'actions')
 			{
 				key = key.replace('.actions', '.action');
@@ -641,31 +639,21 @@ function readData(key, data, channel)
 			}
 			
 			// set brightness to 0 when device is off
+			let real_bri = library.getDeviceState(key.replace('.state', '.action') + '.real_bri');
 			if (data.bri !== undefined && data.on == false && adapter.config.briWhenOff)
 			{
 				data.bri = 0;
 				data.level = 0;
 			}
-			else if (data.bri !== undefined && data.on == true && adapter.config.briWhenOff)
+			else if (data.bri !== undefined && data.on == true && real_bri != data.bri && adapter.config.briWhenOff)
 				library.setDeviceState(key.replace('.state', '.action') + '.real_bri', data.bri);
-			
-			// get allOn / anyOn state
-			if (channel == 'lights' && data.on)
-			{
-				GLOBALS.allOn = GLOBALS.allOn && data.on;
-				GLOBALS.anyOn = GLOBALS.anyOn || data.on;
-			}
 			
 			// add scene trigger button as additional state (only to scenes)
 			if (data.type == 'GroupScene' || data.type == 'LightScene')
+			{
 				data.action = { 'trigger': false };
-			
-			// create channel
-			library.set({
-				node: key,
-				role: 'channel',
-				description: id || RegExp('\.[0-9]{1-3}$').test(key.substr(-4)) ? data.name : library.ucFirst(key.substr(key.lastIndexOf('.')+1))
-			});
+				data.uid = key.substr(key.lastIndexOf('.')+1);
+			}
 			
 			// read nested data
 			for (let nestedKey in data)
@@ -675,17 +663,76 @@ function readData(key, data, channel)
 				// create sub channel for scenes
 				if (key.indexOf('scenes') > -1 && ((data.type == 'GroupScene' && data.group) || (data.type == 'LightScene' && data.lights && data.lights[0])))
 				{
-					pathKey = '.' + data.type + '-' + (data.group || data.lights[0]) + '_' + data.uid;
+					// skips if groups are not indexed so far
+					if (data.type == 'GroupScene' && (!DEVICES['groups'] || !DEVICES['groups'][data.group]))
+					{
+						adapter.log.silly('Groups not yet given, thus scene ' + data.name + ' (' + data.uid + ') skipped for now.');
+						return false;
+					}
+					
+					// LightScene
+					let pathDescription = '';
+					if (data.type == 'LightScene')
+					{
+						key = key.replace('.' + data.uid, adapter.config.sceneNaming == 'scene' ? '.' + id : '.LightScenes');
+						pathKey = '.' + library.clean(data.name, true, '_') + '_' + data.lights.join('-');
+						
+						description = 'Light Scenes';
+						pathDescription = 'Scene ' + data.name + ' for ' + (data.lights.length > 1 ? 'lights ' + data.lights.join(', ') : 'light ' + data.lights[0]);
+					}
+					
+					// GroupScene
+					else
+					{
+						let groupId = library.clean(DEVICES['groups'][data.group].name, true, '_');
+						let groupUid = DEVICES['groups'][data.group].uid;
+						let group = adapter.config.nameId == 'append' ? groupId + '-' + groupUid : ('00' + groupUid).substr(-3) + '-' + groupId;
+						let scene = library.clean(data.name, true, '_');
+						
+						// scene.group
+						if (adapter.config.sceneNaming == 'scene')
+						{
+							key = key.replace('.' + data.uid, '.' + scene);
+							pathKey = '.' + group;
+							description = 'Scene ' + data.name;
+							pathDescription = 'Group ' + DEVICES['groups'][data.group].name;
+						}
+						
+						// group.scene
+						else
+						{
+							key = key.replace('.' + data.uid, '.' + group);
+							pathKey = '.' + scene;
+							description = 'Scenes for Group ' + DEVICES['groups'][data.group].name;
+							pathDescription = 'Scene ' + data.name;
+						}
+					}
+					
+					// Duplicates
+					let uid = library.getDeviceState(key + pathKey + '.uid');
+					if (uid && uid != data.uid)
+						pathKey += '_' + data.uid;
+					
+					// create channel for group and scene
 					library.set({
-						node: key + pathKey,
-						role: 'channel',
-						description: data.type + ' ' + (data.group || data.lights[0])
-					});
+							'node': key + pathKey,
+							'role': 'channel',
+							'description': pathDescription
+						},
+						null, { 'properties': { 'device': true } });
 				}
 				
 				// read data
 				readData(key + pathKey + '.' + nestedKey, data[nestedKey], channel);
 			}
+			
+			// create channel
+			library.set({
+					'node': key,
+					'role': 'channel',
+					'description': description || id && data.name || library.ucFirst(key.substr(key.lastIndexOf('.')+1))
+				},
+				null, { 'properties': { 'device': true } });
 		}
 	}
 	
@@ -702,10 +749,11 @@ function readData(key, data, channel)
 		{
 			key = key.replace('.state.', '.action.').replace('.config.', '.action.');
 			library.set({
-				node: key.substr(0, key.indexOf('.action.')+7),
-				role: 'channel',
-				description: 'Action'
-			});
+					node: key.substr(0, key.indexOf('.action.')+7),
+					role: 'channel',
+					description: 'Action'
+				},
+				null, { 'properties': { 'device': true } });
 		}
 		
 		// set state
@@ -722,7 +770,10 @@ function readData(key, data, channel)
 					}
 				)
 			},
-			data
+			data,
+			{
+				'properties': { 'device': true }
+			}
 		);
 		
 		// subscribe to states
@@ -759,18 +810,13 @@ function convertNode(node, data)
  */
 function get(node)
 {
-	let path = node.join('.');
-	node.splice(1,1);
+	let ns = node.shift() || ''; // lights, groups, scenes, etc.
 	
-	return _NODES[library.clean(path)] || _NODES[library.clean(node.join('.'))] || _NODES[library.clean(node[node.length-1])] || { 'description': '(no description given)', 'role': 'text', 'type': 'string', 'convert': null };
-}
-
-/**
- *
- */
-function runCommand()
-{
-	
+	return _NODES[library.clean(ns + '.' + node.join('.'))] || // from --lights.<light>.name-- it searches the whole string
+			_NODES[library.clean(ns + '.' + node.slice(1).join('.'))] || // from --lights.<light>.name-- it removes <light> and searches --lights.name--
+			_NODES[library.clean(ns + '.' + node.slice(2).join('.'))] || // from --scenes.<group>.<scene>.name-- it removes <group> and <scene> and searches --scenes.name--
+			_NODES[library.clean(node[node.length-1])] || // from --lights.<light>.name-- it removes everything except the state and searches --name--
+			{ 'description': '(no description given)', 'role': 'text', 'type': 'string', 'convert': null };
 }
 
 /**

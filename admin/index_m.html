@@ -24,6 +24,7 @@
 		//initModal(settings.modal);
 		if (!settings.nameId) settings.nameId = 'prepend';
 		
+		//
 		['Groups', 'Resourcelinks', 'Scenes', 'Schedules', 'Rules', 'Sensors'].forEach(function(item)
 		{
 			$('body').on('change', '#sync' + item, function()
@@ -197,12 +198,12 @@
 				</div>
 			</div>
 			
-			<!-- Other & Events -->
+			<!-- Sync -->
 			<div class="row">
 				<div class="col s12 m12">
 					<div class="row" style="margin-bottom: 0">
 						<div class="col s12 m12">
-							<p class="translate title">other</p>
+							<p class="translate title">sync</p>
 						</div>
 					</div>
 					<div class="row box" style="margin-bottom: 0">
@@ -290,6 +291,74 @@
 							</div>
 							<div class="row">
 								<div class="input-field col s12 m12">
+									<div style="display: block">
+										<p class="subtitle translate">garbageCollectorInfo</p>
+										
+										<input class="value" id="garbageCollector" type="checkbox" />
+										<label for="garbageCollector" class="translate">garbageCollector</label>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col s5 m5">
+							<div class="row">
+								<div class="input-field col s12 m12">
+									<div style="display: block">
+										<p class="subtitle translate">nameIdInfo</p>
+										
+										<label style="display: block">
+											<input name="nameId" id="nameIdPrepend" class="value" value="prepend" type="radio" />
+											<span class="translate">nameIdPrepend</span>
+										</label>
+										
+										<label style="display: block">
+											<input name="nameId" id="nameIdAppend" class="value" value="append" type="radio" />
+											<span class="translate">nameIdAppend</span>
+										</label>
+										
+										<!--
+										<div style="margin-top: 5px">
+											<input class="value" id="onlyForDuplicates" type="checkbox" />
+											<label for="onlyForDuplicates" class="translate">onlyForDuplicates</label>
+										</div>
+										-->
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="input-field col s12 m12">
+									<div style="display: block">
+										<p class="subtitle translate">sceneInfo</p>
+										
+										<label style="display: block">
+											<input name="sceneNaming" id="sceneNamingScene" class="value" value="scene" type="radio" />
+											<span class="translate">sceneNamingScene</span>
+										</label>
+										
+										<label style="display: block">
+											<input name="sceneNaming" id="sceneNamingRoom" class="value" value="room" type="radio" />
+											<span class="translate">sceneNamingRoom</span>
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Other & Events -->
+			<div class="row">
+				<div class="col s12 m12">
+					<div class="row" style="margin-bottom: 0">
+						<div class="col s12 m12">
+							<p class="translate title">other</p>
+						</div>
+					</div>
+					<div class="row box" style="margin-bottom: 0">
+						<div class="col s7 m7" style="margin: 0">
+							<div class="row">
+								<div class="input-field col s12 m12">
 									<p class="subtitle translate">queueInfo</p>
 									
 									<p>
@@ -308,18 +377,10 @@
 							<div class="row">
 								<div class="input-field col s12 m12">
 									<div style="display: block">
-										<p class="subtitle translate">nameIdInfo</p>
+										<p class="subtitle translate">briWhenOffInfo</p>
 										
-										<label>
-											<input name="nameId" id="nameIdPrepend" class="value" value="prepend" type="radio" />
-											<span class="translate">nameIdPrepend</span>
-										</label>
-										
-										<label>
-											<input name="nameId" id="nameIdAppend" class="value" value="append" type="radio" />
-											<span class="translate">nameIdAppend</span>
-										</label>
-										
+										<input class="value" id="briWhenOff" type="checkbox" />
+										<label for="briWhenOff" class="translate">briWhenOff</label>
 									</div>
 								</div>
 							</div>
@@ -333,7 +394,6 @@
 									</div>
 								</div>
 							</div>
-							
 						</div>
 					</div>
 				</div>

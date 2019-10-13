@@ -1,5 +1,6 @@
 module.exports =
 {
+	"lastSeen": {"description": "Datetime of last update", "role": "text", "type": "string", "device": false},
 	"datetime": {"description": "Datetime of last update", "role": "text", "type": "string", "device": false},
 	"timestamp": {"description": "Timestamp of last update", "role": "value", "type": "number", "device": false},
 	"syncing": {"description": "Indicates whether object tree will be synchronized", "role": "indicator", "type": "boolean", "device": false},
@@ -24,6 +25,7 @@ module.exports =
 	"colormode": {"description": "Indicates the color mode in which the light is working", "role": "indicator.colormode", "type": "string"},
 	"scene": {"description": "Apply scene on light or group", "role": "switch.scene", "type": "string"},
 	"trigger": {"description": "Trigger scene on light or group", "role": "button", "type": "boolean"},
+	"options": {"description": "Options for action trigger", "role": "json", "type": "string"},
 	"_rgb": {"description": "RGB (red, green, blue) color space", "role": "level.color.rgb", "type": "string"},
 	"_hsv": {"description": "HSV (hue, saturation, value / brightness) color space", "role": "level.color.hsv", "type": "string"},
 	"_cmyk": {"description": "CMYK (cyan, magenta, yellow and key / black) color space", "role": "level.color.cmyk", "type": "string"},
@@ -83,7 +85,9 @@ module.exports =
 	"groups.state.any_on": {"description": "Indicates if any light of the group is turned on", "role": "indicator", "type": "boolean"},
 	
 	"groups.class": {"description": "Category of Room types", "role": "text", "type": "string"},
-	"groups.name": {"description": "A unique, editable name given to the group.", "role": "text", "type": "string"},
+	"groups.lights": {"description": "Lights assigned to the group", "role": "text", "type": "string"},
+	"groups.sensors": {"description": "Sensors assigned to the group", "role": "text", "type": "string"},
+	"groups.name": {"description": "A unique, editable name given to the group", "role": "text", "type": "string"},
 	"groups.recycle": {"description": "Resource is automatically deleted when not referenced anymore", "role": "indicator", "type": "boolean"},
 	"groups.type": {"description": "Type of group", "role": "text", "type": "string"},
 	"groups.uid": {"description": "Unique ID of the group", "role": "value", "type": "number"},
@@ -112,10 +116,12 @@ module.exports =
 	"sensors.manufacturername": {"description": "The manufacturer name", "role": "text", "type": "string"},
 	"sensors.modelid": {"description": "The hardware model of the sensor", "role": "text", "type": "string"},
 	"sensors.name": {"description": "A unique, editable name given to the sensor", "role": "text", "type": "string"},
+	"sensors.productname": {"description": "Product name of the sensor", "role": "text", "type": "string"},
 	"sensors.recycle": {"description": "Resource is automatically deleted when not referenced anymore", "role": "indicator", "type": "boolean"},
 	"sensors.swversion": {"description": "Software version", "role": "text", "type": "string"},
 	"sensors.type": {"description": "", "role": "text", "type": "string"},
 	"sensors.uid": {"description": "Unique ID of the sensor", "role": "value", "type": "number"},
+	"sensors.diversityid": {"description": "Unique ID of the sensor", "role": "text", "type": "string"},
 	"sensors.uniqueid": {"description": "Unique ID of the sensor", "role": "text", "type": "string"},
 	
 	// SCENES
@@ -123,12 +129,22 @@ module.exports =
 	"scenes.appdata.version": {"description": "App specific version of the data field", "role": "value", "type": "number"},
 	"scenes.group": {"description": "Group ID that a scene is linked to", "role": "value", "type": "number"},
 	"scenes.lastupdated": {"description": "UTC time the scene has been created or has been updated by a PUT", "role": "text", "type": "string"},
-	"scenes.locked": {"description": "Indicates that the scene is locked by a rule or a schedule and cannot be deleted until all resources requiring or that reference the scene are deleted.", "role": "indicator", "type": "boolean"},
-	"scenes.name": {"description": "Human readable name of the scene.", "role": "text", "type": "string"},
+	"scenes.locked": {"description": "Indicates that the scene is locked by a rule or a schedule and cannot be deleted until all resources requiring or that reference the scene are deleted", "role": "indicator", "type": "boolean"},
+	"scenes.name": {"description": "Human readable name of the scene", "role": "text", "type": "string"},
 	"scenes.owner": {"description": "Whitelist user that created or modified the content of the scene", "role": "text", "type": "string"},
 	"scenes.picture": {"description": "Individual scene picture", "role": "text", "type": "string"},
 	"scenes.recycle": {"description": "Indicates whether the scene can be automatically deleted by the bridge", "role": "indicator", "type": "boolean"},
 	"scenes.type": {"description": "Type of the scene (LightScene or GroupScene)", "role": "text", "type": "string"},
-	"scenes.uid": {"description": "The id of the scene being modified or created.", "role": "text", "type": "string"},
-	"scenes.version": {"description": "Version of scene document (lightstates will be empty or available)", "role": "value", "type": "number", "common": {"states": {1: "Scene created via PUT, lightstates will be empty", 2: "Scene created via POST lightstates available"}}}
+	"scenes.uid": {"description": "The id of the scene being modified or created", "role": "text", "type": "string"},
+	"scenes.version": {"description": "Version of scene document (lightstates will be empty or available)", "role": "value", "type": "number", "common": {"states": {1: "Scene created via PUT, lightstates will be empty", 2: "Scene created via POST lightstates available"}}},
+
+	// SCHEDULES
+	"schedules.created": {"description": "The creation date of the schedule", "role": "text", "type": "string"},
+	"schedules.description": {"description": "The description of the schedule", "role": "text", "type": "string"},
+	"schedules.localtime": {"description": "The local tie of the schedule", "role": "text", "type": "string"},
+	"schedules.name": {"description": "Human readable name of the schedule", "role": "text", "type": "string"},
+	"schedules.recycle": {"description": "Indicates whether the schedule can be automatically deleted by the bridge", "role": "indicator", "type": "boolean"},
+	"schedules.status": {"description": "The status of the schedule", "role": "indicator", "type": "boolean"},
+	"schedules.time": {"description": "The time of the schedule", "role": "text", "type": "string"},
+	"schedules.uid": {"description": "The id of the schedule being modified or created", "role": "text", "type": "string"}
 }
