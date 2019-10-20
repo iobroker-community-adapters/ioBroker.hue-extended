@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "hue-extended",
-        "version": "1.0.1",
+        "version": "1.1.0-beta.1",
         "title": "Philips Hue Extended",
         "desc": {
             "en": "Integration of all your Philips Hue Devices with your ioBroker",
@@ -17,10 +17,28 @@
         },
         "news": {
             "1.0.0": {
-                "en": "- BREAKING CHANGE: changed certain objects due to standardization\n- fixed incorrect conversion between color spaces (rgb, hex, etc.)"
+                "en": "- BREAKING CHANGE: changed certain objects due to standardization\n- fixed incorrect conversion between color spaces (rgb, hex, etc.)",
+                "de": "- Wichtige ÄNDERUNG: geändert, bestimmte Objekte durch Standardisierung\n- fixed falsche Konvertierung zwischen Farbräumen (rgb, hex, etc.)",
+                "ru": "- Последние изменение: изменены некоторые объекты из-за стандартизации\n- исправлено некорректное преобразование между цветовыми пространствами (RGB, и наговор, и т. д.)",
+                "pt": "- ALTERAÇÃO de última hora: mudou de determinados objetos, devido à padronização\n- fixo incorreta conversão entre espaços de cor (rgb, hexadecimal, etc.)",
+                "nl": "- Het BREKEN van VERANDERING: gewijzigd bepaalde objecten als gevolg van standaardisatie\n- vaste onjuiste omzetting tussen kleurruimte (rgb hex, enz.)",
+                "fr": "- MODIFICATION de RUPTURE: modification de certains objets en raison de la normalisation\n- correction d'un bug provoquant la conversion entre les espaces de couleurs (rgb, hex, etc.)",
+                "it": "- ROTTURA della MODIFICA: modificato alcuni oggetti a causa della standardizzazione\n- corretto errore di conversione tra gli spazi colore (rgb, hex, etc.)",
+                "es": "- CAMBIO de hora: se ha cambiado ciertos objetos debido a la estandarización\n- fija incorrecta de la conversión entre espacios de color (rgb, hex, etc.)",
+                "pl": "- Ostatnie zmiany: zmieniono niektóre obiekty z powodu standaryzacji\n- poprawiono nieprawidłowe konwersja między przestrzeniami kolorów (RGB, i наговор, itp.)",
+                "zh-cn": "-裂变化：改变某些物体由于标准化\n-固定不正确之间的转换颜色空间(rgb hex，等等。)"
             },
             "0.9.0": {
-                "en": "- BREAKING CHANGE: changed grouping of scenes and added option to choose how objects are mapping (either scenes.<group>.<scene>.objects or scenes.<scene>.<group>.objects)\n- retrieving group for all-lights directly from Hue Bridge API (instead of assembling through states)\n- added option to delete outdated devices (gargabe collector)"
+                "en": "- BREAKING CHANGE: changed grouping of scenes and added option to choose how objects are mapping (either scenes.<group>.<scene>.objects or scenes.<scene>.<group>.objects)\n- retrieving group for all-lights directly from Hue Bridge API (instead of assembling through states)\n- added option to delete outdated devices (gargabe collector)",
+                "de": "- Wichtige ÄNDERUNG: geänderte Gruppierung von Szenen und option Hinzugefügt, um zu wählen, wie Objekte mapping (entweder Szenen.<Gruppe>.<Szene>.Objekte oder Szenen.<Szene>.<Gruppe>.Objekte)\n- abrufen-Gruppe für alle-Lichter direkt aus Hue Bridge API (statt der Zusammenstellung durch die Staaten)\n- option Hinzugefügt, um zu löschen Sie veraltete Geräte (gargabe collector)",
+                "ru": "- Последние изменение: изменена группировка сцены и добавлена опция, чтобы выбрать, как объекты сопоставления (либо сцен.<группы>.<сцена>.объекты или сцены.<сцена>.<группа>.объектов)\n- получение группы для всех-огни непосредственно из Хюэ мост API (вместо монтаж через штаты)\n- добавлена опция для удаления устаревших устройств (коллектор gargabe)",
+                "pt": "- ALTERAÇÃO de última hora: alterado agrupamento de cenas e adicionada opção para escolher a forma como os objetos são de mapeamento (ou cenas.<grupo>.<cena>.objetos ou cenas.<cena>.<grupo>.objetos)\n- recuperação de grupo para todas as luzes diretamente a partir de Tonalidade Ponte API (em vez de montar através de estados)\n- adicionada opção para excluir desatualizado dispositivos (gargabe collector)",
+                "nl": "- Het BREKEN van VERANDERING: gewijzigd groepering van scènes en toegevoegde optie om te kiezen hoe objecten worden mapping (ofwel scènes.<groep>.<scene>.voorwerpen of scènes.<scene>.<groep>.objecten)\n- ophalen groep voor alle-lichten rechtstreeks vanuit Hue Bridge API (in plaats van montage door staten)\n- optie toegevoegd om het verwijderen van verouderde apparaten (gargabe collector)",
+                "fr": "- MODIFICATION de RUPTURE: modification de regroupement des scènes et ajout d'une option pour choisir la manière dont les objets sont de cartographie (soit scènes.<groupe>.<scène>.les objets ou les scènes.<scène>.<groupe>.les objets)\n- récupération de groupe pour toutes les lumières de la directement à partir de la Teinte Pont de l'API (au lieu de rassembler à travers les états)\n- ajout d'une option pour supprimer les périphériques obsolètes (gargabe collector)",
+                "it": "- ROTTURA della MODIFICA: modificato il raggruppamento di scene e aggiunta l'opzione per scegliere il modo in cui gli oggetti sono mapping (o scene.<gruppo>.<scena>.oggetti o scene.<scena>.<gruppo>.gli oggetti)\n- il recupero di gruppo per tutte le luci direttamente dalla Tonalità Ponte API (invece di assemblare uniti)\n- aggiunta l'opzione per eliminare obsoleto dispositivi (gargabe collector)",
+                "es": "- CAMBIO de hora: se ha cambiado la agrupación de las escenas y añadida la opción de elegir cómo los objetos son de asignación (cualquiera de las escenas.<grupo>.<escena>.objetos o escenas.<escena>.<grupo>.los objetos)\n- recuperación de grupo para todas las luces directamente de Hue Puente de la API (en lugar de armar a través de los estados)\n- añadida la opción de eliminar dispositivos obsoletos (gargabe coleccionista)",
+                "pl": "- Ostatnie zmiany: poprawiono grupowanie sceny i dodano opcję, aby wybrać, jak obiekty mapowania (lub scen.<grupy>.<scena>.obiektów lub scen.<scena>.<grupa>.obiektów)\n- uzyskiwanie grupy dla wszystkich-światła bezpośrednio z Hue bridge API (zamiast montaż przez zjednoczone)\n- dodano opcję, aby usunąć starszych urządzeń (kolektor gargabe)",
+                "zh-cn": "-裂变化：改变组的场景而增加的选择到如何选择对象映射(无论是现场。<组>.<现场>.对象或现场。<现场>.<组>.对象)\n-检索组对于所有的灯光，直接从顺桥API(而不是通过组装国)\n-增加的选择，以删除过时的设备(gargabe集)"
             },
             "0.8.8": {
                 "en": "- added option to set level to 0 when device is turned off\n- fix {\"on\":true,\"bri\":null} when device is turned on\n- reduced log messages for successful applied actions",
@@ -220,9 +238,11 @@
         "refresh": 30,
         "syncLights": true,
         "syncGroups": true,
+        "syncScenes": true,
+		"syncHueLabsScenes": true,
         "hueToXY": true,
         "useQueue": true,
-		"sceneNaming": "room"
+        "sceneNaming": "room"
     },
     "objects": [],
     "instanceObjects": []

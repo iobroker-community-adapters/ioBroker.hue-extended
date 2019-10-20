@@ -163,10 +163,10 @@ function startAdapter(options)
 		if (appliance.type == 'scenes')
 		{
 			let scene = {
-				name: library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.name'),
-				type: library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.type'),
-				groupId: library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.group'),
-				lights: library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.lights')
+				'name': library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.name'),
+				'type': library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.type'),
+				'groupId': library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.group'),
+				'lights': library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.lights')
 			};
 			
 			// GroupScene
@@ -185,10 +185,30 @@ function startAdapter(options)
 				commands = { 'scene': appliance.uid };
 			}
 			
+			// LabScene
+			else if (scene.type == 'LabScene')
+			{
+				let options = null;
+				try
+				{
+					options = JSON.parse(library.getDeviceState(appliance.path + '.options'));
+					
+					appliance.method = options.method;
+					appliance.trigger = 'sensors/' + options.address;
+					commands = options.body;
+				}
+				catch(err)
+				{
+					adapter.log.warn('Invalid scene data given!');
+					adapter.log.debug(err.message);
+					return false;
+				}
+			}
+			
 			// Error
 			else
 			{
-				adapter.log.warn('Invalid scene type given! Must bei either GroupScene or LightScene.');
+				adapter.log.warn('Invalid scene type given! Must bei either GroupScene, LightScene or LabScene.');
 				return false;
 			}
 		}
@@ -417,6 +437,55 @@ function getPayload(refresh)
 		library.set({ ...library.getNode('timestamp'), 'node': 'info.timestamp' }, Math.floor(Date.now()/1000));
 		library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' }, true);
 		
+		// read hue labs from payload
+		if (adapter.config.syncScenes && adapter.config.syncHueLabsScenes)	// TODO: COMPARE LENGTH
+		{
+			// find "huelabs" in resourcelinks
+			let formulas = [];
+			for (let key in payload['resourcelinks'])
+			{
+				let resourcelink = payload['resourcelinks'][key];
+				if (resourcelink && resourcelink.name == 'HueLabs 2.0')
+				{
+					// get formulas
+					formulas = resourcelink.links.map(formula => payload['resourcelinks'][formula.substr(formula.lastIndexOf('/')+1)]);
+					break;
+				}
+			}
+			
+			// get formula trigger
+			formulas.forEach((formula, i) =>
+			{
+				for (let index in formula.links)
+				{
+					let link = formula.links[index];
+					let id = link.substr(link.lastIndexOf('/')+1);
+					
+					// add sensor data to scene
+					if (link && link.indexOf('sensors') > -1)
+					{
+						let sensor = payload['sensors'][id];
+						if (sensor && sensor.manufacturername == 'Philips' && sensor.modelid == 'HUELABSVTOGGLE')
+						{
+							formulas[i].state = sensor.state;
+							formulas[i].command = { 'address': '/sensors/' + id + '/state', 'body': {"status": (1-sensor.state.status)}, 'method': 'PUT' };
+						}
+					}
+					
+					// add group data to scene
+					else if (link && link.indexOf('groups') > -1)
+					{
+						formulas[i].group = id;
+						formulas[i].type = 'LabScene';
+					}
+				}
+				
+				// add huelab scene to ordinary scenes
+				if (formulas[i].group && formulas[i].command)
+					payload['scenes'][formula.description] = formulas[i];
+			});
+		}
+		
 		// go through channels
 		for (let channel in payload)
 		{
@@ -441,7 +510,8 @@ function getPayload(refresh)
 					// only write if syncing is on
 					if (adapter.config['sync' + library.ucFirst(channel)])
 						addBridgeData(channel, { '0': pl });
-				});
+					
+				}).catch(err => {});
 			}
 			else
 				DEVICES[channel] = JSON.parse(JSON.stringify(payload[channel])); // copy and index payload
@@ -466,7 +536,6 @@ function getPayload(refresh)
 				library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' + library.ucFirst(channel) }, false);
 			}
 		}
-		
 		
 		// refresh interval
 		retry = 0;
@@ -614,7 +683,7 @@ function readData(key, data, channel)
 			}
 			
 			// change state for schedules
-			if (channel == 'schedules' && key.substr(-7) == 'command')
+			if ((channel == 'schedules' || channel == 'scenes') && key.substr(-7) == 'command')
 			{
 				key = key.replace('.command', '') + '.action';
 				
@@ -674,7 +743,7 @@ function readData(key, data, channel)
 				library.setDeviceState(key.replace('.state', '.action') + '.real_brightness', data.bri);
 			
 			// add scene trigger button as additional state (only to scenes)
-			if (data.type == 'GroupScene' || data.type == 'LightScene')
+			if (data.type == 'GroupScene' || data.type == 'LightScene' || data.type == 'LabScene')
 			{
 				data.action = { 'trigger': false };
 				data.uid = key.substr(key.lastIndexOf('.')+1);
@@ -696,10 +765,10 @@ function readData(key, data, channel)
 				let pathKey = '';
 				
 				// create sub channel for scenes
-				if (key.indexOf('scenes') > -1 && ((data.type == 'GroupScene' && data.group) || (data.type == 'LightScene' && data.lights && data.lights[0])))
+				if (key.indexOf('scenes') > -1 && (((data.type == 'GroupScene' || data.type == 'LabScene') && data.group) || (data.type == 'LightScene' && data.lights && data.lights[0])))
 				{
 					// skips if groups are not indexed so far
-					if (data.type == 'GroupScene' && (!DEVICES['groups'] || !DEVICES['groups'][data.group]))
+					if ((data.type == 'GroupScene' || data.type == 'LabScene') && (!DEVICES['groups'] || !DEVICES['groups'][data.group]))
 					{
 						adapter.log.silly('Groups not yet given, thus scene ' + data.name + ' (' + data.uid + ') skipped for now.');
 						return false;
@@ -716,13 +785,21 @@ function readData(key, data, channel)
 						pathDescription = 'Scene ' + data.name + ' for ' + (data.lights.length > 1 ? 'lights ' + data.lights.join(', ') : 'light ' + data.lights[0]);
 					}
 					
-					// GroupScene
+					// GroupScene or LabScene
 					else
 					{
-						let groupId = library.clean(DEVICES['groups'][data.group].name, true, '_').replace(/\./g, '-');
-						let groupUid = DEVICES['groups'][data.group].uid;
-						let group = adapter.config.nameId == 'append' ? groupId + '-' + groupUid : ('00' + groupUid).substr(-3) + '-' + groupId;
+						let group;
 						let scene = library.clean(data.name, true, '_').replace(/\./g, '-');
+						
+						if (data.type == 'LabScene')
+							group = 'HueLabsScenes';
+						
+						else
+						{
+							let groupId = library.clean(DEVICES['groups'][data.group].name, true, '_').replace(/\./g, '-');
+							let groupUid = DEVICES['groups'][data.group].uid;
+							group = adapter.config.nameId == 'append' ? groupId + '-' + groupUid : ('00' + groupUid).substr(-3) + '-' + groupId;
+						}
 						
 						// scene.group
 						if (adapter.config.sceneNaming == 'scene')
@@ -738,7 +815,7 @@ function readData(key, data, channel)
 						{
 							key = key.replace('.' + data.uid, '.' + group);
 							pathKey = '.' + scene;
-							description = 'Scenes for Group ' + DEVICES['groups'][data.group].name;
+							description = data.type == 'LabScene' ? 'Hue Lab Scenes' : 'Scenes for Group ' + DEVICES['groups'][data.group].name;
 							pathDescription = 'Scene ' + data.name;
 						}
 					}
