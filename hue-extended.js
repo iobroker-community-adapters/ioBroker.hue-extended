@@ -45,7 +45,7 @@ function startAdapter(options)
 	adapter.on('ready', function()
 	{
 		unloaded = false;
-		library = new Library(adapter, { nodes: _NODES, updatesInLog: true });
+		library = new Library(adapter, { nodes: _NODES, updatesInLog: adapter.config.debug || false });
 		
 		// Check Node.js Version
 		let version = parseInt(process.version.substr(1, process.version.indexOf('.')-1));
@@ -70,22 +70,7 @@ function startAdapter(options)
 				library.setDeviceState(state.replace(adapterName + '.' + adapter.instance + '.', ''), states[state] && states[state].val);
 			
 			// retrieve payload from Hue Bridge
-			['groups', 'lights', 'config', 'resourcelinks', 'rules', 'scenes', 'schedules', 'sensors'].forEach(channel =>
-			{
-				// create channel
-				library.set({
-					'node': channel,
-					'role': 'channel',
-					'description': library.ucFirst(channel.substr(channel.lastIndexOf('.')+1))
-				});
-				
-				// syncing info for channel
-				library.set({ ...library.getNode('syncing'), 'node': channel + '.syncing' }, false);
-				library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' + library.ucFirst(channel) }, false);
-				
-				// get payload
-				getPayload(channel, adapter.config.refresh || 30);
-			});
+			getPayload(adapter.config.refresh || 30);
 			
 			// add states for last action
 			readData(
@@ -416,59 +401,75 @@ else
  *
  *
  */
-function getPayload(channel, refresh)
+function getPayload(refresh)
 {
-	// retrieve only initially and if syncing is on
-	if (DEVICES[channel] && !adapter.config['sync' + library.ucFirst(channel)])
-		return false;
-	
-	// add little delay (in ms) for each channel so not all pull at once
-	delay = (delay + 100)%800;
-	
 	// get data from bridge
-	_request({ uri: bridge + channel, json: true }).then(payload =>
+	_request({ uri: bridge, json: true }).then(payload =>
 	{
 		if (!payload || (payload[0] && payload[0].error))
 		{
-			adapter.log.error('Error retrieving channel ' + channel + ' from Hue Bridge' + (payload[0] && payload[0].error ? ': ' + payload[0].error.description : '!'));
+			adapter.log.error('Error retrieving payload from Hue Bridge' + (payload[0] && payload[0].error ? ': ' + payload[0].error.description : '!'));
 			return false;
 		}
 		
-		// sync all groups
-		if (channel == 'groups')
-		{
-			_request({ uri: bridge + channel + '/0', json: true }).then(pl =>
-			{
-				pl.name = 'All Lights';
-				
-				// index
-				DEVICES[channel] = JSON.parse(JSON.stringify(payload));
-				DEVICES[channel][0] = JSON.parse(JSON.stringify(pl));
-				
-				// only write if syncing is on
-				if (adapter.config['sync' + library.ucFirst(channel)])
-					addBridgeData(channel, { '0': pl });
-			});
-		}
-		else
-			DEVICES[channel] = JSON.parse(JSON.stringify(payload)); // copy and index payload
+		// add meta data
+		library.set({ ...library.getNode('datetime'), 'node': 'info.datetime' }, library.getDateTime(Date.now()));
+		library.set({ ...library.getNode('timestamp'), 'node': 'info.timestamp' }, Math.floor(Date.now()/1000));
+		library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' }, true);
 		
-		// only write if syncing is on
-		if (adapter.config['sync' + library.ucFirst(channel)])
+		// go through channels
+		for (let channel in payload)
 		{
-			// update overall syncing information
-			library.set({ ...library.getNode('datetime'), 'node': 'info.datetime' }, library.getDateTime(Date.now()));
-			library.set({ ...library.getNode('timestamp'), 'node': 'info.timestamp' }, Math.floor(Date.now()/1000));
-			library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' }, true);
-			library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' + library.ucFirst(channel) }, true);
-			library.set({ ...library.getNode('syncing'), 'node': channel + '.syncing' }, true);
+			// create channel
+			library.set({
+				'node': channel,
+				'role': 'channel',
+				'description': library.ucFirst(channel.substr(channel.lastIndexOf('.')+1))
+			});
 			
-			// add to states
-			addBridgeData(channel, payload);
+			// sync all groups
+			if (channel == 'groups')
+			{
+				_request({ uri: bridge + channel + '/0', json: true }).then(pl =>
+				{
+					pl.name = 'All Lights';
+					
+					// index
+					DEVICES[channel] = JSON.parse(JSON.stringify(payload));
+					DEVICES[channel][0] = JSON.parse(JSON.stringify(pl));
+					
+					// only write if syncing is on
+					if (adapter.config['sync' + library.ucFirst(channel)])
+						addBridgeData(channel, { '0': pl });
+				});
+			}
+			else
+				DEVICES[channel] = JSON.parse(JSON.stringify(payload)); // copy and index payload
+			
+			// only write if syncing is on
+			if (adapter.config['sync' + library.ucFirst(channel)])
+			{
+				// update overall syncing information
+				library.set({ ...library.getNode('datetime'), 'node': 'info.datetime' }, library.getDateTime(Date.now()));
+				library.set({ ...library.getNode('timestamp'), 'node': 'info.timestamp' }, Math.floor(Date.now()/1000));
+				library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' }, true);
+				library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' + library.ucFirst(channel) }, true);
+				library.set({ ...library.getNode('syncing'), 'node': channel + '.syncing' }, true);
+				
+				// add to states
+				addBridgeData(channel, payload[channel]);
+			}
+			
+			else
+			{
+				library.set({ ...library.getNode('syncing'), 'node': channel + '.syncing' }, false);
+				library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' + library.ucFirst(channel) }, false);
+			}
 		}
+		
 		
 		// refresh interval
-		retry[channel] = 0;
+		retry = 0;
 		
 		if (refresh > 0 && refresh < 3)
 		{
@@ -477,14 +478,14 @@ function getPayload(channel, refresh)
 		}
 		
 		if (refresh > 0 && !unloaded)
-			refreshCycle = setTimeout(getPayload, refresh*1000+delay, channel, refresh);
+			refreshCycle = setTimeout(getPayload, refresh*1000, refresh);
 		
 	}).catch(err =>
 	{
 		// Indicate that tree is not synchronized anymore
 		library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' }, false);
-		library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' + library.ucFirst(channel) }, false);
-		library.set({ ...library.getNode('syncing'), 'node': channel + '.syncing' }, false);
+		//library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' + library.ucFirst(channel) }, false);
+		//library.set({ ...library.getNode('syncing'), 'node': channel + '.syncing' }, false);
 		
 		// ERROR
 		let error = err.message;
@@ -502,17 +503,17 @@ function getPayload(channel, refresh)
 			error = 'Socket hang up';
 		
 		// TRY AGAIN OR STOP ADAPTER
-		if (!retry[channel] || retry[channel] < 10)
+		if (!retry || retry < 10)
 		{
-			adapter.log.debug('Error connecting while retrieving channel ' + channel + ': ' + error + '. ' + (retry[channel] > 0 ? 'Already retried ' + retry[channel] + 'x so far. ' : '') + 'Try again in 10 seconds..');
+			adapter.log.debug('Error connecting to Hue Bridge: ' + error + '. ' + (retry > 0 ? 'Already retried ' + retry + 'x so far. ' : '') + 'Try again in 10 seconds..');
 			//adapter.log.debug(err.message);
 			//adapter.log.debug(JSON.stringify(err.stack));
-			retry[channel] = !retry[channel] ? 1 : retry[channel]+1;
-			refreshCycle = setTimeout(getPayload, 10*1000+delay, channel, refresh);
+			retry = !retry ? 1 : retry+1;
+			refreshCycle = setTimeout(getPayload, 10*1000, refresh);
 		}
 		else
 		{
-			library.terminate('Error connecting while retrieving channel ' + channel + ': ' + error + '. ' + (retry[channel] > 0 ? 'Already retried ' + retry[channel] + 'x in total, thus connection closed now.' : 'Connection closed.') + ' See debug log for details.');
+			library.terminate('Error connecting to Hue Bridge: ' + error + '. ' + (retry > 0 ? 'Already retried ' + retry + 'x in total, thus connection closed now.' : 'Connection closed.') + ' See debug log for details.');
 			adapter.log.debug(err.message);
 			adapter.log.debug(JSON.stringify(err.stack));
 		}
@@ -576,7 +577,7 @@ function readData(key, data, channel)
 			if (data.name && key.indexOf('config') == -1 && key.indexOf('scenes') == -1 && key.indexOf('resourcelinks') == -1)
 			{
 				data.uid = key.substr(key.lastIndexOf('.')+1);
-				id = library.clean(data.name, true, '_');
+				id = library.clean(data.name, true, '_').replace(/\./g, '-');
 				let uid = ('00' + data.uid).substr(-3);
 				
 				// append UID
@@ -589,10 +590,10 @@ function readData(key, data, channel)
 			}
 			
 			// change state for resourcelinks
-			if (channel == 'resourcelinks')
+			if (data.name && channel == 'resourcelinks')
 			{
 				data.uid = key.substr(key.lastIndexOf('.')+1);
-				id = library.clean(data.name, true, '_');
+				id = library.clean(data.name, true, '_').replace(/\./g, '-');
 				key = key.replace('.' + data.uid, '.' + id);
 			}
 			
@@ -648,7 +649,7 @@ function readData(key, data, channel)
 			if (data.hue !== undefined)
 				data.hue = Math.max(Math.min(Math.round(data.hue / 65535 * 360), 360), 0);
 			
-			if (data.ct !== undefined)
+			if (data.ct !== undefined && typeof data.ct !== 'object')
 				data.ct = Math.max(Math.min(Math.round(1 / data.ct * 1000000), 6500), 2000);
 			
 			// add additional color spaces
@@ -682,7 +683,7 @@ function readData(key, data, channel)
 			// remap states for standardization (see https://github.com/Zefau/ioBroker.hue-extended/issues/1 and https://forum.iobroker.net/post/298019)
 			for (let state in _MAPPING)
 			{
-				if (data[state] !== undefined)
+				if (data[state] !== undefined && typeof data[state] !== 'object')
 				{
 					data[_MAPPING[state]] = data[state];
 					delete data[state];
@@ -709,7 +710,7 @@ function readData(key, data, channel)
 					if (data.type == 'LightScene')
 					{
 						key = key.replace('.' + data.uid, adapter.config.sceneNaming == 'scene' ? '.' + id : '.LightScenes');
-						pathKey = '.' + library.clean(data.name, true, '_') + '_' + data.lights.join('-');
+						pathKey = '.' + library.clean(data.name, true, '_').replace(/\./g, '-') + '_' + data.lights.join('-');
 						
 						description = 'Light Scenes';
 						pathDescription = 'Scene ' + data.name + ' for ' + (data.lights.length > 1 ? 'lights ' + data.lights.join(', ') : 'light ' + data.lights[0]);
@@ -718,10 +719,10 @@ function readData(key, data, channel)
 					// GroupScene
 					else
 					{
-						let groupId = library.clean(DEVICES['groups'][data.group].name, true, '_');
+						let groupId = library.clean(DEVICES['groups'][data.group].name, true, '_').replace(/\./g, '-');
 						let groupUid = DEVICES['groups'][data.group].uid;
 						let group = adapter.config.nameId == 'append' ? groupId + '-' + groupUid : ('00' + groupUid).substr(-3) + '-' + groupId;
-						let scene = library.clean(data.name, true, '_');
+						let scene = library.clean(data.name, true, '_').replace(/\./g, '-');
 						
 						// scene.group
 						if (adapter.config.sceneNaming == 'scene')

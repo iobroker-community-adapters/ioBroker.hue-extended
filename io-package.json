@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "hue-extended",
-        "version": "1.0.0-rc.1",
+        "version": "1.0.0",
         "title": "Philips Hue Extended",
         "desc": {
             "en": "Integration of all your Philips Hue Devices with your ioBroker",
