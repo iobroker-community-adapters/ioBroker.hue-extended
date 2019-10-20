@@ -280,17 +280,17 @@ function startAdapter(options)
 				
 				// if device is turned off, set brightness to 0
 				// NOTE: Brightness is a scale from 1 (the minimum the light is capable of) to 254 (the maximum).
-				if (action == 'on' && value == false && commands.level === undefined && commands.bri === undefined && adapter.config.briWhenOff)
+				if (action == 'on' && value == false && library.getDeviceState(appliance.path + '.brightness') !== null && commands.level === undefined && commands.bri === undefined && adapter.config.briWhenOff)
 				{
-					library.setDeviceState(appliance.path + '.real_bri', library.getDeviceState(appliance.path + '.bri') || 0);
-					library._setValue(appliance.path + '.bri', 0);
+					library.setDeviceState(appliance.path + '.real_brightness', library.getDeviceState(appliance.path + '.brightness') || 0);
+					library._setValue(appliance.path + '.brightness', 0);
 					library._setValue(appliance.path + '.level', 0);
 				}
 				
 				// if device is turned on, make sure brightness is not 0
-				if (action == 'on' && value == true && commands.level === undefined && commands.bri === undefined)
+				if (action == 'on' && value == true && library.getDeviceState(appliance.path + '.brightness') !== null && commands.level === undefined && commands.bri === undefined)
 				{
-					let bri = library.getDeviceState(appliance.path + '.real_bri') || 0;
+					let bri = library.getDeviceState(appliance.path + '.real_brightness') || 0;
 					commands.bri = bri == 0 ? 254 : bri;
 				}
 				
@@ -560,7 +560,7 @@ function readData(key, data, channel)
 	let node = get(key.split('.'));
 	
 	// loop nested data
-	if (data !== null && typeof data == 'object' && !(Array.isArray(data) && (key.substr(-2) == 'xy' || key.substr(-6) == 'lights' || key.substr(-7) == 'sensors')))
+	if (data !== null && typeof data == 'object' && !(Array.isArray(data) && (key.substr(-2) == 'xy' || key.substr(-6) == 'lights' || key.substr(-7) == 'sensors' || key.substr(-5) == 'links')))
 	{
 		// create channel
 		if (Object.keys(data).length > 0)
@@ -573,7 +573,7 @@ function readData(key, data, channel)
 			
 			// use uid and name instead of only uid
 			let id = false;
-			if (data.name && key.indexOf('config') == -1 && key.indexOf('scenes') == -1)
+			if (data.name && key.indexOf('config') == -1 && key.indexOf('scenes') == -1 && key.indexOf('resourcelinks') == -1)
 			{
 				data.uid = key.substr(key.lastIndexOf('.')+1);
 				id = library.clean(data.name, true, '_');
@@ -586,6 +586,14 @@ function readData(key, data, channel)
 				// prepend UID
 				else
 					key = key.replace('.' + data.uid, '.' + uid + '-' + id);
+			}
+			
+			// change state for resourcelinks
+			if (channel == 'resourcelinks')
+			{
+				data.uid = key.substr(key.lastIndexOf('.')+1);
+				id = library.clean(data.name, true, '_');
+				key = key.replace('.' + data.uid, '.' + id);
 			}
 			
 			// change state for rules
@@ -655,14 +663,14 @@ function readData(key, data, channel)
 			}
 			
 			// set brightness to 0 when device is off
-			let real_bri = library.getDeviceState(key.replace('.state', '.action') + '.real_bri');
+			let real_bri = library.getDeviceState(key.replace('.state', '.action') + '.real_brightness');
 			if (data.bri !== undefined && data.on == false && adapter.config.briWhenOff)
 			{
 				data.bri = 0;
 				data.level = 0;
 			}
 			else if (data.bri !== undefined && data.on == true && real_bri != data.bri && adapter.config.briWhenOff)
-				library.setDeviceState(key.replace('.state', '.action') + '.real_bri', data.bri);
+				library.setDeviceState(key.replace('.state', '.action') + '.real_brightness', data.bri);
 			
 			// add scene trigger button as additional state (only to scenes)
 			if (data.type == 'GroupScene' || data.type == 'LightScene')
