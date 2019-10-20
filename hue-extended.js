@@ -435,7 +435,7 @@ function getPayload(refresh)
 					pl.name = 'All Lights';
 					
 					// index
-					DEVICES[channel] = JSON.parse(JSON.stringify(payload));
+					DEVICES[channel] = JSON.parse(JSON.stringify(payload[channel]));
 					DEVICES[channel][0] = JSON.parse(JSON.stringify(pl));
 					
 					// only write if syncing is on
@@ -444,7 +444,7 @@ function getPayload(refresh)
 				});
 			}
 			else
-				DEVICES[channel] = JSON.parse(JSON.stringify(payload)); // copy and index payload
+				DEVICES[channel] = JSON.parse(JSON.stringify(payload[channel])); // copy and index payload
 			
 			// only write if syncing is on
 			if (adapter.config['sync' + library.ucFirst(channel)])

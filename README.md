@@ -31,6 +31,9 @@ Connect your Philips Hue Lights with ioBroker.
 
 ## Changelog
 
+### 1.0.1 (2019-10-20)
+- (Zefau) fixed incorrect omitting GroupScenes
+
 ### 1.0.0 (2019-10-20)
 - (Zefau) fixed issue setting devices with `bri` / `brightness` (e.g. plugs)
 
