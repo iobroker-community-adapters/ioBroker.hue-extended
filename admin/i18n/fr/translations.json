@@ -38,6 +38,7 @@
     "sync": "Paramètres De Synchronisation",
     "syncConfig": "Synchroniser Config",
     "syncGroups": "Synchroniser Les Groupes",
+    "syncHueLabsScenes": "Synchroniser La Teinte Des Laboratoires De Scènes",
     "syncInfo": "Sélectionnez les éléments à synchroniser",
     "syncLights": "Synchroniser Les Feux De",
     "syncRecycled": "Synchroniser supprimé / articles recyclés",

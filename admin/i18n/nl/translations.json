@@ -38,6 +38,7 @@
     "sync": "Synchronisatie-Instellingen",
     "syncConfig": "Synchroniseren Config",
     "syncGroups": "Groepen Synchroniseren",
+    "syncHueLabsScenes": "Synchroniseren Tint Labs Schermen",
     "syncInfo": "Selecteer de items die moeten worden gesynchroniseerd",
     "syncLights": "Het Synchroniseren Van Verkeerslichten",
     "syncRecycled": "Synchroniseren verwijderd / gerecycled items",

@@ -38,6 +38,7 @@
     "sync": "同步设置",
     "syncConfig": "同步配置",
     "syncGroups": "同步组",
+    "syncHueLabsScenes": "同步色实验室场景",
     "syncInfo": "选择项目，要同步",
     "syncLights": "同步灯",
     "syncRecycled": "同删除/再循环项目",

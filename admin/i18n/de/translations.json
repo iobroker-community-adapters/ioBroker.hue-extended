@@ -38,6 +38,7 @@
     "sync": "Synchronisierungseinstellungen",
     "syncConfig": "Synchronisation der Konfiguration",
     "syncGroups": "Synchronisation der Gruppen",
+    "syncHueLabsScenes": "Synchronisiere Hue Labs Szenen",
     "syncInfo": "Wähle die Elemente aus, die synchronisiert werden sollen",
     "syncLights": "Synchronisation der Lichter",
     "syncRecycled": "Synchronisiere gelöschte (recycled) Elemente",
