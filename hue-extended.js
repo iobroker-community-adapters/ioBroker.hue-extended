@@ -21,7 +21,7 @@ const _SUBSCRIPTIONS = require(__dirname + '/_NODES.js').SUBSCRIPTIONS;
  */
 let adapter;
 let library;
-let unloaded, delay = 0, retry = {};
+let unloaded, delay = 0, retry = 0;
 let garbageCollector, refreshCycle;
 
 let bridge, device;
@@ -163,10 +163,10 @@ function startAdapter(options)
 		if (appliance.type == 'scenes')
 		{
 			let scene = {
-				name: library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.name'),
-				type: library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.type'),
-				groupId: library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.group'),
-				lights: library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.lights')
+				'name': library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.name'),
+				'type': library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.type'),
+				'groupId': library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.group'),
+				'lights': library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.lights')
 			};
 			
 			// GroupScene
@@ -316,8 +316,8 @@ function startAdapter(options)
 						Object.assign(commands, { "xy": JSON.stringify(_hueColor.convertRGBtoXY(rgb)) });
 				}
 				
-				// if .on is not off, be sure device is on
-				if (commands.on === undefined)
+				// if .on is not off, be sure device is on (except for alerts)
+				if (commands.on === undefined && commands.alert === undefined)
 					commands.on = true; // A light cannot have its hue, saturation, brightness, effect, ct or xy modified when it is turned off. Doing so will return 201 error.
 			}
 			
@@ -441,7 +441,8 @@ function getPayload(refresh)
 					// only write if syncing is on
 					if (adapter.config['sync' + library.ucFirst(channel)])
 						addBridgeData(channel, { '0': pl });
-				});
+					
+				}).catch(err => {});
 			}
 			else
 				DEVICES[channel] = JSON.parse(JSON.stringify(payload[channel])); // copy and index payload
@@ -470,11 +471,12 @@ function getPayload(refresh)
 		
 		// refresh interval
 		retry = 0;
+		const maxRefresh = 2;
 		
-		if (refresh > 0 && refresh < 3)
+		if (refresh > 0 && refresh < maxRefresh)
 		{
-			adapter.log.warn('Due to performance reasons, the refresh rate can not be set to less than 3 seconds. Using 3 seconds now.');
-			refresh = 3;
+			adapter.log.warn('Due to performance reasons, the refresh rate can not be set to less than ' + maxRefresh + ' seconds. Using ' + maxRefresh + ' seconds now.');
+			refresh = maxRefresh;
 		}
 		
 		if (refresh > 0 && !unloaded)
