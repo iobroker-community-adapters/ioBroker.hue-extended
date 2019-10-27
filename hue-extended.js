@@ -15,15 +15,19 @@ const _NODES = require(__dirname + '/_NODES.js').STATES;
 const _MAPPING = require(__dirname + '/_NODES.js').MAPPING;
 const _SUBSCRIPTIONS = require(__dirname + '/_NODES.js').SUBSCRIPTIONS;
 
+const _MAPPING_BRIDGE = Object.keys(_MAPPING);
+const _MAPPING_STATES = Object.values(_MAPPING);
+
 
 /*
  * variables initiation
  */
 let adapter;
 let library;
-let unloaded, delay = 0, retry = {};
+let unloaded, delay = 0, retry = 0;
 let garbageCollector, refreshCycle;
 
+let MAX_ATTEMPTS = 3;
 let bridge, device;
 let DEVICES = {};
 let QUEUE = {};
@@ -56,6 +60,9 @@ function startAdapter(options)
 		library.set(Library.CONNECTION, true);
 		if (!adapter.config.bridgeIp || !adapter.config.bridgeUser)
 			return library.terminate('Please provide connection settings for Hue Bridge!');
+		
+		// 
+		MAX_ATTEMPTS = adapter.config.maxAttempts || MAX_ATTEMPTS;
 		
 		// Bridge connection
 		bridge = 'http://' + adapter.config.bridgeIp + ':' + (adapter.config.bridgePort || 80) + '/api/' + adapter.config.bridgeUser + '/';
@@ -95,12 +102,11 @@ function startAdapter(options)
 			if (!unloaded && adapter.config.garbageCollector)
 			{
 				adapter.log.debug('Running Garbage Collector...');
-				library.runGarbageCollector('device', true, Date.now(), true, 24*60*60);
-				adapter.log.debug('Garbage Collector finished.');
-				garbageCollector = setTimeout(runGarbageCollector, 4*60*60*1000); // run every 4h
+				library.runGarbageCollector(adapterName + '.' + adapter.instance, Math.round(Date.now()/1000), true, 60*60); // delete states older than an hour
+				garbageCollector = setTimeout(runGarbageCollector, 60*60*1000); // run every hour
 			}
 			
-		}, 60*1000);
+		}, 2*60*1000);
 		
 		// start listening for events in the queue
 		queue();
@@ -117,16 +123,15 @@ function startAdapter(options)
 		
 		// get params & action
 		let params = id.replace(adapterName + '.' + adapter.instance + '.', '').split('.');
-		let action = params[params.length-1];
+		let action = params.pop();
 		let path = params.join('.');
 		
 		// appliance data
 		let appliance = {};
 		appliance.path = path.substr(0, path.lastIndexOf('.'));
 		appliance.type = params.splice(0,1).toString();
-		appliance.deviceId = appliance.type == 'scenes' ? params.splice(0,2).join('.') : params.splice(0,1).toString();
-		appliance.name = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.name');
-		appliance.uid = library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.uid');
+		appliance.name = library.getDeviceState(appliance.path + '.name');
+		appliance.uid = library.getDeviceState(appliance.path + '.uid');
 		appliance.trigger = appliance.type + '/' + appliance.uid + '/' + (appliance.type == 'groups' ? 'action' : (appliance.type == 'sensors' ? 'config' : 'state'));
 		
 		// no uid
@@ -137,7 +142,7 @@ function startAdapter(options)
 		}
 		
 		// reset if scene was set
-		if (id.indexOf('.scene') > -1)
+		if (action == 'scene')
 			library._setValue(id, '');
 		
 		// build command
@@ -163,10 +168,10 @@ function startAdapter(options)
 		if (appliance.type == 'scenes')
 		{
 			let scene = {
-				'name': library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.name'),
-				'type': library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.type'),
-				'groupId': library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.group'),
-				'lights': library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.lights')
+				'name': library.getDeviceState(appliance.path + '.name'),
+				'type': library.getDeviceState(appliance.path + '.type'),
+				'groupId': library.getDeviceState(appliance.path + '.group'),
+				'lights': library.getDeviceState(appliance.path + '.lights')
 			};
 			
 			// GroupScene
@@ -191,7 +196,7 @@ function startAdapter(options)
 				let options = null;
 				try
 				{
-					options = JSON.parse(library.getDeviceState(appliance.path + '.options'));
+					options = JSON.parse(library.getDeviceState(appliance.path + '.action.options'));
 					
 					appliance.method = options.method;
 					appliance.trigger = 'sensors/' + options.address;
@@ -219,7 +224,7 @@ function startAdapter(options)
 			let options = null;
 			try
 			{
-				options = JSON.parse(library.getDeviceState(appliance.path + '.options'));
+				options = JSON.parse(library.getDeviceState(appliance.path + '.action.options'));
 				
 				appliance.method = options.method;
 				appliance.trigger = options.address;
@@ -268,16 +273,44 @@ function startAdapter(options)
 				};
 			}
 			
-			// go through commands, modify if required and add to queue
+			// check for each light, if hue lab scene is activated
+			// this has to be done for each light, because hue labs scenes might be activated for multiple groups
+			// and multiple groups are reflected by a single virtual group in the Hue API
+			let lights = appliance.type == 'lights' ? [appliance.uid] : DEVICES['groups'][appliance.uid].lights;
+			let hueLabScene;
+			
+			for (let index in lights)
+			{
+				let light = lights[index];
+				let lightId = library.clean(DEVICES['lights'][light].name, true, '_').replace(/\./g, '-');
+				let lightUid = adapter.config.nameId == 'append' ? light : ('00' + light).substr(-3);
+				
+				hueLabScene = library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.hueLabScene');
+				if (hueLabScene)
+				{
+					// turn off hue lab scene
+					let command = DEVICES['scenes'][hueLabScene].command;
+					if (command.body && command.body.status === 0)
+					{
+						library.setDeviceState(appliance.path + '.action.hueLabScene', '');
+						sendCommand({ 'path': DEVICES['scenes'][hueLabScene].path, 'name': DEVICES['scenes'][hueLabScene].name, 'trigger': command.address, 'method': command.method }, command.body);
+						break; // only necessary to stop scene once for all lights
+					}
+				}
+			}
+			
+			// go through commands and modify if required
+			let obj;
 			for (action in commands)
 			{
 				value = commands[action];
+				obj = action;
 				
 				// remap states back due to standardization
-				let remapped = Object.values(_MAPPING).indexOf(action);
+				let remapped = _MAPPING_STATES.indexOf(action);
 				if (remapped > -1)
 				{
-					let key = Object.keys(_MAPPING)[remapped];
+					let key = _MAPPING_BRIDGE[remapped];
 					commands[key] = commands[action];
 					delete commands[action];
 					action = key;
@@ -285,18 +318,18 @@ function startAdapter(options)
 				
 				// if device is turned off, set brightness to 0
 				// NOTE: Brightness is a scale from 1 (the minimum the light is capable of) to 254 (the maximum).
-				if (action == 'on' && value == false && library.getDeviceState(appliance.path + '.brightness') !== null && commands.level === undefined && commands.bri === undefined && adapter.config.briWhenOff)
+				if (action == 'on' && value == false && library.getDeviceState(appliance.path + '.action.brightness') !== null && commands.level === undefined && commands.bri === undefined && adapter.config.briWhenOff)
 				{
-					library.setDeviceState(appliance.path + '.real_brightness', library.getDeviceState(appliance.path + '.brightness') || 0);
-					library._setValue(appliance.path + '.brightness', 0);
-					library._setValue(appliance.path + '.level', 0);
+					library.setDeviceState(appliance.path + '.action.real_brightness', library.getDeviceState(appliance.path + '.action.brightness') || 0);
+					library._setValue(appliance.path + '.action.brightness', 0);
+					library._setValue(appliance.path + '.action.level', 0);
 				}
 				
 				// if device is turned on, make sure brightness is not 0
-				if (action == 'on' && value == true && library.getDeviceState(appliance.path + '.brightness') !== null && commands.level === undefined && commands.bri === undefined)
+				if (action == 'on' && value == true && library.getDeviceState(appliance.path + '.action.brightness') !== null && commands.level === undefined && commands.bri === undefined)
 				{
-					let bri = library.getDeviceState(appliance.path + '.real_brightness') || 0;
-					commands.bri = bri == 0 ? 254 : bri;
+					let bri = adapter.config.briWhenOff ? library.getDeviceState(appliance.path + '.action.real_brightness') : library.getDeviceState(appliance.path + '.action.brightness');
+					commands.bri = !bri || bri == 0 ? 254 : bri;
 				}
 				
 				// if .level is changed the change will be applied to .brightness instead
@@ -308,7 +341,10 @@ function startAdapter(options)
 			
 				// if .bri is changed, make sure light is on
 				if (action == 'bri' && value > 0)
+				{
+					library.setDeviceState(appliance.path + '.action.real_brightness', value);
 					Object.assign(commands, { on: true, bri: value });
+				}
 				
 				// if .bri is changed to 0, turn off
 				if ((action == 'bri' || action == 'level') && value <= 0)
@@ -325,9 +361,9 @@ function startAdapter(options)
 					commands.ct = Math.max(Math.min(Math.round(1 / value * 1000000), 500), 153);
 				
 				// convert HUE to XY
-				if (commands.hue !== undefined && adapter.config.hueToXY && library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.manufacturername') != 'Philips')
+				if (commands.hue !== undefined && adapter.config.hueToXY && library.getDeviceState(appliance.path + '.manufacturername') != 'Philips')
 				{
-					if (!rgb) rgb = hsv ? _color.hsv.rgb(hsv) : _color.hsv.rgb([commands.hue, (commands.sat || library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.sat')), commands.bri || library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.action.bri')]);
+					if (!rgb) rgb = hsv ? _color.hsv.rgb(hsv) : _color.hsv.rgb([commands.hue, (commands.sat || library.getDeviceState(appliance.path + '.action.sat')), commands.bri || library.getDeviceState(appliance.path + '.action.bri')]);
 					
 					if (rgb === null || rgb[0] === undefined || rgb[0] === null)
 						adapter.log.warn('Invalid RGB given (' + JSON.stringify(rgb) + ')!');
@@ -336,21 +372,17 @@ function startAdapter(options)
 						Object.assign(commands, { "xy": JSON.stringify(_hueColor.convertRGBtoXY(rgb)) });
 				}
 				
-				// if .on is not off, be sure device is on
-				if (commands.on === undefined)
+				// if .on is not off, be sure device is on (except for alerts)
+				if (commands.on === undefined && commands.alert === undefined)
 					commands.on = true; // A light cannot have its hue, saturation, brightness, effect, ct or xy modified when it is turned off. Doing so will return 201 error.
 			}
-			
-			// check reachability
-			if (appliance.type == 'lights' && !library.getDeviceState(appliance.type + '.' + appliance.deviceId + '.state.reachable'))
-				adapter.log.warn('Device ' + appliance.name + ' does not seem to be reachable! Command is sent anyway.');
 		}
 		
-		// queue command
+		// queue commands
 		if (adapter.config.useQueue)
 			addToQueue(appliance, commands);
 		else
-			sendCommand(appliance, commands)
+			sendCommand(appliance, commands);
 	});
 	
 	/*
@@ -438,7 +470,7 @@ function getPayload(refresh)
 		library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' }, true);
 		
 		// read hue labs from payload
-		if (adapter.config.syncScenes && adapter.config.syncHueLabsScenes)	// TODO: COMPARE LENGTH
+		if (adapter.config.syncScenes && adapter.config.syncHueLabsScenes)
 		{
 			// find "huelabs" in resourcelinks
 			let formulas = [];
@@ -467,7 +499,7 @@ function getPayload(refresh)
 						let sensor = payload['sensors'][id];
 						if (sensor && sensor.manufacturername == 'Philips' && sensor.modelid == 'HUELABSVTOGGLE')
 						{
-							formulas[i].state = sensor.state;
+							formulas[i].state = { 'on': (sensor.state.status == 1), ...sensor.state };
 							formulas[i].command = { 'address': '/sensors/' + id + '/state', 'body': {"status": (1-sensor.state.status)}, 'method': 'PUT' };
 						}
 					}
@@ -482,7 +514,7 @@ function getPayload(refresh)
 				
 				// add huelab scene to ordinary scenes
 				if (formulas[i].group && formulas[i].command)
-					payload['scenes'][formula.description] = formulas[i];
+					payload['scenes'][library.clean(formula.description)] = formulas[i];
 			});
 		}
 		
@@ -539,11 +571,12 @@ function getPayload(refresh)
 		
 		// refresh interval
 		retry = 0;
+		const maxRefresh = 2;
 		
-		if (refresh > 0 && refresh < 3)
+		if (refresh > 0 && refresh < maxRefresh)
 		{
-			adapter.log.warn('Due to performance reasons, the refresh rate can not be set to less than 3 seconds. Using 3 seconds now.');
-			refresh = 3;
+			adapter.log.warn('Due to performance reasons, the refresh rate can not be set to less than ' + maxRefresh + ' seconds. Using ' + maxRefresh + ' seconds now.');
+			refresh = maxRefresh;
 		}
 		
 		if (refresh > 0 && !unloaded)
@@ -615,7 +648,7 @@ function readData(key, data, channel)
 		return false;
 	
 	// skip recycled
-	if (channel && !adapter.config['sync' + library.ucFirst(channel) + 'Recycled'] && data && data['recycle'] === true)
+	if (channel && !adapter.config['sync' + library.ucFirst(channel) + 'Recycled'] && data && data.recycle === true && !(channel == 'scenes' && adapter.config.syncHueLabsScenes && data.type == 'LabScene'))
 	{
 		adapter.log.silly('Skipping device ' + data['name'] + ' in channel ' + channel + '.');
 		return false;
@@ -643,7 +676,7 @@ function readData(key, data, channel)
 			
 			// use uid and name instead of only uid
 			let id = false;
-			if (data.name && key.indexOf('config') == -1 && key.indexOf('scenes') == -1 && key.indexOf('resourcelinks') == -1)
+			if (data.name && channel != 'config' && channel != 'scenes' && channel != 'resourcelinks')
 			{
 				data.uid = key.substr(key.lastIndexOf('.')+1);
 				id = library.clean(data.name, true, '_').replace(/\./g, '-');
@@ -657,6 +690,10 @@ function readData(key, data, channel)
 				else
 					key = key.replace('.' + data.uid, '.' + uid + '-' + id);
 			}
+			
+			// add uid to scenes
+			else if (data.name && channel == 'scenes')
+				data.uid = key.substr(key.lastIndexOf('.')+1);
 			
 			// change state for resourcelinks
 			if (data.name && channel == 'resourcelinks')
@@ -682,13 +719,17 @@ function readData(key, data, channel)
 				data = states;
 			}
 			
-			// change state for schedules
+			// change state for scenes
+			if (data.type == 'GroupScene' || data.type == 'LightScene')
+				data.action = { 'trigger': false };
+			
+			// change state for schedules / scenes
 			if ((channel == 'schedules' || channel == 'scenes') && key.substr(-7) == 'command')
 			{
 				key = key.replace('.command', '') + '.action';
 				
 				data.address = data.address.substr(data.address.indexOf('/', 5)+1, data.address.length);
-				data = { 'trigger': false, 'options': JSON.stringify(data) };
+				data = channel == 'schedules' ? { 'trigger': false, 'options': JSON.stringify(data) } : { 'options': JSON.stringify(data) };
 			}
 			
 			// add additional states level, scene, _commands and lastAction
@@ -742,12 +783,6 @@ function readData(key, data, channel)
 			else if (data.bri !== undefined && data.on == true && real_bri != data.bri && adapter.config.briWhenOff)
 				library.setDeviceState(key.replace('.state', '.action') + '.real_brightness', data.bri);
 			
-			// add scene trigger button as additional state (only to scenes)
-			if (data.type == 'GroupScene' || data.type == 'LightScene' || data.type == 'LabScene')
-			{
-				data.action = { 'trigger': false };
-				data.uid = key.substr(key.lastIndexOf('.')+1);
-			}
 			
 			// remap states for standardization (see https://github.com/Zefau/ioBroker.hue-extended/issues/1 and https://forum.iobroker.net/post/298019)
 			for (let state in _MAPPING)
@@ -759,84 +794,89 @@ function readData(key, data, channel)
 				}
 			}
 			
-			// read nested data
-			for (let nestedKey in data)
+			// create sub channel for scenes
+			let pathKey = '';
+			if (channel == 'scenes' && (((data.type == 'GroupScene' || data.type == 'LabScene') && data.group) || (data.type == 'LightScene' && data.lights && data.lights[0])))
 			{
-				let pathKey = '';
-				
-				// create sub channel for scenes
-				if (key.indexOf('scenes') > -1 && (((data.type == 'GroupScene' || data.type == 'LabScene') && data.group) || (data.type == 'LightScene' && data.lights && data.lights[0])))
+				// skips if groups are not indexed so far
+				if ((data.type == 'GroupScene' || data.type == 'LabScene') && (!DEVICES['groups'] || !DEVICES['groups'][data.group]))
 				{
-					// skips if groups are not indexed so far
-					if ((data.type == 'GroupScene' || data.type == 'LabScene') && (!DEVICES['groups'] || !DEVICES['groups'][data.group]))
-					{
-						adapter.log.silly('Groups not yet given, thus scene ' + data.name + ' (' + data.uid + ') skipped for now.');
-						return false;
-					}
-					
-					// LightScene
-					let pathDescription = '';
-					if (data.type == 'LightScene')
-					{
-						key = key.replace('.' + data.uid, adapter.config.sceneNaming == 'scene' ? '.' + id : '.LightScenes');
-						pathKey = '.' + library.clean(data.name, true, '_').replace(/\./g, '-') + '_' + data.lights.join('-');
-						
-						description = 'Light Scenes';
-						pathDescription = 'Scene ' + data.name + ' for ' + (data.lights.length > 1 ? 'lights ' + data.lights.join(', ') : 'light ' + data.lights[0]);
-					}
-					
-					// GroupScene or LabScene
-					else
-					{
-						let group;
-						let scene = library.clean(data.name, true, '_').replace(/\./g, '-');
-						
-						if (data.type == 'LabScene')
-							group = 'HueLabsScenes';
-						
-						else
-						{
-							let groupId = library.clean(DEVICES['groups'][data.group].name, true, '_').replace(/\./g, '-');
-							let groupUid = DEVICES['groups'][data.group].uid;
-							group = adapter.config.nameId == 'append' ? groupId + '-' + groupUid : ('00' + groupUid).substr(-3) + '-' + groupId;
-						}
-						
-						// scene.group
-						if (adapter.config.sceneNaming == 'scene')
-						{
-							key = key.replace('.' + data.uid, '.' + scene);
-							pathKey = '.' + group;
-							description = 'Scene ' + data.name;
-							pathDescription = 'Group ' + DEVICES['groups'][data.group].name;
-						}
-						
-						// group.scene
-						else
-						{
-							key = key.replace('.' + data.uid, '.' + group);
-							pathKey = '.' + scene;
-							description = data.type == 'LabScene' ? 'Hue Lab Scenes' : 'Scenes for Group ' + DEVICES['groups'][data.group].name;
-							pathDescription = 'Scene ' + data.name;
-						}
-					}
-					
-					// Duplicates
-					let uid = library.getDeviceState(key + pathKey + '.uid');
-					if (uid && uid != data.uid)
-						pathKey += '_' + data.uid;
-					
-					// create channel for group and scene
-					library.set({
-							'node': key + pathKey,
-							'role': 'channel',
-							'description': pathDescription
-						},
-						null, { 'properties': { 'device': true } });
+					adapter.log.silly('Groups not yet given, thus scene ' + data.name + ' (' + data.uid + ') skipped for now.');
+					return false;
 				}
 				
-				// read data
-				readData(key + pathKey + '.' + nestedKey, data[nestedKey], channel);
+				// LightScene
+				let pathDescription = '';
+				if (data.type == 'LightScene')
+				{
+					key = key.replace('.' + data.uid, adapter.config.sceneNaming == 'scene' ? '.' + id : '.LightScenes');
+					pathKey = '.' + library.clean(data.name, true, '_').replace(/\./g, '-') + '_' + data.lights.join('-');
+					
+					description = 'Light Scenes';
+					pathDescription = 'Scene ' + data.name + ' for ' + (data.lights.length > 1 ? 'lights ' + data.lights.join(', ') : 'light ' + data.lights[0]);
+				}
+				
+				// GroupScene or LabScene
+				else
+				{
+					let groupId = library.clean(DEVICES['groups'][data.group].name, true, '_').replace(/\./g, '-');
+					let groupUid = adapter.config.nameId == 'append' ? data.group : ('00' + data.group).substr(-3);
+					
+					let group = data.type == 'LabScene' && (!adapter.config.groupHueLabs || adapter.config.groupHueLabs == 'extra') ? 'HueLabsScenes' : adapter.config.nameId == 'append' ? groupId + '-' + groupUid : groupUid + '-' + groupId;
+					let scene = library.clean(data.name, true, '_').replace(/\./g, '-');
+					
+					// update state
+					if (data.type == 'LabScene')
+					{
+						library.setDeviceState('groups.' + (adapter.config.nameId == 'append' ? groupId + '-' + groupUid : groupUid + '-' + groupId) + '.action.hueLabScene', library.getDeviceState('groups.' + (adapter.config.nameId == 'append' ? groupId + '-' + groupUid : groupUid + '-' + groupId) + '.action.on') ? data.uid : '');
+						DEVICES['groups'][data.group].lights.forEach(light =>
+						{
+							let lightId = library.clean(DEVICES['lights'][light].name, true, '_').replace(/\./g, '-');
+							let lightUid = adapter.config.nameId == 'append' ? light : ('00' + light).substr(-3);
+							
+							library.setDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.hueLabScene', library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.on') ? data.uid : '');
+						});
+					}
+					
+					// scene.group
+					if (adapter.config.sceneNaming == 'scene')
+					{
+						key = key.replace('.' + data.uid, '.' + scene);
+						pathKey = '.' + group;
+						description = 'Scene ' + data.name;
+						pathDescription = 'Group ' + DEVICES['groups'][data.group].name;
+					}
+					
+					// group.scene
+					else
+					{
+						key = key.replace('.' + data.uid, '.' + group);
+						pathKey = '.' + scene;
+						description = data.type == 'LabScene' ? 'Hue Lab Scenes' : 'Scenes for Group ' + DEVICES['groups'][data.group].name;
+						pathDescription = 'Scene ' + data.name;
+					}
+				}
+				
+				// Duplicates
+				let uid = library.getDeviceState(key + pathKey + '.uid');
+				if (uid && uid != data.uid)
+					pathKey += '_' + data.uid;
+				
+				// update path
+				DEVICES['scenes'][data.uid].path = key + pathKey;
+				
+				// create channel for group and scene
+				library.set({
+						'node': key + pathKey,
+						'role': 'channel',
+						'description': pathDescription
+					},
+					null, { 'properties': { 'device': true } });
 			}
+			
+			// read nested data
+			for (let nestedKey in data)
+				readData(key + pathKey + '.' + nestedKey, data[nestedKey], channel);
 			
 			// create channel
 			library.set({
@@ -932,12 +972,61 @@ function get(node)
 }
 
 /**
+ * Get remapped states (due to standardization)
  *
  */
-function sendCommand(device, actions)
+function getAction(action)
 {
-	// reset stored states so that retrieved states will renew
-	Object.keys(actions).forEach(action => library.setDeviceState(device.type + '.' + device.deviceId + '.' + action, ''));
+	// map bridge to states
+	let state = _MAPPING_STATES.indexOf(action);
+	let bridge = _MAPPING_BRIDGE.indexOf(action);
+	
+	if (bridge > -1)
+		return _MAPPING_STATES[bridge];
+	
+	// map states to bridge
+	else if (state > -1)
+		return _MAPPING_BRIDGE[state];
+	
+	// no changes
+	return action;
+}
+
+/**
+ * Send commands to device
+ *
+ */
+function sendCommand(device, actions, attempt = 1)
+{
+	// check if target value is actually different from current value
+	let value, obj;
+	for (let action in actions)
+	{
+		value = actions[action];
+		obj = action;
+		action = getAction(action);
+		
+		// get current value and compare
+		if (value == library.getDeviceState(device.path + '.action.' + action))
+			delete actions[obj];
+	}
+	
+	// check actions
+	if (Object.keys(actions).length == 0)
+	{
+		adapter.log.debug('Attempt ' + attempt + 'x - No commands to send to ' + device.name + ' (' + device.trigger + ').');
+		return false;
+	}
+	
+	// check reachability
+	if (device.type == 'lights' && !library.getDeviceState(device.path + '.state.reachable'))
+	{
+		adapter.log.warn('Attempt ' + attempt + 'x - Device ' + device.name + ' does not seem to be reachable! Command is sent anyway.');
+		
+		let reachableAttempt = attempt+1;
+		if (reachableAttempt <= MAX_ATTEMPTS)
+			setTimeout(() => sendCommand(device, actions, reachableAttempt), (adapter.config.reattemptIfUnreachable || 3)*1000);
+	}
 	
 	// align command xy
 	if (actions.xy && !Array.isArray(actions.xy))
@@ -956,7 +1045,7 @@ function sendCommand(device, actions)
 	
 	// send command
 	let error = false, lastAction = null;
-	adapter.log.debug('Send command to ' + device.name + ' (' + device.trigger + '): ' + JSON.stringify(actions) + '.');
+	adapter.log.debug('Attempt ' + attempt + 'x - Send commands to ' + device.name + ' (' + device.trigger + '): ' + JSON.stringify(actions) + '.');
 	
 	_request(options).then(res =>
 	{
@@ -966,39 +1055,58 @@ function sendCommand(device, actions)
 			adapter.log.debug('Response: ' + JSON.stringify(res));
 			
 			lastAction = {'lastAction': { 'timestamp': Math.floor(Date.now()/1000), 'datetime': library.getDateTime(Date.now()), 'lastCommand': JSON.stringify(actions), 'lastResult': JSON.stringify(res), 'error': true }};
-			readData(device.path, lastAction);
+			readData(device.path + '.action', lastAction);
 			readData('info', lastAction);
 		}
 		
 		else
 		{
+			// log last action in states
 			error = JSON.stringify(res).indexOf('error') > -1;
 			lastAction = {'lastAction': { 'timestamp': Math.floor(Date.now()/1000), 'datetime': library.getDateTime(Date.now()), 'lastCommand': JSON.stringify(actions), 'lastResult': JSON.stringify(res), 'error': error }};
-			readData(device.path, lastAction);
+			readData(device.path + '.action', lastAction);
 			readData('info', lastAction);
 			
+			// print results in log
 			let type;
 			res.forEach(msg =>
 			{
 				type = Object.keys(msg);
 				if (type == 'error')
-					adapter.log.warn('Error setting ' + msg[type].address + ': ' + msg[type].description);
+					adapter.log.warn('Attempt ' + attempt + 'x - Error setting ' + msg[type].address + ': ' + msg[type].description);
+				
 				else
-					adapter.log.debug('Successfully set ' + Object.keys(msg[type]) + ' on ' + device.name + ' (to ' + Object.values(msg[type]) + ').');
+				{
+					let state = Object.keys(msg[type]).shift();
+					let value = Object.values(msg[type]).shift();
+					let action = state.substr(state.lastIndexOf('/')+1);
+					
+					library._setValue(device.path + '.action.' + (_MAPPING[action] || action), value);
+					adapter.log.debug('Successfully set ' + state + ' on ' + device.name + ' (to ' + value + ').');
+				}
 			});
 			
 			if (!error)
-				adapter.log.info('Successfully set ' + device.name + '.');
+				adapter.log.info('Attempt ' + attempt + 'x - Successfully set ' + device.name + '.');
 		}
 		
 	}).catch(err =>
 	{
 		adapter.log.warn('Failed sending request to ' + device.trigger + '!');
-		adapter.log.debug('Error Message: ' + err.message);
+		adapter.log.debug(err.message);
 		
+		// log last action in states
 		lastAction = {'lastAction': { 'timestamp': Math.floor(Date.now()/1000), 'datetime': library.getDateTime(Date.now()), 'lastCommand': JSON.stringify(actions), 'lastResult': '[{ "error": { "type": "unknown", "address": "' + device.trigger + '", "description": "' + err.message + '" } }]', 'error': true }};
-		readData(device.path, lastAction);
+		readData(device.path + '.action', lastAction);
 		readData('info', lastAction);
+		
+		// try again if socket hang up (except if device is not reachable)
+		if (err.message && (err.message.indexOf('EHOSTUNREACH') > -1 || err.message.indexOf('socket hang up') > -1) && attempt <= MAX_ATTEMPTS && !(device.type == 'lights' && !library.getDeviceState(device.path + '.state.reachable')))
+		{
+			attempt++;
+			adapter.log.debug('Try again with attempt ' + attempt + 'x..');
+			setTimeout(() => sendCommand(device, actions, attempt), (adapter.config.reattemptIfError || 3)*1000);
+		}
 	});
 }
 

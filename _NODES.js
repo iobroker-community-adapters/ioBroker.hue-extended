@@ -136,9 +136,12 @@ module.exports =
 		"sensors.uniqueid": {"description": "Unique ID of the sensor", "role": "text", "type": "string"},
 		
 		// SCENES
+		"scenes.state.status": {"description": "Status", "role": "value", "type": "number"},
+		"scenes.state.lastupdated": {"description": "Last update", "role": "text", "type": "string"},
 		"scenes.appdata.data": {"description": "App specific data (free format string)", "role": "text", "type": "string"},
 		"scenes.appdata.version": {"description": "App specific version of the data field", "role": "value", "type": "number"},
 		"scenes.group": {"description": "Group ID that a scene is linked to", "role": "value", "type": "number"},
+		"scenes.lights": {"description": "Lights assigned to the scene", "role": "text", "type": "string"},
 		"scenes.lastupdated": {"description": "UTC time the scene has been created or has been updated by a PUT", "role": "text", "type": "string"},
 		"scenes.locked": {"description": "Indicates that the scene is locked by a rule or a schedule and cannot be deleted until all resources requiring or that reference the scene are deleted", "role": "indicator", "type": "boolean"},
 		"scenes.name": {"description": "Human readable name of the scene", "role": "text", "type": "string"},
