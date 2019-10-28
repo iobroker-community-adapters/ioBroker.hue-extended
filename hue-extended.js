@@ -846,7 +846,7 @@ function readData(key, data, channel)
 				
 				// Duplicates
 				let uid = library.getDeviceState(key + pathKey + '.uid');
-				if (uid && uid != data.uid)
+				if (uid && uid != data.uid && adapter.config.syncScenesDuplicates)
 					pathKey += '_' + data.uid;
 				
 				// update path
@@ -994,7 +994,7 @@ function sendCommand(device, actions, attempt = 1)
 		action = getAction(action);
 		
 		// get current value and compare
-		if (value == library.getDeviceState(device.path + '.action.' + action))
+		if (['transitiontime'].indexOf(action) === -1 && value == library.getDeviceState(device.path + '.action.' + action))
 			delete actions[obj];
 	}
 	
