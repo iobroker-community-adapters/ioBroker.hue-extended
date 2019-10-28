@@ -95,19 +95,6 @@ function startAdapter(options)
 			);
 		});
 		
-		// delete old states (which were not updated recently)
-		clearTimeout(garbageCollector);
-		garbageCollector = setTimeout(function runGarbageCollector()
-		{
-			if (!unloaded && adapter.config.garbageCollector)
-			{
-				adapter.log.debug('Running Garbage Collector...');
-				library.runGarbageCollector(adapterName + '.' + adapter.instance, Math.round(Date.now()/1000), true, 60*60); // delete states older than an hour
-				garbageCollector = setTimeout(runGarbageCollector, 60*60*1000); // run every hour
-			}
-			
-		}, 2*60*1000);
-		
 		// start listening for events in the queue
 		queue();
 	});
