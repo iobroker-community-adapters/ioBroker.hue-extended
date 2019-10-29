@@ -93,6 +93,17 @@ function startAdapter(options)
 				},
 				''
 			);
+			
+			// delete old states (which were not updated recently)
+			garbageCollector = setTimeout(function runGarbageCollector()
+			{
+				if (!unloaded && adapter.config.garbageCollector)
+				{
+					library.runGarbageCollector(adapterName + '.' + adapter.instance, true, [], true);
+					garbageCollector = setTimeout(runGarbageCollector, 60*60*1000); // run every hour
+				}
+				
+			}, 2*60*1000);
 		});
 		
 		// start listening for events in the queue

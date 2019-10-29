@@ -45,6 +45,7 @@
     "syncResources": "Sincronizzare Le Risorse",
     "syncRules": "Sincronizzare Le Regole",
     "syncScenes": "Sincronizzare Le Scene",
+    "syncScenesDuplicates": "Sincronizza anche scene duplicate",
     "syncSchedules": "Sincronizzare Orari",
     "syncSensors": "Sincronizzare I Sensori",
     "tab_alexa": "Alexa integrazione",

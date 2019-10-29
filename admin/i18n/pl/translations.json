@@ -45,6 +45,7 @@
     "syncResources": "Synchronizacja Zasobów",
     "syncRules": "Zasady Synchronizacji ",
     "syncScenes": "Synchronizować Sceny",
+    "syncScenesDuplicates": "Synchronizuj również zduplikowane sceny",
     "syncSchedules": "Zsynchronizować Rozkłady Jazdy",
     "syncSensors": "Synchronizować Czujniki",
     "tab_alexa": "Alexa integracji",

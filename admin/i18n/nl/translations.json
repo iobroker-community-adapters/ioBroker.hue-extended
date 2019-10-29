@@ -45,6 +45,7 @@
     "syncResources": "Bronnen Synchroniseren",
     "syncRules": "Synchroniseren Regels",
     "syncScenes": "Synchroniseren Schermen",
+    "syncScenesDuplicates": "Synchroniseer ook dubbele scènes",
     "syncSchedules": "Synchroniseren Schema ' S",
     "syncSensors": "Synchroniseren Sensoren",
     "tab_alexa": "Alexa integratie",
