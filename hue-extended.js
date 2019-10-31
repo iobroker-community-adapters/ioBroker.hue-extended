@@ -394,7 +394,7 @@ function startAdapter(options)
 					commands.ct = Math.max(Math.min(Math.round(1 / value * 1000000), 500), 153);
 				
 				// convert HUE / CT to XY
-				if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && library.getDeviceState(appliance.path + '.manufacturername') != 'Philips')
+				if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && library.getDeviceState(appliance.path + '.manufacturername') != 'PhilipsX')
 				{
 					if (!rgb)
 					{
@@ -405,7 +405,7 @@ function startAdapter(options)
 						}
 						else if (commands.hue !== undefined && adapter.config.hueToXY)
 						{
-							rgb = hsv ? _color.hsv.rgb(hsv) : _color.hsv.rgb([commands.hue, (commands.sat || library.getDeviceState(appliance.path + '.action.sat')), commands.bri || library.getDeviceState(appliance.path + '.action.bri')]);
+							rgb = hsv ? _color.hsv.rgb(hsv) : _color.hsv.rgb([commands.hue, (commands.sat || library.getDeviceState(appliance.path + '.action.saturation')), commands.bri || library.getDeviceState(appliance.path + '.action.brightness')]);
 							delete commands.hue;
 						}
 					}
