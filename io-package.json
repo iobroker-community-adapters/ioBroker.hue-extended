@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "hue-extended",
-        "version": "1.1.2",
+        "version": "1.1.3",
         "title": "Philips Hue Extended",
         "desc": {
             "en": "Integration of all your Philips Hue Devices with your ioBroker",
@@ -16,9 +16,210 @@
             "zh-cn": "一体化的所有飞利浦色调设备与你ioBroker"
         },
         "news": {
-			"releases": {
+			"all-releases": {
 				"en": "Please see release page (https://github.com/Zefau/ioBroker.hue-extended/releases) for changelog and detailed information."
-			}
+			},
+            "1.1.0": {
+				"en": "- add support for Hue Labs scenes\n- add retry if bridge returns error `socket hang up`\n- add retry if device is not reachable"
+			},
+            "1.0.2": {
+				"en": "- added scenes from Hue Labs"
+			},
+            "1.0.1": {
+				"en": "- fixed incorrect omitting GroupScenes"
+			},
+            "1.0.0": {
+                "en": "- BREAKING CHANGE: changed certain objects due to standardization\n- fixed incorrect conversion between color spaces (rgb, hex, etc.)",
+                "de": "- Wichtige ÄNDERUNG: geändert, bestimmte Objekte durch Standardisierung\n- fixed falsche Konvertierung zwischen Farbräumen (rgb, hex, etc.)",
+                "ru": "- Последние изменение: изменены некоторые объекты из-за стандартизации\n- исправлено некорректное преобразование между цветовыми пространствами (RGB, и наговор, и т. д.)",
+                "pt": "- ALTERAÇÃO de última hora: mudou de determinados objetos, devido à padronização\n- fixo incorreta conversão entre espaços de cor (rgb, hexadecimal, etc.)",
+                "nl": "- Het BREKEN van VERANDERING: gewijzigd bepaalde objecten als gevolg van standaardisatie\n- vaste onjuiste omzetting tussen kleurruimte (rgb hex, enz.)",
+                "fr": "- MODIFICATION de RUPTURE: modification de certains objets en raison de la normalisation\n- correction d'un bug provoquant la conversion entre les espaces de couleurs (rgb, hex, etc.)",
+                "it": "- ROTTURA della MODIFICA: modificato alcuni oggetti a causa della standardizzazione\n- corretto errore di conversione tra gli spazi colore (rgb, hex, etc.)",
+                "es": "- CAMBIO de hora: se ha cambiado ciertos objetos debido a la estandarización\n- fija incorrecta de la conversión entre espacios de color (rgb, hex, etc.)",
+                "pl": "- Ostatnie zmiany: zmieniono niektóre obiekty z powodu standaryzacji\n- poprawiono nieprawidłowe konwersja między przestrzeniami kolorów (RGB, i наговор, itp.)",
+                "zh-cn": "-裂变化：改变某些物体由于标准化\n-固定不正确之间的转换颜色空间(rgb hex，等等。)"
+            },
+            "0.9.0": {
+                "en": "- BREAKING CHANGE: changed grouping of scenes and added option to choose how objects are mapping (either scenes.<group>.<scene>.objects or scenes.<scene>.<group>.objects)\n- retrieving group for all-lights directly from Hue Bridge API (instead of assembling through states)\n- added option to delete outdated devices (gargabe collector)",
+                "de": "- Wichtige ÄNDERUNG: geänderte Gruppierung von Szenen und option Hinzugefügt, um zu wählen, wie Objekte mapping (entweder Szenen.<Gruppe>.<Szene>.Objekte oder Szenen.<Szene>.<Gruppe>.Objekte)\n- abrufen-Gruppe für alle-Lichter direkt aus Hue Bridge API (statt der Zusammenstellung durch die Staaten)\n- option Hinzugefügt, um zu löschen Sie veraltete Geräte (gargabe collector)",
+                "ru": "- Последние изменение: изменена группировка сцены и добавлена опция, чтобы выбрать, как объекты сопоставления (либо сцен.<группы>.<сцена>.объекты или сцены.<сцена>.<группа>.объектов)\n- получение группы для всех-огни непосредственно из Хюэ мост API (вместо монтаж через штаты)\n- добавлена опция для удаления устаревших устройств (коллектор gargabe)",
+                "pt": "- ALTERAÇÃO de última hora: alterado agrupamento de cenas e adicionada opção para escolher a forma como os objetos são de mapeamento (ou cenas.<grupo>.<cena>.objetos ou cenas.<cena>.<grupo>.objetos)\n- recuperação de grupo para todas as luzes diretamente a partir de Tonalidade Ponte API (em vez de montar através de estados)\n- adicionada opção para excluir desatualizado dispositivos (gargabe collector)",
+                "nl": "- Het BREKEN van VERANDERING: gewijzigd groepering van scènes en toegevoegde optie om te kiezen hoe objecten worden mapping (ofwel scènes.<groep>.<scene>.voorwerpen of scènes.<scene>.<groep>.objecten)\n- ophalen groep voor alle-lichten rechtstreeks vanuit Hue Bridge API (in plaats van montage door staten)\n- optie toegevoegd om het verwijderen van verouderde apparaten (gargabe collector)",
+                "fr": "- MODIFICATION de RUPTURE: modification de regroupement des scènes et ajout d'une option pour choisir la manière dont les objets sont de cartographie (soit scènes.<groupe>.<scène>.les objets ou les scènes.<scène>.<groupe>.les objets)\n- récupération de groupe pour toutes les lumières de la directement à partir de la Teinte Pont de l'API (au lieu de rassembler à travers les états)\n- ajout d'une option pour supprimer les périphériques obsolètes (gargabe collector)",
+                "it": "- ROTTURA della MODIFICA: modificato il raggruppamento di scene e aggiunta l'opzione per scegliere il modo in cui gli oggetti sono mapping (o scene.<gruppo>.<scena>.oggetti o scene.<scena>.<gruppo>.gli oggetti)\n- il recupero di gruppo per tutte le luci direttamente dalla Tonalità Ponte API (invece di assemblare uniti)\n- aggiunta l'opzione per eliminare obsoleto dispositivi (gargabe collector)",
+                "es": "- CAMBIO de hora: se ha cambiado la agrupación de las escenas y añadida la opción de elegir cómo los objetos son de asignación (cualquiera de las escenas.<grupo>.<escena>.objetos o escenas.<escena>.<grupo>.los objetos)\n- recuperación de grupo para todas las luces directamente de Hue Puente de la API (en lugar de armar a través de los estados)\n- añadida la opción de eliminar dispositivos obsoletos (gargabe coleccionista)",
+                "pl": "- Ostatnie zmiany: poprawiono grupowanie sceny i dodano opcję, aby wybrać, jak obiekty mapowania (lub scen.<grupy>.<scena>.obiektów lub scen.<scena>.<grupa>.obiektów)\n- uzyskiwanie grupy dla wszystkich-światła bezpośrednio z Hue bridge API (zamiast montaż przez zjednoczone)\n- dodano opcję, aby usunąć starszych urządzeń (kolektor gargabe)",
+                "zh-cn": "-裂变化：改变组的场景而增加的选择到如何选择对象映射(无论是现场。<组>.<现场>.对象或现场。<现场>.<组>.对象)\n-检索组对于所有的灯光，直接从顺桥API(而不是通过组装国)\n-增加的选择，以删除过时的设备(gargabe集)"
+            },
+            "0.8.8": {
+                "en": "- added option to set level to 0 when device is turned off\n- fix {\"on\":true,\"bri\":null} when device is turned on\n- reduced log messages for successful applied actions",
+                "de": "- Hinzugefügt: option zum setzen der level auf 0, wenn das Gerät ausgeschaltet ist\n- fix {\"on\":true,\"bri\":null}, wenn das Gerät eingeschaltet ist\n- reduziert die log Nachrichten für erfolgreich angewandte Maßnahmen",
+                "ru": "- добавлена опция для установки уровня 0, когда устройство выключено\n- исправить {\"о\":правда,\"Брай\":нуль}, когда устройство включено\n- уменьшена сообщения журнала для успешных прикладных действий",
+                "pt": "- adicionada opção para definir o nível para 0 quando o dispositivo está desligado\n- correção {\"on\":true,\"bri\":null} quando o dispositivo for ligado\n- redução de mensagens de log para o sucesso das ações aplicadas",
+                "nl": "- optie toegevoegd om het niveau op 0 wanneer het apparaat is uitgeschakeld\n- fix {\"on\":true,\"bri\":null} wanneer het apparaat is ingeschakeld\n- verminderde berichten in het logboek voor succesvol toegepast acties",
+                "fr": "- ajout d'une option pour définir le niveau à 0 lorsque l'appareil est éteint\n- fix {\"à\":true,\"bri\":null} lorsque l'appareil est allumé\n- réduit les messages de journal pour la réussite des actions appliquées",
+                "it": "- aggiunta l'opzione per impostare il livello a 0 quando il dispositivo è spento\n- fix {\"a\":true,\"bri\":null} quando il dispositivo è acceso\n- ridotti i messaggi di log per il successo delle azioni applicate",
+                "es": "- añadida la opción para ajustar el nivel a 0 cuando el dispositivo está apagado\n- revisión {\"a\":true,\"bri\":null} cuando el dispositivo está encendido\n- reducción de los mensajes de registro para el éxito de las medidas aplicadas",
+                "pl": "- dodano opcję, aby ustawić poziom 0, gdy urządzenie jest wyłączone\n- naprawić {\"o\":true,\"Bry\":null}, gdy urządzenie jest włączone\n- zmniejszona wiadomości dziennika do udanych stosowanych działań",
+                "zh-cn": "-增加选择来设定的水平为0时装置被关闭\n-修复{\"在\":true,\"bri\":null}当设备开机\n-减少的日志信息对于成功应用的行动"
+            },
+            "0.8.7": {
+                "en": "- added option to use Queue optionally (or sending commands directly)\n- fixed bug sending incomplete commands when commands include bri (#2)\n- fixed bug not being able to deactivate / unset option -using xy instead of hue-",
+                "de": "- option Hinzugefügt, um die Verwendung der Warteschlange Optional (oder das senden von Kommandos)\n- behoben: Fehler senden unvollständige Befehle als Befehle enthalten bri (#2)\n- behoben: Fehler, die nicht in der Lage zu deaktivieren / unset option -mit xy statt der Farbton-",
+                "ru": "- добавлена возможность использовать очереди по желанию (или отправки команд напрямую)\n- Исправлена ошибка отправки неполных команд, когда команды включают Брай (#2)\n- Исправлена ошибка, не будучи в состоянии отключить опцию-Использовать / отменить ху вместо Гуе-",
+                "pt": "- adicionada opção para usar Fila, opcionalmente, (ou enviar comandos diretamente)\n- corrigido o erro de envio incompleto comandos quando comandos incluem bri (#2)\n- corrigido o bug de não ser capaz de desativar / remover a opção -usando o gráfico de dispersão, em vez de hue-",
+                "nl": "- optie toegevoegd om het gebruik van de Wachtrij optioneel (of het verzenden van commando ' s direct)\n- bug opgelost verzenden van onvolledige opdrachten als opdrachten zijn bri (#2)\n- bug niet kunnen uitschakelen in - / uitschakelen optie -via xy in plaats van hue-",
+                "fr": "- ajout d'une option pour l'utilisation de la File d'attente en option (ou d'envoyer directement des commandes)\n- correction d'un bug d'envoi incomplet des commandes lorsque les commandes sont bri (#2)\n- correction d'un bug de ne pas être en mesure de désactiver / unset option à l'aide de xy au lieu de hue-",
+                "it": "- aggiunta l'opzione per utilizzare la Coda di scelta (o l'invio di comandi direttamente)\n- corretto il bug di invio incompleto comandi quando i comandi includono la bri (#2)\n- corretto il bug di non essere in grado di disattivare / deseleziona l'opzione-usando xy invece di tonalità-",
+                "es": "- añadida la opción de utilizar Cola opcionalmente (o el envío de comandos directamente)\n- corregido el error de enviar incompleta comandos cuando los comandos se incluyen bri (#2)\n- corregido el bug de no poder desactivar / desactivar la opción de utilizar xy en lugar de hue-",
+                "pl": "- dodano możliwość korzystania z kolejki na życzenie (lub wysyłania poleceń bezpośrednio)\n- Naprawiono błąd wysyłania niepełnych poleceń, gdy drużyny zawierają Bry (#2)\n- Naprawiono błąd, nie będąc w stanie wyłączyć opcję-Użyć / anulować hu zamiast Гуе-",
+                "zh-cn": "-增加的选择使用排队任选(或发送命令直接)\n-修正不完整发送命令时命令包括bri(#2)\n-修正错误不能够停/取消的选择-使用x-y而不是顺化"
+            },
+            "0.8.6": {
+                "en": "- added support for LightScenes\n- added option to hide deleted devices\n- added support to trigger schedules\n- added support to trigger rules\n- fixed incorrect conversion between bri and level",
+                "de": "- zusätzliche Unterstützung für LightScenes",
+                "ru": "- добавлена поддержка для LightScenes",
+                "pt": "- adicionado suporte para LightScenes",
+                "nl": "- toegevoegde ondersteuning voor LightScenes",
+                "fr": "- ajout du support pour LightScenes",
+                "it": "- aggiunto il supporto per LightScenes",
+                "es": "- añadido soporte para los LightScenes",
+                "pl": "- dodano wsparcie dla LightScenes",
+                "zh-cn": "-增加支持LightScenes"
+            },
+            "0.8.5": {
+                "en": "- added trigger for sensors with state config.on (moved and mapped as action.on)",
+                "de": "- Hinzugefügt Auslöser für sensoren mit Status config.auf (verschoben und zugeordnet als Aktion.auf)",
+                "ru": "- добавлен триггер для датчиков с состоянием конфигурации.на (перемещать и сопоставляются действий.о)",
+                "pt": "- adicionado gatilho para sensores com o estado de configuração.em (deslocado e mapeada como a ação.em)",
+                "nl": "- toegevoegd trigger voor sensoren met state config.op (verplaatst en toegewezen actie.op)",
+                "fr": "- ajout de déclenchement pour les capteurs de l'état de config.sur (déplacé et cartographiés comme action.sur)",
+                "it": "- aggiunto il trigger per sensori con config.a (spostato e mappati in azione.a)",
+                "es": "- añadido gatillo para sensores con el estado de configuración.en (desplazado y se asigna como acción.a)",
+                "pl": "- dodano wyzwalacz dla czujników stanu konfiguracji.na (przenosić i są mapowane działań.o)",
+                "zh-cn": "-加入触发的传感器与国家配置。在(移动和映射为行动。上)"
+            },
+            "0.8.4": {
+                "en": "- fixed bug -Cannot read property getObject of undefined- on adapter start\n- fixed replacement of specials characters within device names\n- added object definitions for bri, level, ct, hue, hue_degrees and sat",
+                "de": "- behoben: Fehler -kann Nicht Lesen-Eigenschaft getObject undefined - adapter starten\n- Festnetz-Ersatz-Angebote von Zeichen im Gerätenamen\n- zusätzliche Objekt-Definitionen für bri -, level -, ct -, Farbton -, hue_degrees und setzte sich",
+                "ru": "- Исправлена ошибка -не удается прочитать свойство функции getobject неопределен - пуск адаптера \n- исправлено заменой спец символы в имена устройств \n- добавлены определения объекта Бри, уровень, КТ, оттенок, hue_degrees и сел",
+                "pt": "- corrigido o erro -não é Possível ler a propriedade getObject de indefinido - adaptador para iniciar\n- substituição fixo de caracteres especiais dentro nomes de dispositivos\n- adicionado definições de objeto para bri, nível, ct, matiz, hue_degrees e sentou-se",
+                "nl": "- bug opgelost -Niet kan lezen eigendom getObject undefined adapter - start\n- vaste vervanging van specials tekens in namen van het apparaat\nde toegevoegde object-definities voor bri, niveau, ct, hue, hue_degrees en zat",
+                "fr": "- correction d'un bug, Impossible de lire la propriété getObject de undefined adaptateur commencer\n- remplacement fixe de caractères spéciaux dans les noms de périphériques\n- ajout des définitions d'objet pour la bri, le niveau, le ct, la teinte, hue_degrees et sat",
+                "it": "- corretto il bug -Impossibile leggere la proprietà getObject undefined adattatore di iniziare\n- fissa la sostituzione di caratteri speciali all'interno di nomi di periferica\naggiunto oggetto definizioni per bri, livello, ct, tonalità, hue_degrees e sat",
+                "es": "- corregido el error -No se puede leer la propiedad getObject de indefinido - en el adaptador de inicio\n- reemplazo fijo de caracteres especiales en los nombres de dispositivo\n- añadido definiciones de objeto de bri, el nivel, el ct, el tono, la hue_degrees y se sentó",
+                "pl": "- Naprawiono błąd -nie można odczytać właściwość funkcji getobject неопределен - start zasilacza \n- naprawiono wymianą specjalne znaki do nazwy urządzeń \n- dodano definicji obiektu Bree, poziom, CT, barwa, hue_degrees i usiadł",
+                "zh-cn": "-修正错误不能读取财产的许未定义的适配器开始\n-固定替代的特色人物内的设备名称\n-增加对象的定义bri,一级，ct，顺化，hue_degrees坐"
+            },
+            "0.8.3": {
+                "en": "- added lastAction channel (with states lastCommand, lastResult, error, timestamp and datetime) to each light and group as well as for all lights / groups in info channel\n- fixed error retrieving and setting state xy\n- moved syncing, timestamp, datetime to info channel",
+                "de": "- Hinzugefügt lastAction Kanal (mit den Staaten lastCommand, lastResult, Fehler, timestamp und datetime) jeder Licht-und Gruppe, sowie für alle Leuchten / Gruppen im info-Kanal\n- Fehler behoben, abrufen und festlegen von Staat xy\n- verschoben Synchronisation, timestamp, datetime-info-Kanal",
+                "ru": "- добавлено канал lastAction (с lastCommand государств, lastResult, ошибки, timestamp и datetime) в светлые и группы, а также для всех огни / групп в информационный канал\n- Исправлена ошибка извлечения и установки государства ху\n- переехал синхронизации, метки, дата информационный канал",
+                "pt": "- adicionado lastAction canal (com os estados lastCommand, lastResult, erro, carimbo de data / hora e data / hora) para cada luz e de grupo, bem como para luzes / grupos de informações do canal\n- corrigido erro ao recuperar e definir o estado de dispersão\n- mudou-se de sincronizar, carimbo de data / hora data / hora para info de canal",
+                "nl": "- toegevoegd lastAction kanaal (met staten lastCommand, lastResult, fout, timestamp en datum en tijd) op elke licht en de groep als alle lichten / - groepen in het info kanaal\n- vaste fout opgetreden bij het ophalen en instellen van state xy\n- verplaatst synchroniseren, tijdstempel datetime naar info kanaal",
+                "fr": " ajoutée lastAction canal (avec les états lastCommand, lastResult, d'erreur, d'horodatage et datetime) pour chaque lumière et de groupe ainsi que tous les lumières ou les groupes dans des canaux d'information\n- correction d'erreur lors de la récupération et de l'état xy\n- déplacement de la synchronisation, timestamp, date / heure d'info de canal",
+                "it": "- aggiunto lastAction canale (con gli stati lastCommand, lastResult, errore, timestamp e datetime) per ogni luce e di gruppo, nonché per tutte le luci / gruppi nel canale di informazioni\n- corretto errore durante il recupero e l'impostazione dello stato xy\n- spostato la sincronizzazione, \"timestamp\", \" datetime per info canale",
+                "es": "- añadido lastAction canal (con los estados lastCommand, lastResult, error, marca de hora y fecha y hora) para cada luz y de grupo, así como de todas las luces / grupos en el canal de información\n- corregido un error al recuperar y establecer el estado de xy\n- movió la sincronización de la hora, datetime para canal de información",
+                "pl": "- dodano kanał lastAction (z lastCommand państw, lastResult, błędy, timestamp i datetime) w jasne i grupy, a także dla wszystkich świateł / grup w kanał informacyjny\n- Naprawiono błąd podczas pobierania i instalowania państwa hu\n- przeniósł synchronizacji, etykieta, data kanał informacyjny",
+                "zh-cn": "-增加lastAction道(与国lastCommand,.lastResult、错误的时间戳和datetime)每个光团以及为所有的灯/团体在信息通道\n-固定的错误检索和设置状态xy\n-移动同步、时间戳、datetime到信息的通道"
+            },
+            "0.8.2": {
+                "en": "- Node.js v6 compatibility\n- fixed error retrieving a new user from Hue Bridge",
+                "de": "- Node.js v6-Kompatibilität\n- Fehler beim abrufen eines neuen Benutzer aus Hue Bridge",
+                "ru": "- Node.js совместимость В6 \n- Исправлена ошибка при получении нового пользователя из Хюэ мост",
+                "pt": "- Node.js v6 de compatibilidade\n- corrigido erro ao recuperar um novo usuário de Tonalidade Ponte",
+                "nl": "- Node.js v6 compatibiliteit\n- vaste fout bij het ophalen van een nieuwe gebruiker van Hue Bridge",
+                "fr": "- Node.js v6 de compatibilité\n- correction d'une erreur de la récupération d'un nouvel utilisateur à partir de la Teinte Pont",
+                "it": "- Node.js v6 compatibilità\n- corretto errore durante il recupero di un nuovo utente da Tonalità Ponte",
+                "es": "- Node.js v6 de compatibilidad\n- corregido un error al recuperar un nuevo usuario de Hue Bridge",
+                "pl": "- Node.js zgodność B6 \n- Naprawiono błąd podczas pobierania nowego użytkownika z Hue bridge",
+                "zh-cn": "-Node.js v6兼容性\n-固定的错误检索的新的用户顺桥"
+            },
+            "0.8.1": {
+                "en": "- fixed incorrect Version in ioBroker",
+                "de": "- fixed falsche Version in ioBroker",
+                "ru": "- исправлена некорректная версия в ioBroker",
+                "pt": "- corrigido Versão incorreta em ioBroker",
+                "nl": "- vaste onjuiste Versie in ioBroker",
+                "fr": "- correction d'une mauvaise Version de ioBroker",
+                "it": "- corretto errore in Versione ioBroker",
+                "es": "- fija Versión incorrecta en ioBroker",
+                "pl": "- poprawiono nieprawidłowe wersja w ioBroker",
+                "zh-cn": "-固定不正确的版本在ioBroker"
+            },
+            "0.8.0": {
+                "en": "- reworked triggering scenes\n- fixed missing level state on non-Philips lights\n- changed data retrieval from Hue Bridge to reduce parallel connection attemps\n- added connection retry when Hue Bridge returns error",
+                "de": "- überarbeitet das auslösen von Szenen\n- Feste fehlende level-Status auf nicht-Philips-Leuchten\n- geändert abrufen von Daten aus Hue-Bridge zu reduzieren Parallelschaltung versucht\n- Hinzugefügt Zusammenhang wiederholen, wenn Hue Bridge gibt Fehler",
+                "ru": "- переделан запуск сцены\n- исправлено отсутствие на государственном уровне не-огней Philips\n- изменен извлечения данных из Хюэ моста, чтобы уменьшить параллельное соединение попытки\n- добавлена подключения повторного при Hue мост возвращает ошибку",
+                "pt": "- reformulado provocando cenas\n- corrigido a falta de nível de estado não-Philips luzes\n- mudou de recuperação de dados a partir de Tonalidade Ponte para reduzir conexão paralela tentativas\n- adicionado novas tentativas de conexão quando Tonalidade Ponte retorna erro",
+                "nl": "- herwerkte triggering schermen\n- vaste ontbrekende niveau staat op non-Philips lampen\n- gewijzigd gegevens ophalen van de Hue Bridge te verminderen parallelle verbinding pogingen\n- toegevoegd verbinding opnieuw Hue Bridge retourneert fout",
+                "fr": "- retravaillé le déclenchement de scènes\n- correction d'un manque au niveau de l'état sur la non-Philips lumières\n- changé la récupération de données à partir de la Teinte Pont de réduire parallèle tentatives de connexion\n- ajout de tentatives de connexion lorsque la Teinte Pont renvoie l'erreur",
+                "it": "- rielaborato attivazione scene\n- fisso mancante a livello di stato di non-Philips luci\n- cambiato il recupero dei dati da Tonalità Ponte per ridurre il collegamento in parallelo tentativi\n- aggiunto un nuovo tentativo di connessione quando la Tonalità Ponte restituisce l'errore",
+                "es": "- reelaborado activación de escenas\n- falta fijos a nivel de estado sobre la no-Philips luces\n- se ha modificado de recuperación de datos de Hue Bridge para reducir la posibilidad de conexión en paralelo intentos\n- añadido de reintento de conexión cuando Hue Bridge devuelve el error",
+                "pl": "- przerobiony uruchomienie sceny\n- naprawiono brak na szczeblu państwowym nie-światła Philips\n- zmieniony pobierania danych z Hue bridge, aby zmniejszyć połączenie równoległe próby\n- dodano ponownego połączenia w Hue bridge zwraca błąd",
+                "zh-cn": "-重新触发的场景\n-缺少固定等级的状态在非飞利浦路灯\n变化的数据检索色的桥梁，以减少平行的尝试连接\n-增加连接试的时候顺桥返回的错误"
+            },
+            "0.7.0": {
+                "en": "- added 'all'-group to apply action on all groups at once\n- added commands action to apply own commands combination at once\n- lowered minimum refresh time",
+                "de": "- Hinzugefügt \"alle\" -Gruppe anwenden der Aktion auf alle Gruppen auf einmal\n- einige Befehle Hinzugefügt, die Aktion für eigene Befehle Kombination auf einmal\n- tiefergelegtes minimale refresh-Zeit",
+                "ru": "- добавлены \" все \" -группы, чтобы применить действие на все группы сразу\n- добавлены команды действия, чтобы применить собственную комбинацию команд сразу\n- снижены минимальные сроки обновления ",
+                "pt": "- adicionado \"todos\" -grupo para aplicar a acção em todos os grupos de uma vez\n- adicionados os comandos de ação para aplicar comandos, combinação de uma vez\n- baixou o mínimo de tempo de atualização",
+                "nl": "- toegevoegd 'alle'-groep van toepassing zijn actie op alle groepen tegelijk\n- toegevoegd opdrachten maatregelen voor de toepassing van eigen opdrachten combinatie in een keer\n- verlaagde minimum vernieuwingstijd",
+                "fr": "- ajout de 'tous'-groupe pour appliquer l'action à tous les groupes à la fois\n- ajout de commandes d'action pour appliquer propres commandes combinaison à la fois\n- baissé minimum le temps de rafraîchissement de",
+                "it": "- aggiunto \"tutti\" -gruppo per applicare l'azione su tutti i gruppi in una sola volta\n- aggiunti i comandi di azione per applicare i propri comandi combinazione in una volta\n- abbassato il minimo tempo di refresh",
+                "es": "- añadido \"todos\" -grupo de acción de aplicación en todos los grupos a la vez\n- añadido los comandos de acción para aplicar propios comandos combinación de una vez\n- bajó mínimo el tiempo de actualización",
+                "pl": "- dodano \"wszystko\" -grupy, aby wykonać działanie na wszystkie grupy <url>\n- dodano polecenia czynności, aby zastosować własną kombinację poleceń <url>\n- obniżone minimalne terminy aktualizacji ",
+                "zh-cn": "-添加\"所有\"组申请的行动的所有团体一次\n-增加的命令行动适用自己的命令合在一旦\n-降低最低刷新时间"
+            },
+            "0.6.2": {
+                "en": "- fixed error when triggering scene\n- fixed display error in adapter configuration interface",
+                "de": "- Fehler behoben beim Auslösen von Szenen\n- Anzeigefehler in der Adapter-Konfiguration behoben",
+                "ru": "- Исправлена ошибка при запуска сцены\n- Исправлена ошибка отображения в адаптер интерфейс конфигурации ",
+                "pt": "- corrigido erro ao desencadeamento de cena\n- corrigido o erro de exibição no adaptador de interface de configuração",
+                "nl": "- fout opgelost bij het activeren van de scène\n- vaste display fout in configuratie-interface adapter",
+                "fr": "- correction d'une erreur lors du déclenchement de la scène\n- correction de l'affichage d'erreur dans la configuration de l'adaptateur d'interface",
+                "it": "- corretto errore quando si attivano scena\n- corretto errore di visualizzazione nella scheda di interfaccia di configurazione",
+                "es": "- corregido un error al desencadenamiento de la escena\n- corregido el error en la configuración del adaptador de interfaz",
+                "pl": "- Naprawiono błąd podczas uruchamiania sceny\n- Naprawiono błąd wyświetlania w adapter interfejs konfiguracji ",
+                "zh-cn": "-固定错误时的触发的场景\n-固定显示错误配置接口适配器"
+            },
+            "0.6.1": {
+                "en": "- corrected German translations\n- completed README",
+                "de": "- korrigierte Deutsche Übersetzung\n- finalisierte README",
+                "ru": "- исправлен немецкий перевод\n- завершена ридми",
+                "pt": "- corrigido traduções em alemão\n- concluída leia-me",
+                "nl": "- gecorrigeerd duitse vertalingen\n- afgerond LEESMIJ-bestand",
+                "fr": "- correction de traductions allemandes\n- terminé README",
+                "it": "- correzione di traduzioni in tedesco\n- completato il README",
+                "es": " corrección de traducciones en alemán\n- completado LÉAME",
+                "pl": "- poprawiono tłumaczenie niemieckie\n- zakończona readme",
+                "zh-cn": "-修正的德语翻译\n-完成README"
+            },
+            "0.6.0": {
+                "en": "- implemented queue for any applied actions\n- implemented user creation in interface configuration (admin panel)\n- added additional actions for color spaces rgb, hsv, cmyk, xyz and hex",
+                "de": "- implementiert die queue für alle angewandten Aktionen\n- implementiert die user-Kreation in der interface-Konfiguration (admin-panel)\n- zusätzliche Aktionen für die Farbräume rgb, hsv, cmyk, xyz-und hex",
+                "ru": "- реализована очередь для применения каких-либо действий\n- создание пользователей в конфигурации интерфейс (админка)\n- добавлены дополнительные действия для цветовые пространства RGB, ВПГ, модель CMYK, XYZ и наговор",
+                "pt": "- implementado fila para qualquer aplicadas ações\n- implementada a criação de usuário na interface de configuração (painel de administrador)\n- adicionado ações adicionais para espaços de cor rgb, hsv, cmyk, xyz e hexadecimal",
+                "nl": "- uitgevoerd in de rij voor de eventuele toegepaste acties\n- uitgevoerd gebruiker in de interface-configuratie (admin panel)\n- extra acties voor kleurruimte rgb, hsv, cmyk, xyz en hex",
+                "fr": "- mise en œuvre de la file d'attente pour toutes les actions appliquées\n- mise en œuvre la création d'un utilisateur dans la configuration de l'interface (panneau d'administration)\n- ajout d'actions supplémentaires pour les espaces colorimétriques rvb, hsv, cmjn, xyz et hex",
+                "it": "- implementato in coda per eventuali azioni applicate\n- implementata la creazione dell'utente nell'interfaccia di configurazione (pannello di amministrazione)\n- aggiunta di ulteriori azioni per spazi di colore rgb, hsv, cmyk, xyz e hex",
+                "es": "- implementado cola para cualquier aplicar acciones\n- implementado la creación del usuario en la configuración de la interfaz (panel de administración)\n- añadido acciones adicionales para los espacios de color rgb, hsv, cmyk, xyz y hexadecimal",
+                "pl": "- realizowane wszystkim do stosowania jakichkolwiek działań\n- tworzenie użytkowników w konfiguracji interfejs (админка)\n- dodano dodatkowe kroki, aby przestrzenie kolorów RGB, HSV, model CMYK, XYZ i наговор",
+                "zh-cn": "-实施的队列中的任何适用的行动\n实现的用户建立接口的结构(管理小组)\n-增加额外的行动rgb颜色空间，单纯疱疹病毒，cmyk,xyz和hex"
+            },
+            "0.5.0": {
+                "en": "- added support for scenes (reorganized states and added trigger)\n- fixed action xy",
+                "de": "- zusätzliche Unterstützung für Szenen (reorganisiert Staaten und zusätzlichen trigger)\n- Feste Aktion xy",
+                "ru": "- добавлена поддержка для сцены (реорганизована государства и добавил триггер)\n- исправлено действие ху",
+                "pt": "- adicionado suporte para cenas (reorganizada estados e adicionado trigger)\n- corrigido ação xy",
+                "nl": "- toegevoegde ondersteuning voor alle schermen (gereorganiseerd staten en toegevoegd trigger)\n- vaste actie xy",
+                "fr": "- ajout du support pour les scènes (réorganisé états et ajouté de déclenchement)\n- correction d'action xy",
+                "it": "- aggiunto il supporto per le scene stati riorganizzati e aggiunto trigger)\n- risolto azione xy",
+                "es": "- añadido soporte para las escenas (reorganizado los estados y añadió trigger)\n- fija la acción xy",
+                "pl": "- dodano wsparcie dla sceny (reorganizacji państwa i dodał wyzwalacz)\n- poprawiono działanie hu",
+                "zh-cn": "-增加支持的场景(重组国和加入触发)\n-固定行动xy"
+            }
         },
         "license": "MIT",
         "platform": "Javascript/Node.js",

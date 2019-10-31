@@ -99,7 +99,7 @@ function startAdapter(options)
 			{
 				if (!unloaded && adapter.config.garbageCollector)
 				{
-					library.runGarbageCollector(adapterName + '.' + adapter.instance, true, [], true);
+					library.runGarbageCollector(adapterName + '.' + adapter.instance, true, 24*60*60); // delete states older than 24h
 					garbageCollector = setTimeout(runGarbageCollector, 60*60*1000); // run every hour
 				}
 				
@@ -291,7 +291,7 @@ function startAdapter(options)
 					if (command.body && command.body.status === 0)
 					{
 						library.setDeviceState(appliance.path + '.action.hueLabScene', '');
-						sendCommand({ 'path': DEVICES['scenes'][hueLabScene].path, 'name': DEVICES['scenes'][hueLabScene].name, 'trigger': command.address, 'method': command.method }, command.body);
+						sendCommand({ 'type': 'scenes', 'path': DEVICES['scenes'][hueLabScene].path, 'name': DEVICES['scenes'][hueLabScene].name, 'trigger': command.address, 'method': command.method }, command.body);
 						break; // only necessary to stop scene once for all lights
 					}
 				}
@@ -997,33 +997,37 @@ function getAction(action)
 function sendCommand(device, actions, attempt = 1)
 {
 	// check if target value is actually different from current value
-	let value, obj;
-	for (let action in actions)
+	if (device.type == 'lights' || device.type == 'groups')
 	{
-		value = actions[action];
-		obj = action;
-		action = getAction(action);
+		let curValue, value, obj;
+		for (let action in actions)
+		{
+			value = actions[action];
+			obj = action;
+			action = getAction(action);
+			
+			// get current value and compare
+			curValue = library.getDeviceState(device.path + '.action.' + action);
+			if (['transitiontime', 'trigger', 'scene'].indexOf(action) === -1 && curValue !== null && value == curValue)
+				delete actions[obj];
+		}
 		
-		// get current value and compare
-		if (['transitiontime'].indexOf(action) === -1 && value == library.getDeviceState(device.path + '.action.' + action))
-			delete actions[obj];
-	}
-	
-	// check actions
-	if (Object.keys(actions).length == 0)
-	{
-		adapter.log.debug('Attempt ' + attempt + 'x - No commands to send to ' + device.name + ' (' + device.trigger + ').');
-		return false;
-	}
-	
-	// check reachability
-	if (device.type == 'lights' && !library.getDeviceState(device.path + '.state.reachable'))
-	{
-		adapter.log.warn('Attempt ' + attempt + 'x - Device ' + device.name + ' does not seem to be reachable! Command is sent anyway.');
+		// check actions
+		if (Object.keys(actions).length == 0)
+		{
+			adapter.log.debug('Attempt ' + attempt + 'x - No commands to send to ' + device.name + ' (' + device.trigger + ').');
+			return false;
+		}
 		
-		let reachableAttempt = attempt+1;
-		if (reachableAttempt <= MAX_ATTEMPTS)
-			setTimeout(() => sendCommand(device, actions, reachableAttempt), (adapter.config.reattemptIfUnreachable || 3)*1000);
+		// check reachability
+		if (device.type == 'lights' && !library.getDeviceState(device.path + '.state.reachable'))
+		{
+			adapter.log.warn('Attempt ' + attempt + 'x - Device ' + device.name + ' does not seem to be reachable! Command is sent anyway.');
+			
+			let reachableAttempt = attempt+1;
+			if (reachableAttempt <= MAX_ATTEMPTS)
+				setTimeout(() => sendCommand(device, actions, reachableAttempt), (adapter.config.reattemptIfUnreachable || 3)*1000);
+		}
 	}
 	
 	// align command xy
