@@ -5,8 +5,8 @@ const utils = require('@iobroker/adapter-core'); // Get common adapter utils
 const _fs = require('fs');
 const _request = require('request-promise');
 const _color = require('color-convert');
-const _hueColor = require('./lib/hueColor.js');
-const _ctColor = require('./lib/ctColor.js');
+const _hueColor = require('@q42philips/hue-color-converter');
+const _ctColor = require('./lib/ct-color-converter.js');
 
 
 /*
@@ -397,7 +397,7 @@ function startAdapter(options)
 				let lights = library.getDeviceState(appliance.path + '.lights');
 				let manufacturers = appliance.type == 'groups' && lights ? lights.split(',').map(light => library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? library.clean(DEVICES['lights'][light].name, true, '_').replace(/\./g, '-') + '-' + light : ('00' + light).substr(-3) + '-' + library.clean(DEVICES['lights'][light].name, true, '_').replace(/\./g, '-')) + '.manufacturername')) : [library.getDeviceState(appliance.path + '.manufacturername')]; // only lights hold manufacturername, which is why it is retrieved from each light if we're on a group
 				
-				if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && manufacturers.filter(manufacturer => manufacturer != 'Philips').length > 0)
+				if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && manufacturers.filter(manufacturer => manufacturer != 'PhilipsX').length > 0)
 				{
 					if (!rgb)
 					{
@@ -417,7 +417,7 @@ function startAdapter(options)
 						adapter.log.warn('Invalid RGB given (' + JSON.stringify(rgb) + ')!');
 					
 					else
-						commands.xy = _hueColor.convertRGBtoXY(rgb);
+						commands.xy = _hueColor.calculateXY(rgb[0], rgb[1], rgb[2]);
 				}
 				
 				// if .on is not off, be sure device is on (except for alerts)
