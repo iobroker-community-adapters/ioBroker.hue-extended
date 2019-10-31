@@ -2,6 +2,7 @@
 const adapterName = require('./io-package.json').common.name;
 const utils = require('@iobroker/adapter-core'); // Get common adapter utils
 
+const _fs = require('fs');
 const _request = require('request-promise');
 const _color = require('color-convert');
 const _hueColor = require('./lib/hueColor.js');
@@ -18,7 +19,6 @@ const _SUBSCRIPTIONS = require(__dirname + '/_NODES.js').SUBSCRIPTIONS;
 const _MAPPING_BRIDGE = Object.keys(_MAPPING);
 const _MAPPING_STATES = Object.values(_MAPPING);
 
-
 /*
  * variables initiation
  */
@@ -27,6 +27,8 @@ let library;
 let unloaded, delay = 0, retry = 0;
 let garbageCollector, refreshCycle;
 
+
+let REQUEST_OPTIONS = { 'json': true };
 let MAX_ATTEMPTS = 3;
 let bridge, device;
 let DEVICES = {};
@@ -64,8 +66,40 @@ function startAdapter(options)
 		// 
 		MAX_ATTEMPTS = adapter.config.maxAttempts || MAX_ATTEMPTS;
 		
+		// Secure connection
+		REQUEST_OPTIONS.secureConnection = false;
+		if (adapter.config.secureConnection)
+		{
+			adapter.log.info('Establishing secure connection to bridge..');
+			
+			try
+			{
+				REQUEST_OPTIONS = {
+					...REQUEST_OPTIONS,
+					'cert': _fs.readFileSync(adapter.config.certPublicPath),
+					'key': _fs.readFileSync(adapter.config.certPrivatePath),
+					'rejectUnauthorized': false,
+					'secureConnection': true
+				};
+				
+				if (adapter.config.certChainedPath)
+					REQUEST_OPTIONS.ca = _fs.readFileSync(adapter.config.certChainedPath);
+				
+				if (REQUEST_OPTIONS.key.indexOf('ENCRYPTED') > -1)
+					REQUEST_OPTIONS.passphrase = adapter.config.passphrase;
+			}
+			catch(err)
+			{
+				adapter.log.warn('Establishing secure connection failed! Falling back to unsecure connection to bridge..');
+				REQUEST_OPTIONS.secureConnection = false;
+			}
+		}
+		else
+			adapter.log.info('Establishing connection to bridge..');
+		
 		// Bridge connection
-		bridge = 'http://' + adapter.config.bridgeIp + ':' + (adapter.config.bridgePort || 80) + '/api/' + adapter.config.bridgeUser + '/';
+		adapter.config.bridgePort = REQUEST_OPTIONS.secureConnection ? 443 : (adapter.config.bridgePort || 80);
+		bridge = (REQUEST_OPTIONS.secureConnection ? 'https://' : 'http://') + adapter.config.bridgeIp + ':' + adapter.config.bridgePort + '/api/' + adapter.config.bridgeUser + '/';
 		
 		// retrieve all values from states to avoid message "Unsubscribe from all states, except system's, because over 3 seconds the number of events is over 200 (in last second 0)"
 		adapter.getStates(adapterName + '.' + adapter.instance + '.*', (err, states) =>
@@ -454,7 +488,7 @@ else
 function getPayload(refresh)
 {
 	// get data from bridge
-	_request({ uri: bridge, json: true }).then(payload =>
+	_request({ ...REQUEST_OPTIONS, 'uri': bridge }).then(payload =>
 	{
 		if (!payload || (payload[0] && payload[0].error))
 		{
@@ -529,7 +563,7 @@ function getPayload(refresh)
 			// sync all groups
 			if (channel == 'groups')
 			{
-				_request({ uri: bridge + channel + '/0', json: true }).then(pl =>
+				_request({ ...REQUEST_OPTIONS, 'uri': bridge + channel + '/0' }).then(pl =>
 				{
 					pl.name = 'All Lights';
 					
@@ -868,8 +902,7 @@ function readData(key, data, channel)
 						'node': key + pathKey,
 						'role': 'channel',
 						'description': pathDescription
-					},
-					null, { 'properties': { 'device': true } });
+					});
 			}
 			
 			// read nested data
@@ -881,8 +914,7 @@ function readData(key, data, channel)
 					'node': key,
 					'role': 'channel',
 					'description': description || id && data.name || library.ucFirst(key.substr(key.lastIndexOf('.')+1))
-				},
-				null, { 'properties': { 'device': true } });
+				});
 		}
 	}
 	
@@ -902,8 +934,7 @@ function readData(key, data, channel)
 					node: key.substr(0, key.indexOf('.action.')+7),
 					role: 'channel',
 					description: 'Action'
-				},
-				null, { 'properties': { 'device': true } });
+				});
 		}
 		
 		// set state
@@ -920,10 +951,7 @@ function readData(key, data, channel)
 					}
 				)
 			},
-			data,
-			{
-				'properties': { 'device': true }
-			}
+			data
 		);
 		
 		// subscribe to states
@@ -1041,7 +1069,6 @@ function sendCommand(device, actions, attempt = 1)
 	let options = {
 		uri: bridge + device.trigger,
 		method: device.method || 'PUT',
-		json: true,
 		body: actions
 	};
 	
@@ -1049,7 +1076,7 @@ function sendCommand(device, actions, attempt = 1)
 	let error = false, lastAction = null;
 	adapter.log.debug('Attempt ' + attempt + 'x - Send commands to ' + device.name + ' (' + device.trigger + '): ' + JSON.stringify(actions) + '.');
 	
-	_request(options).then(res =>
+	_request({ ...REQUEST_OPTIONS, ...options }).then(res =>
 	{
 		if (!Array.isArray(res))
 		{
@@ -1141,14 +1168,14 @@ function queue()
  */
 function getUser(success, failure)
 {
+	adapter.config.bridgePort = REQUEST_OPTIONS.secureConnection ? 443 : (adapter.config.bridgePort || 80);
 	let options = {
-		uri: 'http://' + adapter.config.bridgeIp + ':' + (adapter.config.bridgePort || 80) + '/api/',
+		uri: (REQUEST_OPTIONS.secureConnection ? 'https://' : 'http://') + adapter.config.bridgeIp + ':' + adapter.config.bridgePort + '/api/',
 		method: 'POST',
-		json: true,
 		body: { 'devicetype': 'iobroker.hue-extended' }
 	};
 	
-	_request(options).then(res =>
+	_request({ ...REQUEST_OPTIONS, ...options }).then(res =>
 	{
 		if (res && res[0] && res[0].success && res[0].success.username)
 			success && success(res[0].success.username);

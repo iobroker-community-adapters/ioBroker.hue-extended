@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "hue-extended",
-        "version": "1.1.3",
+        "version": "1.1.4",
         "title": "Philips Hue Extended",
         "desc": {
             "en": "Integration of all your Philips Hue Devices with your ioBroker",
@@ -16,18 +16,54 @@
             "zh-cn": "一体化的所有飞利浦色调设备与你ioBroker"
         },
         "news": {
-			"all-releases": {
-				"en": "Please see release page (https://github.com/Zefau/ioBroker.hue-extended/releases) for changelog and detailed information."
-			},
+            "all-releases": {
+                "en": "Please see release page (https://github.com/Zefau/ioBroker.hue-extended/releases) for changelog and detailed information.",
+                "de": "Auf der Release-Seite (https://github.com/Zefau/ioBroker.hue-extended/releases) finden Sie das Änderungsprotokoll und detaillierte Informationen.",
+                "ru": "Пожалуйста, смотрите страницу релиза (https://github.com/Zefau/ioBroker.hue-extended/releases) для журнала изменений и подробной информации.",
+                "pt": "Consulte a página da versão (https://github.com/Zefau/ioBroker.hue-extended/releases) para obter o registro de alterações e informações detalhadas.",
+                "nl": "Raadpleeg de releasepagina (https://github.com/Zefau/ioBroker.hue-extended/releases) voor wijzigingslogboek en gedetailleerde informatie.",
+                "fr": "Veuillez consulter la page de publication (https://github.com/Zefau/ioBroker.hue-extended/releases) pour le journal des modifications et des informations détaillées.",
+                "it": "Consultare la pagina di rilascio (https://github.com/Zefau/ioBroker.hue-extended/releases) per il log delle modifiche e informazioni dettagliate.",
+                "es": "Consulte la página de lanzamiento (https://github.com/Zefau/ioBroker.hue-extended/releases) para ver el registro de cambios e información detallada.",
+                "pl": "Zobacz dziennik zmian i szczegółowe informacje na stronie wydania (https://github.com/Zefau/ioBroker.hue-extended/releases).",
+                "zh-cn": "请参阅发布页面（https://github.com/Zefau/ioBroker.hue-extended/releases）以获取更改日志和详细信息。"
+            },
             "1.1.0": {
-				"en": "- add support for Hue Labs scenes\n- add retry if bridge returns error `socket hang up`\n- add retry if device is not reachable"
-			},
+                "en": "- add support for Hue Labs scenes\n- add retry if bridge returns error `socket hang up`\n- add retry if device is not reachable",
+                "de": "- Unterstützung für Hue Labs-Szenen hinzufügen\n",
+                "ru": "- добавить поддержку сцен Hue Labs\n",
+                "pt": "- adicione suporte para cenas do Hue Labs\n",
+                "nl": "- ondersteuning toevoegen voor Hue Labs-scènes\n",
+                "fr": "- ajouter un support pour les scènes Hue Labs\n",
+                "it": "- aggiungi il supporto per le scene di Hue Labs\n",
+                "es": "- Añadir soporte para escenas Hue Labs\n",
+                "pl": "- dodaj obsługę scen Hue Labs\n",
+                "zh-cn": "-添加对Hue Labs场景的支持\n"
+            },
             "1.0.2": {
-				"en": "- added scenes from Hue Labs"
-			},
+                "en": "- added scenes from Hue Labs",
+                "de": "- Szenen aus Hue Labs hinzugefügt",
+                "ru": "- добавлены сцены из Hue Labs",
+                "pt": "- cenas adicionadas do Hue Labs",
+                "nl": "- scènes uit Hue Labs toegevoegd",
+                "fr": "- ajout de scènes de Hue Labs",
+                "it": "- aggiunte scene da Hue Labs",
+                "es": "- escenas agregadas de Hue Labs",
+                "pl": "- dodano sceny z Hue Labs",
+                "zh-cn": "-从Hue Labs添加了场景"
+            },
             "1.0.1": {
-				"en": "- fixed incorrect omitting GroupScenes"
-			},
+                "en": "- fixed incorrect omitting GroupScenes",
+                "de": "- Fehler beim Auslassen von GroupScenes behoben",
+                "ru": "- исправлено некорректное пропускание групповых сцен",
+                "pt": "- correção incorreta de omissão de GroupScenes",
+                "nl": "- foutieve weglating van GroupScenes opgelost",
+                "fr": "- correction incorrecte en omettant GroupScenes",
+                "it": "- risolto GroupScenes omesso errato",
+                "es": "- Se corrigió la omisión incorrecta de GroupScenes",
+                "pl": "- naprawiono nieprawidłowe pomijanie scen grupowych",
+                "zh-cn": "-修正了不正确的省略GroupScenes"
+            },
             "1.0.0": {
                 "en": "- BREAKING CHANGE: changed certain objects due to standardization\n- fixed incorrect conversion between color spaces (rgb, hex, etc.)",
                 "de": "- Wichtige ÄNDERUNG: geändert, bestimmte Objekte durch Standardisierung\n- fixed falsche Konvertierung zwischen Farbräumen (rgb, hex, etc.)",

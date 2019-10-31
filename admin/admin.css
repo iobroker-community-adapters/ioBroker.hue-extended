@@ -2,8 +2,8 @@
  * Admin styles.
  *
  * @author Zefau <zefau@mailbox.org>
- * @version 0.3.4
- * @date 2019-10-12
+ * @version 0.4.0
+ * @date 2019-10-31
  *
  */
 .m select {display: block !important}
@@ -46,3 +46,8 @@ pre {display: inline}
 
 .m .row {margin-bottom: 0 !important}
 .m label {color: #000}
+
+label.select {
+	top: -27px !important;
+	font-size: .8rem !important;
+}

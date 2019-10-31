@@ -61,13 +61,13 @@ function _load(settings, onChange)
 		return;
 	
 	$('.value').each(function()
-	{            
+	{
 		var $this = $(this);
 		var id = $this.attr('id');
 		
 		// load certificates
 		if ($this.attr('data-select') === "certificate")
-			fillSelectCertificates('#'+id,  $this.attr('data-type') || '', settings[id]);
+			fillSelectCertificates('#'+id,  $this.attr('data-type') || '', settings[id]); // public, private, chained
 		
 		// load settings
 		if ($this.attr('type') === 'checkbox')
@@ -107,11 +107,12 @@ function _save(callback, obj)
 		// save certificates
 		else if ($this.attr('data-select') === "certificate")
 		{
-			socket.emit('getObject', 'system.certificates', function (err, res) {
+			socket.emit('getObject', 'system.certificates', function (err, res)
+			{
 				if (res.native.certificates !== undefined)
 				{
 					obj[id] = $this.val();
-					obj[id + 'Val'] = res.native.certificates[$this.val()];
+					obj[id + 'Path'] = res.native.certificates[$this.val()];
 				}
 			});
 		}
