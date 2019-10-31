@@ -394,7 +394,7 @@ function startAdapter(options)
 					commands.ct = Math.max(Math.min(Math.round(1 / value * 1000000), 500), 153);
 				
 				// convert HUE / CT to XY
-				if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && library.getDeviceState(appliance.path + '.manufacturername') != 'PhilipsX')
+				if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && library.getDeviceState(appliance.path + '.manufacturername') != 'Philips')
 				{
 					if (!rgb)
 					{
