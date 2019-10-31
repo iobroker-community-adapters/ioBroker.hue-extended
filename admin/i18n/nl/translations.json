@@ -10,6 +10,7 @@
     "certPublic": "Openbaar certificaat",
     "connectionInformation": "Maak de verbinding informatie voor uw Hue Bridge",
     "connectionTitle": "Verbindingsinstellingen voor Hue Bridge",
+    "ctToXY": "Gebruik <pre> XY </pre> in plaats van <pre> ct </pre> (alleen voor niet-Philips-apparaten)",
     "donateInformation": "Voel je vrij om te suggereren nieuwe functies via Github of ioBroker forum. Als je van deze adapter, die je erg welkom om te doneren.",
     "donateTitle": "Ondersteuning van de ontwikkeling van de hue-extended Adapter!",
     "garbageCollector": "Verwijderen van verouderde apparaten van objecten",

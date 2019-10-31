@@ -10,6 +10,7 @@
     "certPublic": "Certyfikat publiczny",
     "connectionInformation": "Podać informacje na temat podłączania do sieci Hue bridge",
     "connectionTitle": "Ustawienia połączenia Hue bridge",
+    "ctToXY": "Użyj <pre> XY </pre> zamiast <pre> ct </pre> (tylko dla urządzeń firm innych niż Philips)",
     "donateInformation": "Nie wahaj się zaproponować nowe funkcje poprzez GitHub lub forum ioBroker. Jeśli podoba ci się ten zasilacz, możesz podarować.",
     "donateTitle": "Wsparcie rozwoju Hue-zaawansowany zasilacz!",
     "garbageCollector": "Usunięcie przestarzałych urządzeń od obiektów",

@@ -10,6 +10,7 @@
     "certPublic": "公开证书",
     "connectionInformation": "提供连接信息顺桥",
     "connectionTitle": "连接设置顺桥",
+    "ctToXY": "使用<pre> XY </ pre>代替<pre> ct </ pre>（仅适用于非飞利浦设备）",
     "donateInformation": "随时提出新的功能，通过审查或ioBroker论坛。 如果你喜欢这个转接器，你非常受欢迎的捐赠。",
     "donateTitle": "支持发展的顺化扩展适配器!",
     "garbageCollector": "删除过时的设备的对象",

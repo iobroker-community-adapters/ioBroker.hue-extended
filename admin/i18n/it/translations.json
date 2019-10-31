@@ -10,6 +10,7 @@
     "certPublic": "Certificato pubblico",
     "connectionInformation": "Fornire le informazioni di connessione per il Bridge Hue",
     "connectionTitle": "Impostazioni di connessione per Tonalità Ponte",
+    "ctToXY": "Usa <pre> XY </pre> invece di <pre> ct </pre> (solo per dispositivi non Philips)",
     "donateInformation": "Sentitevi liberi di suggerire nuove funzionalità tramite Github o ioBroker forum. Se ti piace questo adattatore, è molto benvenuto a donare.",
     "donateTitle": "Sostenere lo sviluppo della tonalità esteso Adattatore!",
     "garbageCollector": "Elimina i dispositivi da oggetti",

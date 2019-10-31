@@ -10,6 +10,7 @@
     "certPublic": "Certificado público",
     "connectionInformation": "Forneça informações de conexão para o seu Tonalidade Ponte",
     "connectionTitle": "Configurações de conexão de Tonalidade Ponte",
+    "ctToXY": "Use <pre> XY </pre> em vez de <pre> ct </pre> (apenas para dispositivos que não sejam da Philips)",
     "donateInformation": "Sinta-se livre para sugerir novos recursos via Github ou ioBroker fórum. Se você gosta deste adaptador, você é muito bem-vindo para doar.",
     "donateTitle": "Apoiar o desenvolvimento da tonalidade expandida do Adaptador!",
     "garbageCollector": "Excluir desatualizado dispositivos de objetos",

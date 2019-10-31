@@ -6,6 +6,7 @@ const _fs = require('fs');
 const _request = require('request-promise');
 const _color = require('color-convert');
 const _hueColor = require('./lib/hueColor.js');
+const _ctColor = require('./lib/ctColor.js');
 
 
 /*
@@ -389,19 +390,31 @@ function startAdapter(options)
 				if (action == 'hue' && value <= 360)
 					commands.hue = Math.max(Math.min(Math.round(value / 360 * 65535), 65535), 0);
 				
-				if (action == 'ct')
+				if (action == 'ct' && value > 500)
 					commands.ct = Math.max(Math.min(Math.round(1 / value * 1000000), 500), 153);
 				
-				// convert HUE to XY
-				if (commands.hue !== undefined && adapter.config.hueToXY && library.getDeviceState(appliance.path + '.manufacturername') != 'Philips')
+				// convert HUE / CT to XY
+				if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && library.getDeviceState(appliance.path + '.manufacturername') != 'Philips')
 				{
-					if (!rgb) rgb = hsv ? _color.hsv.rgb(hsv) : _color.hsv.rgb([commands.hue, (commands.sat || library.getDeviceState(appliance.path + '.action.sat')), commands.bri || library.getDeviceState(appliance.path + '.action.bri')]);
+					if (!rgb)
+					{
+						if (commands.ct !== undefined && adapter.config.ctToXY)
+						{
+							rgb = _ctColor.convertCTtoRGB(Math.max(Math.min(Math.round(1 / commands.ct * 1000000), 6500), 2000));
+							delete commands.ct;
+						}
+						else if (commands.hue !== undefined && adapter.config.hueToXY)
+						{
+							rgb = hsv ? _color.hsv.rgb(hsv) : _color.hsv.rgb([commands.hue, (commands.sat || library.getDeviceState(appliance.path + '.action.sat')), commands.bri || library.getDeviceState(appliance.path + '.action.bri')]);
+							delete commands.hue;
+						}
+					}
 					
 					if (rgb === null || rgb[0] === undefined || rgb[0] === null)
 						adapter.log.warn('Invalid RGB given (' + JSON.stringify(rgb) + ')!');
 					
 					else
-						Object.assign(commands, { "xy": JSON.stringify(_hueColor.convertRGBtoXY(rgb)) });
+						commands.xy = _hueColor.convertRGBtoXY(rgb);
 				}
 				
 				// if .on is not off, be sure device is on (except for alerts)
@@ -1059,8 +1072,8 @@ function sendCommand(device, actions, attempt = 1)
 	}
 	
 	// align command xy
-	if (actions.xy && !Array.isArray(actions.xy))
-		actions.xy = actions.xy.split(',').map(val => Number.parseFloat(val));
+	if (actions.xy)
+		actions.xy = (Array.isArray(actions.xy) ? actions.xy : actions.xy.split(',')).map(val => Number.parseFloat(val));
 	
 	// clean trigger
 	device.trigger = device.trigger.substr(0, 1) == '/' ? device.trigger.substr(1, device.trigger.length) : device.trigger;

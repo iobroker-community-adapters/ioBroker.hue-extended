@@ -10,6 +10,7 @@
     "certPublic": "Certificado publico",
     "connectionInformation": "Proporcionar información de conexión para el Puente Hue",
     "connectionTitle": "Ajustes de conexión para el Puente Hue",
+    "ctToXY": "Use <pre> XY </pre> en lugar de <pre> ct </pre> (solo para dispositivos que no sean Philips)",
     "donateInformation": "Siéntase libre de sugerir nuevas características a través de Github o ioBroker foro. Si te gusta este adaptador, usted muy bienvenido a donar.",
     "donateTitle": "Apoyar el desarrollo de los hue-extendida Adaptador!",
     "garbageCollector": "Eliminar dispositivos obsoletos de objetos",

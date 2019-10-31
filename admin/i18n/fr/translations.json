@@ -10,6 +10,7 @@
     "certPublic": "Certificat public",
     "connectionInformation": "Fournir les informations de connexion pour votre Teinte Pont",
     "connectionTitle": "Paramètres de connexion pour la Teinte Pont",
+    "ctToXY": "Utilisez <pre> XY </ pre> au lieu de <pre> ct </ pre> (uniquement pour les appareils non Philips)",
     "donateInformation": "N'hésitez pas à suggérer de nouvelles fonctionnalités via Github ou ioBroker forum. Si vous aimez cet adaptateur, vous les bienvenus pour faire un don.",
     "donateTitle": "Soutenir le développement de la teinte-extension de Carte!",
     "garbageCollector": "Supprimer obsolète appareils à partir d'objets",

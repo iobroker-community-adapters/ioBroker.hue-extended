@@ -10,6 +10,7 @@
     "certPublic": "Public Certificate",
     "connectionInformation": "Provide connection information for your Hue Bridge",
     "connectionTitle": "Connection settings for Hue Bridge",
+    "ctToXY": "Use <pre>XY</pre> instead of <pre>ct</pre> (only for non-Philips devices)",
     "donateInformation": "Feel free to suggest new features via Github or ioBroker forum. If you like this adapter, you very welcome to donate.",
     "donateTitle": "Support the development of the hue-extended Adapter!",
     "garbageCollector": "Delete outdated devices from objects",
