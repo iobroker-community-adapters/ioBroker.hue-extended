@@ -394,7 +394,10 @@ function startAdapter(options)
 					commands.ct = Math.max(Math.min(Math.round(1 / value * 1000000), 500), 153);
 				
 				// convert HUE / CT to XY
-				if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && library.getDeviceState(appliance.path + '.manufacturername') != 'Philips')
+				let lights = library.getDeviceState(appliance.path + '.lights');
+				let manufacturers = appliance.type == 'groups' && lights ? lights.split(',').map(light => library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? library.clean(DEVICES['lights'][light].name, true, '_').replace(/\./g, '-') + '-' + light : ('00' + light).substr(-3) + '-' + library.clean(DEVICES['lights'][light].name, true, '_').replace(/\./g, '-')) + '.manufacturername')) : [library.getDeviceState(appliance.path + '.manufacturername')]; // only lights hold manufacturername, which is why it is retrieved from each light if we're on a group
+				
+				if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && manufacturers.filter(manufacturer => manufacturer != 'Philips').length > 0)
 				{
 					if (!rgb)
 					{
@@ -1038,7 +1041,7 @@ function getAction(action)
 function sendCommand(device, actions, attempt = 1)
 {
 	// check if target value is actually different from current value
-	if (device.type == 'lights' || device.type == 'groups')
+	if ((device.type == 'lights' || device.type == 'groups') && device.trigger != 'groups/0/action')
 	{
 		let curValue, value, obj;
 		for (let action in actions)
@@ -1123,6 +1126,14 @@ function sendCommand(device, actions, attempt = 1)
 					let value = Object.values(msg[type]).shift();
 					let action = state.substr(state.lastIndexOf('/')+1);
 					
+					// convert value ranges
+					if (action == 'hue')
+						value = Math.max(Math.min(Math.round(value / 65535 * 360), 360), 0);
+
+					if (action == 'ct')
+						value = Math.max(Math.min(Math.round(1 / value * 1000000), 6500), 2000);
+					
+					//
 					library._setValue(device.path + '.action.' + (_MAPPING[action] || action), value);
 					adapter.log.debug('Successfully set ' + state + ' on ' + device.name + ' (to ' + value + ').');
 				}
