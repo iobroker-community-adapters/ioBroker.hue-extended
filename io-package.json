@@ -16,18 +16,6 @@
             "zh-cn": "一体化的所有飞利浦色调设备与你ioBroker"
         },
         "news": {
-            "all-releases": {
-                "en": "Please see release page (https://github.com/Zefau/ioBroker.hue-extended/releases) for changelog and detailed information.",
-                "de": "Auf der Release-Seite (https://github.com/Zefau/ioBroker.hue-extended/releases) finden Sie das Änderungsprotokoll und detaillierte Informationen.",
-                "ru": "Пожалуйста, смотрите страницу релиза (https://github.com/Zefau/ioBroker.hue-extended/releases) для журнала изменений и подробной информации.",
-                "pt": "Consulte a página da versão (https://github.com/Zefau/ioBroker.hue-extended/releases) para obter o registro de alterações e informações detalhadas.",
-                "nl": "Raadpleeg de releasepagina (https://github.com/Zefau/ioBroker.hue-extended/releases) voor wijzigingslogboek en gedetailleerde informatie.",
-                "fr": "Veuillez consulter la page de publication (https://github.com/Zefau/ioBroker.hue-extended/releases) pour le journal des modifications et des informations détaillées.",
-                "it": "Consultare la pagina di rilascio (https://github.com/Zefau/ioBroker.hue-extended/releases) per il log delle modifiche e informazioni dettagliate.",
-                "es": "Consulte la página de lanzamiento (https://github.com/Zefau/ioBroker.hue-extended/releases) para ver el registro de cambios e información detallada.",
-                "pl": "Zobacz dziennik zmian i szczegółowe informacje na stronie wydania (https://github.com/Zefau/ioBroker.hue-extended/releases).",
-                "zh-cn": "请参阅发布页面（https://github.com/Zefau/ioBroker.hue-extended/releases）以获取更改日志和详细信息。"
-            },
             "1.1.0": {
                 "en": "- add support for Hue Labs scenes\n- add retry if bridge returns error `socket hang up`\n- add retry if device is not reachable",
                 "de": "- Unterstützung für Hue Labs-Szenen hinzufügen\n",
