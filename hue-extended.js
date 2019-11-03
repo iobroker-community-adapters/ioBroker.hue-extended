@@ -274,6 +274,8 @@ function startAdapter(options)
 		// handle lights or groups
 		else if (appliance.type == 'lights' || appliance.type == 'groups')
 		{
+			let lights = appliance.type == 'lights' ? [appliance.uid] : DEVICES['groups'][appliance.uid].lights;
+			
 			// handle color spaces
 			let value = commands[action];
 			let rgb = null, hsv = null;
@@ -307,17 +309,21 @@ function startAdapter(options)
 			}
 			
 			// check for each light, if hue lab scene is activated
+			//
 			// this has to be done for each light, because hue labs scenes might be activated for multiple groups
 			// and multiple groups are reflected by a single virtual group in the Hue API
-			let lights = appliance.type == 'lights' ? [appliance.uid] : DEVICES['groups'][appliance.uid].lights;
+			//
+			let manufacturers = [];
 			let hueLabScene;
 			
 			for (let index in lights)
 			{
+				// light identifier
 				let light = lights[index];
 				let lightId = library.clean(DEVICES['lights'][light].name, true, '_').replace(/\./g, '-');
 				let lightUid = adapter.config.nameId == 'append' ? light : ('00' + light).substr(-3);
 				
+				// check for activated hue lab scene
 				hueLabScene = library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.hueLabScene');
 				if (hueLabScene)
 				{
@@ -327,9 +333,11 @@ function startAdapter(options)
 					{
 						library.setDeviceState(appliance.path + '.action.hueLabScene', '');
 						sendCommand({ 'type': 'scenes', 'path': DEVICES['scenes'][hueLabScene].path, 'name': DEVICES['scenes'][hueLabScene].name, 'trigger': command.address, 'method': command.method }, command.body);
-						break; // only necessary to stop scene once for all lights
 					}
 				}
+				
+				// get manufacturers
+				manufacturers.push(library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.manufacturername'));
 			}
 			
 			// go through commands and modify if required
@@ -394,10 +402,7 @@ function startAdapter(options)
 					commands.ct = Math.max(Math.min(Math.round(1 / value * 1000000), 500), 153);
 				
 				// convert HUE / CT to XY
-				let lights = library.getDeviceState(appliance.path + '.lights');
-				let manufacturers = appliance.type == 'groups' && lights ? lights.split(',').map(light => library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? library.clean(DEVICES['lights'][light].name, true, '_').replace(/\./g, '-') + '-' + light : ('00' + light).substr(-3) + '-' + library.clean(DEVICES['lights'][light].name, true, '_').replace(/\./g, '-')) + '.manufacturername')) : [library.getDeviceState(appliance.path + '.manufacturername')]; // only lights hold manufacturername, which is why it is retrieved from each light if we're on a group
-				
-				if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && manufacturers.filter(manufacturer => manufacturer != 'PhilipsX').length > 0)
+				if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && manufacturers.filter(manufacturer => manufacturer != 'Philips').length > 0)
 				{
 					if (!rgb)
 					{
@@ -644,9 +649,17 @@ function getPayload(refresh)
 		if (err.message.substr(0, 3) == 500)
 			error = 'Hue Bridge is busy';
 		
+		// ERROR: HTTP 502
+		else if (err.message.substr(0, 3) == 502)
+			error = '502 Bad Gateway';
+		
 		// ERROR: ECONNREFUSED
 		else if (err.message.indexOf('ECONNREFUSED') > -1)
 			error = 'Connection refused';
+		
+		// ERROR: EHOSTUNREACH
+		else if (err.message.indexOf('EHOSTUNREACH') > -1)
+			error = 'Host not reachable';
 		
 		// ERROR: SOCKET HANG UP
 		else if (err.message.indexOf('socket hang up') > -1)
