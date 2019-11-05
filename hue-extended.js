@@ -5,8 +5,8 @@ const utils = require('@iobroker/adapter-core'); // Get common adapter utils
 const _fs = require('fs');
 const _request = require('request-promise');
 const _color = require('color-convert');
-const _hueColor = require('@q42philips/hue-color-converter');
-const _ctColor = require('./lib/ct-color-converter.js');
+const _hueColor = require('./lib/node-hue-api');
+const _ctColor = require('./lib/ct-color-converter');
 
 
 /*
@@ -313,6 +313,7 @@ function startAdapter(options)
 			// this has to be done for each light, because hue labs scenes might be activated for multiple groups
 			// and multiple groups are reflected by a single virtual group in the Hue API
 			//
+			let xySupported = [];
 			let manufacturers = [];
 			let hueLabScene;
 			
@@ -338,6 +339,7 @@ function startAdapter(options)
 				
 				// get manufacturers
 				manufacturers.push(library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.manufacturername'));
+				xySupported.push(library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.xy'));
 			}
 			
 			// go through commands and modify if required
@@ -400,35 +402,38 @@ function startAdapter(options)
 				
 				if (action == 'ct' && value > 500)
 					commands.ct = Math.max(Math.min(Math.round(1 / value * 1000000), 500), 153);
-				
-				// convert HUE / CT to XY
-				if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && manufacturers.filter(manufacturer => manufacturer != 'Philips').length > 0)
+			}
+			
+			// convert HUE / CT to XY
+			if (adapter.config.hueToXY)
+				adapter.log.debug('Converting ' + JSON.stringify(commands) + ' to xy: ' + JSON.stringify(lights) + ' - ' + JSON.stringify(manufacturers) + ' - ' +JSON.stringify(xySupported));
+			
+			if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && manufacturers.filter(manufacturer => manufacturer != 'Philips').length > 0 && xySupported.indexOf(null) == -1)
+			{
+				if (!rgb)
 				{
-					if (!rgb)
+					if (commands.ct !== undefined && adapter.config.ctToXY)
 					{
-						if (commands.ct !== undefined && adapter.config.ctToXY)
-						{
-							rgb = _ctColor.convertCTtoRGB(Math.max(Math.min(Math.round(1 / commands.ct * 1000000), 6500), 2000));
-							delete commands.ct;
-						}
-						else if (commands.hue !== undefined && adapter.config.hueToXY)
-						{
-							rgb = hsv ? _color.hsv.rgb(hsv) : _color.hsv.rgb([commands.hue, (commands.sat || library.getDeviceState(appliance.path + '.action.saturation')), commands.bri || library.getDeviceState(appliance.path + '.action.brightness')]);
-							delete commands.hue;
-						}
+						rgb = _ctColor.convertCTtoRGB(Math.max(Math.min(Math.round(1 / commands.ct * 1000000), 6500), 2000));
+						delete commands.ct;
 					}
-					
-					if (rgb === null || rgb[0] === undefined || rgb[0] === null)
-						adapter.log.warn('Invalid RGB given (' + JSON.stringify(rgb) + ')!');
-					
-					else
-						commands.xy = _hueColor.calculateXY(rgb[0], rgb[1], rgb[2]);
+					else if (commands.hue !== undefined && adapter.config.hueToXY)
+					{
+						rgb = hsv ? _color.hsv.rgb(hsv) : _color.hsv.rgb([commands.hue, (commands.sat || library.getDeviceState(appliance.path + '.action.saturation')), commands.bri || library.getDeviceState(appliance.path + '.action.brightness')]);
+						delete commands.hue;
+					}
 				}
 				
-				// if .on is not off, be sure device is on (except for alerts)
-				if (commands.on === undefined && commands.alert === undefined)
-					commands.on = true; // A light cannot have its hue, saturation, brightness, effect, ct or xy modified when it is turned off. Doing so will return 201 error.
+				if (rgb === null || rgb[0] === undefined || rgb[0] === null)
+					adapter.log.warn('Invalid RGB given (' + JSON.stringify(rgb) + ')!');
+				
+				else
+					commands.xy = _hueColor.convertRGBtoXY(rgb);
 			}
+			
+			// if .on is not off, be sure device is on (except for alerts)
+			if (commands.on === undefined && commands.alert === undefined)
+				commands.on = true; // A light cannot have its hue, saturation, brightness, effect, ct or xy modified when it is turned off. Doing so will return 201 error.
 		}
 		
 		// queue commands
