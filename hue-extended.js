@@ -405,8 +405,8 @@ function startAdapter(options)
 			}
 			
 			// convert HUE / CT to XY
-			if (adapter.config.hueToXY)
-				adapter.log.debug('Converting ' + JSON.stringify(commands) + ' to xy: ' + JSON.stringify(lights) + ' - ' + JSON.stringify(manufacturers) + ' - ' +JSON.stringify(xySupported));
+			if (adapter.config.hueToXY && (commands.hue !== undefined || commands.ct !== undefined))
+				adapter.log.debug('Converting ' + JSON.stringify(commands) + ' to xy: ' + JSON.stringify(lights) + ' - ' + JSON.stringify(manufacturers) + ' - ' + JSON.stringify(xySupported));
 			
 			if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && manufacturers.filter(manufacturer => manufacturer != 'Philips').length > 0 && xySupported.indexOf(null) == -1)
 			{
@@ -1070,7 +1070,7 @@ function sendCommand(device, actions, attempt = 1)
 			
 			// get current value and compare
 			curValue = library.getDeviceState(device.path + '.action.' + action);
-			if (['transitiontime', 'trigger', 'scene'].indexOf(action) === -1 && curValue !== null && value == curValue)
+			if (['effect', 'alert', 'transitiontime', 'trigger', 'scene'].indexOf(action) === -1 && curValue !== null && value == curValue)
 				delete actions[obj];
 		}
 		
