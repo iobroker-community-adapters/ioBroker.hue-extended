@@ -30,7 +30,7 @@ Connect your Philips Hue Lights with ioBroker.
 - Run scene or apply `_scene` on light or group
 
 
-## Changelog / Release-Notes
+## Changelog
 
 Please see [release page](https://github.com/Zefau/ioBroker.hue-extended/releases) for changelog and detailed information.
 
