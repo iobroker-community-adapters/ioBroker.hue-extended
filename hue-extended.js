@@ -138,7 +138,7 @@ function startAdapter(options)
 					garbageCollector = setTimeout(runGarbageCollector, 60*60*1000); // run every hour
 				}
 				
-			}, 2*60*1000);
+			}, 1*60*1000);
 		});
 		
 		// start listening for events in the queue

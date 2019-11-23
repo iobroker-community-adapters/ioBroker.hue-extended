@@ -1,24 +1,28 @@
 {
-  "_from": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master",
-  "_id": "iobroker.hue-extended@0.4.1",
+  "_from": "iobroker.hue-extended@1.1.6",
+  "_id": "iobroker.hue-extended@1.1.6",
   "_inBundle": false,
-  "_integrity": "sha512-WHHZxT9hLJgnjIqOe3yV3CvcRfhE1wcBdl4I1KurKgOsr+3BLFgznLM8U81KHyqUS61q7ZvU2Y/gPHyGeQE3RQ==",
+  "_integrity": "sha512-vTwtDKXUrtflxGt9lFYMDxgMuDAq4LZDpY/f5syev8OwhTfw0Zl5PvVeTeGG98K7ZjP6EUBIr8PUS2e8GKUzjA==",
   "_location": "/iobroker.hue-extended",
   "_phantomChildren": {},
   "_requested": {
-    "type": "remote",
-    "raw": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master",
-    "rawSpec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master",
-    "saveSpec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master",
-    "fetchSpec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master"
+    "type": "version",
+    "registry": true,
+    "raw": "iobroker.hue-extended@1.1.6",
+    "name": "iobroker.hue-extended",
+    "escapedName": "iobroker.hue-extended",
+    "rawSpec": "1.1.6",
+    "saveSpec": null,
+    "fetchSpec": "1.1.6"
   },
   "_requiredBy": [
-    "#USER"
+    "#USER",
+    "/"
   ],
-  "_resolved": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master",
-  "_shasum": "aa86743860c616735b21d9183f9246067c354a8b",
-  "_spec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/master",
-  "_where": "C:\\Users\\Zefau\\iobroker",
+  "_resolved": "https://registry.npmjs.org/iobroker.hue-extended/-/iobroker.hue-extended-1.1.6.tgz",
+  "_shasum": "c811dd40134ec209c9b97646b94c6e5da6c497ed",
+  "_spec": "iobroker.hue-extended@1.1.6",
+  "_where": "/root",
   "author": {
     "name": "zefau",
     "email": "zefau@mailbox.org"
@@ -72,5 +76,5 @@
     "test:unit": "mocha test/unit --exit",
     "translate": "gulp translateAndUpdateWordsJS"
   },
-  "version": "1.1.6"
+  "version": "1.1.7"
 }
