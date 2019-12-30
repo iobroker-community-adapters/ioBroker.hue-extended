@@ -38,7 +38,7 @@
     }
   ],
   "dependencies": {
-    "@iobroker/adapter-core": "^1.0.3",
+    "@iobroker/adapter-core": "^2.0.0",
     "color-convert": "^2.0.1",
     "request": "^2.88.0",
     "request-promise": "^4.2.4"
