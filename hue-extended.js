@@ -170,29 +170,27 @@ function startAdapter(options)
 		appliance.trigger = appliance.type + '/' + appliance.uid + '/' + (appliance.type == 'groups' ? 'action' : (appliance.type == 'sensors' ? 'config' : 'state'));
 		
 		// no uid
-		if (!appliance.uid)
-		{
+		if (!appliance.uid) {
 			adapter.log.warn('Command can not be send to device due to error (no UID)!');
 			return false;
 		}
 		
 		// reset if scene was set
-		if (action == 'scene')
+		if (action == 'scene') {
 			library._setValue(id, '');
+		}
 		
 		// build command
 		let commands = { [action]: state.val };
 		
 		// override with provided commands
-		if (action == '_commands')
-		{
-			try
-			{
+		if (action == '_commands') {
+			
+			try {
 				library._setValue(id, '');
 				commands = JSON.parse(state.val);
 			}
-			catch(err)
-			{
+			catch(err) {
 				adapter.log.warn('Commands supplied in wrong format! Format shall be {"command": value}, e.g. {"on": true} (with parenthesis).');
 				adapter.log.debug(err.message);
 				return false;
@@ -200,14 +198,47 @@ function startAdapter(options)
 		}
 		
 		// handle sccene
-		if (appliance.type == 'scenes')
-		{
+		if (appliance.type == 'scenes') {
+			
+			// set scene
 			let scene = {
+				'uid': library.getDeviceState(appliance.path + '.uid'),
 				'name': library.getDeviceState(appliance.path + '.name'),
 				'type': library.getDeviceState(appliance.path + '.type'),
 				'groupId': library.getDeviceState(appliance.path + '.group'),
 				'lights': library.getDeviceState(appliance.path + '.lights')
 			};
+			
+			// modify transitiontime
+			if (action == 'transitiontime') {
+				
+				// get current lightstates
+				_request({ ...REQUEST_OPTIONS, 'uri': bridge + 'scenes/' + scene.uid }).then(s => {
+					if (s.lightstates && typeof s.lightstates == 'object') {
+						
+						// set lightstates including transitiontime
+						for (let key in s.lightstates) {
+							
+							let lightstate = s.lightstates[key];
+							lightstate.transitiontime = state.val;
+						
+							_request({
+								...REQUEST_OPTIONS,
+								uri: bridge + 'scenes/' + scene.uid + '/lightstates/' + key,
+								method: 'PUT',
+								body: s.lightstates[key]
+
+							})
+								.then(function(res) {
+									adapter.log.info('Set transitiontime of scene ' + scene.name + ' (' + scene.uid + ') to ' + state.val + '.');
+								});
+						}
+					}
+				});
+				
+				library._setValue(id, '');
+				return false;
+			}
 			
 			// GroupScene
 			if (scene.type == 'GroupScene')
@@ -739,8 +770,9 @@ function readData(key, data, channel)
 			let description = false;
 			
 			// add last seen date
-			if (data.name)
+			if (data.name) {
 				data.lastSeen = library.getDateTime(Date.now());
+			}
 			
 			// use uid and name instead of only uid
 			let id = false;
@@ -760,8 +792,9 @@ function readData(key, data, channel)
 			}
 			
 			// add uid to scenes
-			else if (data.name && channel == 'scenes')
+			else if (data.name && channel == 'scenes') {
 				data.uid = key.substr(key.lastIndexOf('.')+1);
+			}
 			
 			// change state for resourcelinks
 			if (data.name && channel == 'resourcelinks')
@@ -789,7 +822,10 @@ function readData(key, data, channel)
 			
 			// change state for scenes
 			if (data.type == 'GroupScene' || data.type == 'LightScene')
-				data.action = { 'trigger': false };
+				data.action = {
+					'trigger': false,
+					'transitiontime': ''
+				};
 			
 			// change state for schedules / scenes
 			if ((channel == 'schedules' || channel == 'scenes') && key.substr(-7) == 'command')
@@ -1061,36 +1097,42 @@ function getAction(action)
 function sendCommand(device, actions, attempt = 1)
 {
 	// check if target value is actually different from current value
-	if ((device.type == 'lights' || device.type == 'groups') && device.trigger != 'groups/0/action')
-	{
+	if ((device.type == 'lights' || device.type == 'groups') && device.trigger != 'groups/0/action') {
+		
 		let curValue, value, obj;
-		for (let action in actions)
-		{
+		for (let action in actions) {
+			
 			value = actions[action];
 			obj = action;
 			action = getAction(action);
 			
+			// ignore states
+			let ignoreStates = ['effect', 'alert', 'transitiontime', 'trigger', 'scene'];
+			if (device.type == 'groups') {
+				ignoreStates.push('on');
+			}
+			
 			// get current value and compare
 			curValue = library.getDeviceState(device.path + '.action.' + action);
-			if (['effect', 'alert', 'transitiontime', 'trigger', 'scene'].indexOf(action) === -1 && curValue !== null && value == curValue)
+			if (ignoreStates.indexOf(action) === -1 && curValue !== null && value == curValue) {
 				delete actions[obj];
+			}
 		}
 		
 		// check actions
-		if (Object.keys(actions).length == 0)
-		{
+		if (Object.keys(actions).length == 0) {
 			adapter.log.debug('Attempt ' + attempt + 'x - No commands to send to ' + device.name + ' (' + device.trigger + ').');
 			return false;
 		}
 		
 		// check reachability
-		if (device.type == 'lights' && !library.getDeviceState(device.path + '.state.reachable'))
-		{
+		if (device.type == 'lights' && !library.getDeviceState(device.path + '.state.reachable')) {
 			adapter.log.warn('Attempt ' + attempt + 'x - Device ' + device.name + ' does not seem to be reachable! Command is sent anyway.');
 			
 			let reachableAttempt = attempt+1;
-			if (reachableAttempt <= MAX_ATTEMPTS)
+			if (reachableAttempt <= MAX_ATTEMPTS) {
 				setTimeout(() => sendCommand(device, actions, reachableAttempt), (adapter.config.reattemptIfUnreachable || 3)*1000);
+			}
 		}
 	}
 	
