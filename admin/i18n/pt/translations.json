@@ -22,6 +22,7 @@
     "message_connected": "Conectado ao adaptador. Recuperar usuário..",
     "message_connecting": "Ligar a placa..",
     "message_error-user": "Pode não obter do usuário a partir da Ponte!",
+    "message_noBridgeIp": "Nenhum IP de ponte fornecido! ",
     "message_noconnection": "Não há ligação com o adaptador! Por favor, inicie o adaptador de primeira.",
     "modalMessage": "modalMessage",
     "modalTitle": "modalTitle",

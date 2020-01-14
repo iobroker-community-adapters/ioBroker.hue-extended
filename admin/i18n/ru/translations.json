@@ -22,6 +22,7 @@
     "message_connected": "Подключен к адаптеру. Извлечение пользователей..",
     "message_connecting": "Подключение к адаптеру..",
     "message_error-user": "Не может принести пользователю от моста!",
+    "message_noBridgeIp": "IP-адрес моста не указан! ",
     "message_noconnection": "Нет связи с адаптером! Пожалуйста, начните адаптера.",
     "modalMessage": "modalMessage",
     "modalTitle": "modalTitle",

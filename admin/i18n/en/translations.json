@@ -22,6 +22,7 @@
     "message_connected": "Connected to adapter. Retrieving user..",
     "message_connecting": "Connecting to adapter..",
     "message_error-user": "Could not fetch user from Bridge!",
+    "message_noBridgeIp": "No bridge IP given! Type in a bridge IP!",
     "message_noconnection": "No connection to adapter! Please start adapter first.",
     "modalMessage": "modalMessage",
     "modalTitle": "modalTitle",

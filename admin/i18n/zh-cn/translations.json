@@ -22,6 +22,7 @@
     "message_connected": "连接器。 检索的用户..",
     "message_connecting": "连接到适配器..",
     "message_error-user": "不能取用户从桥！",
+    "message_noBridgeIp": "没有提供桥接IP！",
     "message_noconnection": "没有连接到适配器! 请启动器的第一个。",
     "modalMessage": "modalMessage",
     "modalTitle": "modalTitle",

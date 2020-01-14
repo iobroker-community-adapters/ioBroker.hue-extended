@@ -22,6 +22,7 @@
     "message_connected": "Verbunden zum Adapter. Lade Token..",
     "message_connecting": "Verbinde zum Adapter..",
     "message_error-user": "Benutzer konnte nicht abgerufen werden!",
+    "message_noBridgeIp": "Keine Bridge IP eingetragen! Trage eine Bridge IP ein!",
     "message_noconnection": "Keine Verbindung zum Adapter! Bitte zunächst den Adapter starten.",
     "modalMessage": "modalMessage",
     "modalTitle": "modalTitle",

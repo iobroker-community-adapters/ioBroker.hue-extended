@@ -92,6 +92,8 @@ function startAdapter(options)
 			catch(err)
 			{
 				adapter.log.warn('Establishing secure connection failed! Falling back to unsecure connection to bridge..');
+				adapter.log.debug(err.message);
+				
 				REQUEST_OPTIONS.secureConnection = false;
 			}
 		}
@@ -454,7 +456,7 @@ function startAdapter(options)
 		switch(msg.command)
 		{
 			case 'getUser':
-				getUser(username =>
+				getUser(msg.message.bridgeIp, msg.message.bridgePort || 80, username =>
 				{
 					adapter.log.debug('Retrieved user from Hue Bridge: ' + JSON.stringify(username));
 					library.msg(msg.from, msg.command, {result: true, user: username}, msg.callback);
@@ -1208,16 +1210,16 @@ function queue()
 /**
  *
  */
-function getUser(success, failure)
+function getUser(bridgeIp, bridgePort, success, failure)
 {
-	adapter.config.bridgePort = REQUEST_OPTIONS.secureConnection ? 443 : (adapter.config.bridgePort || 80);
 	let options = {
-		uri: (REQUEST_OPTIONS.secureConnection ? 'https://' : 'http://') + adapter.config.bridgeIp + ':' + adapter.config.bridgePort + '/api/',
+		uri: 'http://' + bridgeIp + ':' + bridgePort + '/api/',
 		method: 'POST',
+		json: true,
 		body: { 'devicetype': 'iobroker.hue-extended' }
 	};
 	
-	_request({ ...REQUEST_OPTIONS, ...options }).then(res =>
+	_request(options).then(res =>
 	{
 		if (res && res[0] && res[0].success && res[0].success.username)
 			success && success(res[0].success.username);

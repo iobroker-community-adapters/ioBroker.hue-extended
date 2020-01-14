@@ -22,6 +22,7 @@
     "message_connected": "Collegato all'adattatore. Il recupero di utente..",
     "message_connecting": "Collegamento alla scheda..",
     "message_error-user": "Non è riuscito a recuperare utente dal Ponte!",
+    "message_noBridgeIp": "Nessun bridge IP fornito! ",
     "message_noconnection": "Nessun collegamento alla scheda! Si prega di avviare prima l'adattatore.",
     "modalMessage": "modalMessage",
     "modalTitle": "modalTitle",

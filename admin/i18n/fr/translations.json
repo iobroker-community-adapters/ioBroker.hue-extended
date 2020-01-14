@@ -22,6 +22,7 @@
     "message_connected": "Connecté à l'adaptateur. La récupération de l'utilisateur..",
     "message_connecting": "La connexion à la carte..",
     "message_error-user": "Ne pouvait pas aller chercher de l'utilisateur à partir de la passerelle!",
+    "message_noBridgeIp": "Aucune IP de pont fournie! ",
     "message_noconnection": "Pas de connexion à la carte! S'il vous plaît commencer adaptateur.",
     "modalMessage": "modalMessage",
     "modalTitle": "modalTitle",

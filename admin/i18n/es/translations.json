@@ -22,6 +22,7 @@
     "message_connected": "Conectado al adaptador. La recuperación de usuario..",
     "message_connecting": "Conexión a un adaptador..",
     "message_error-user": "Podría no obtener el usuario de Puente!",
+    "message_noBridgeIp": "¡No se proporciona IP de puente! ",
     "message_noconnection": "No hay conexión con el adaptador! Por favor, inicie adaptador primero.",
     "modalMessage": "modalMessage",
     "modalTitle": "modalTitle",

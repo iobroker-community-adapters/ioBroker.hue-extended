@@ -22,6 +22,7 @@
     "message_connected": "Podłączony do zasilacza. Usuwanie użytkowników..",
     "message_connecting": "Podłączenie do zasilacza..",
     "message_error-user": "Nie może przynieść użytkownikowi od mostu!",
+    "message_noBridgeIp": "Nie podano adresu IP mostka! ",
     "message_noconnection": "Nie ma związku z adapterem! Proszę, zacznij od zasilacza.",
     "modalMessage": "modalMessage",
     "modalTitle": "modalTitle",

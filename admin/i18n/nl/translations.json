@@ -22,6 +22,7 @@
     "message_connected": "Aangesloten op adapter. Het ophalen van de gebruiker..",
     "message_connecting": "Aansluiten op adapter..",
     "message_error-user": "Kon het niet halen van de gebruiker van de Brug!",
+    "message_noBridgeIp": "Geen bridge IP gegeven! ",
     "message_noconnection": "Geen verbinding met adapter! Start de adapter eerste.",
     "modalMessage": "modalMessage",
     "modalTitle": "modalTitle",

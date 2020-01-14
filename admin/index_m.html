@@ -64,7 +64,7 @@
 		 */
 		getUser.on('click', function()
 		{
-			$('#statusLog').text('');
+			$('#log').text('');
 			$('#modal').modal('open');
 		});
 
@@ -73,27 +73,33 @@
 		 */
 		generateUser.on('click', function()
 		{
-			$('#log').html('');
-			_log(translateWord('message_connecting'));
+			$('#log').text('');
+			
+			if ($('#bridgeIp').val() === '') {
+				_log(translateWord('message_noBridgeIp'));
+			}
+			else {
+				_log(translateWord('message_connecting'));
 
-			// cancel
-			var timeout = setTimeout(function() {_log(translateWord('message_noconnection'), 'error');}, 7000);
+				// cancel
+				var timeout = setTimeout(function() {_log(translateWord('message_noconnection'), 'error');}, 7000);
 
-			// send request
-			sendTo(null, 'getUser', {}, function(res)
-			{
-				_log(translateWord('message_connected'));
-				clearTimeout(timeout);
-
-				if (res !== false && res.result !== false)
+				// send request
+				sendTo(null, 'getUser', { bridgeIp: $('#bridgeIp').val(), bridgePort: $('#bridgePort').val() }, function(res)
 				{
-					$('#bridgeUser').val(res.user).focus();
-					$('#bridgeUser').trigger('change');
-					$('#modal').modal('close');
-				}
-				else
-					_log(res.error !== undefined ? res.error : translateWord('message_error-user'), 'error');
-			});
+					_log(translateWord('message_connected'));
+					clearTimeout(timeout);
+
+					if (res !== false && res.result !== false)
+					{
+						$('#bridgeUser').val(res.user).focus();
+						$('#bridgeUser').trigger('change');
+						$('#modal').modal('close');
+					}
+					else
+						_log(res.error !== undefined ? res.error : translateWord('message_error-user'), 'error');
+				});
+			}
 		});
 	});
 	// -->
