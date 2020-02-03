@@ -34,6 +34,9 @@ Connect your Philips Hue Lights with ioBroker.
 
 Please also see [release page](https://github.com/Zefau/ioBroker.hue-extended/releases) for changelog and detailed information.
 
+### 1.2.1 (2019-02-03)
+- (Zefau) fixed failing secure connection when selecting default certificates
+
 ### 1.2.0 (2019-11-23)
 - (Zefau) added option to change `transitiontime` on scenes (see [#24](https://github.com/Zefau/ioBroker.hue-extended/issues/24))
 

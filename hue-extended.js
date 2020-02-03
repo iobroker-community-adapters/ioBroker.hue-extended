@@ -77,14 +77,14 @@ function startAdapter(options)
 			{
 				REQUEST_OPTIONS = {
 					...REQUEST_OPTIONS,
-					'cert': _fs.readFileSync(adapter.config.certPublicPath),
-					'key': _fs.readFileSync(adapter.config.certPrivatePath),
+					'cert': adapter.config.certPublicPath.indexOf('.') === -1 ? adapter.config.certPublicPath : _fs.readFileSync(adapter.config.certPublicPath),
+					'key': adapter.config.certPrivatePath.indexOf('.') === -1 ? adapter.config.certPrivatePath : _fs.readFileSync(adapter.config.certPrivatePath),
 					'rejectUnauthorized': false,
 					'secureConnection': true
 				};
 				
 				if (adapter.config.certChainedPath)
-					REQUEST_OPTIONS.ca = _fs.readFileSync(adapter.config.certChainedPath);
+					REQUEST_OPTIONS.ca = adapter.config.certChainedPath.indexOf('.') === -1 ? adapter.config.certChainedPath : _fs.readFileSync(adapter.config.certChainedPath);
 				
 				if (REQUEST_OPTIONS.key.indexOf('ENCRYPTED') > -1)
 					REQUEST_OPTIONS.passphrase = adapter.config.passphrase;
