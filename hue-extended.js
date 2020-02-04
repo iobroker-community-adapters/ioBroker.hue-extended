@@ -796,6 +796,11 @@ function readData(key, data, channel)
 				data.uid = key.substr(key.lastIndexOf('.')+1);
 			}
 			
+			// change state for groups
+			if (data.any_on) {
+				data.on = data.any_on;
+			}
+			
 			// change state for resourcelinks
 			if (data.name && channel == 'resourcelinks')
 			{
