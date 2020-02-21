@@ -441,7 +441,7 @@ function startAdapter(options)
 			if (adapter.config.hueToXY && (commands.hue !== undefined || commands.ct !== undefined))
 				adapter.log.debug('Converting ' + JSON.stringify(commands) + ' to xy: ' + JSON.stringify(lights) + ' - ' + JSON.stringify(manufacturers) + ' - ' + JSON.stringify(xySupported));
 			
-			if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && manufacturers.filter(manufacturer => manufacturer != 'Philips').length > 0 && xySupported.indexOf(null) == -1)
+			if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && manufacturers.filter(manufacturer => manufacturer.indexOf('Philips') === -1 && manufacturer.indexOf('Signify') === -1).length > 0 && xySupported.indexOf(null) == -1)
 			{
 				if (!rgb)
 				{

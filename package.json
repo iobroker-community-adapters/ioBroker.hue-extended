@@ -40,7 +40,7 @@
   "dependencies": {
     "@iobroker/adapter-core": "^2.2.1",
     "color-convert": "^2.0.1",
-    "request": "^2.88.0",
+    "request": "^2.88.2",
     "request-promise": "^4.2.5"
   },
   "deprecated": false,
@@ -76,5 +76,5 @@
     "test:unit": "mocha test/unit --exit",
     "translate": "gulp translateAndUpdateWordsJS"
   },
-  "version": "1.2.2"
+  "version": "1.2.3"
 }
