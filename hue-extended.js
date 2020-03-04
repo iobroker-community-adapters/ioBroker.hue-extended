@@ -134,7 +134,7 @@ function startAdapter(options)
 			// delete old states (which were not updated recently)
 			garbageCollector = setTimeout(function runGarbageCollector()
 			{
-				if (!unloaded && adapter.config.garbageCollector)
+				if (!unloaded && adapter.config.refresh > 0 && adapter.config.garbageCollector)
 				{
 					library.runGarbageCollector(adapterName + '.' + adapter.instance, true, 24*60*60); // delete states older than 24h
 					garbageCollector = setTimeout(runGarbageCollector, 60*60*1000); // run every hour
@@ -802,22 +802,19 @@ function readData(key, data, channel)
 			}
 			
 			// change state for resourcelinks
-			if (data.name && channel == 'resourcelinks')
-			{
+			if (data.name && channel == 'resourcelinks') {
 				data.uid = key.substr(key.lastIndexOf('.')+1);
 				id = library.clean(data.name, true, '_').replace(/\./g, '-');
 				key = key.replace('.' + data.uid, '.' + id);
 			}
 			
 			// change state for rules
-			if (channel == 'rules' && key.substr(-7) == 'actions')
-			{
+			if (channel == 'rules' && key.substr(-7) == 'actions') {
 				key = key.replace('.actions', '.action');
 				let states = {};
 				let action;
 				
-				data.forEach(trigger =>
-				{
+				data.forEach(trigger => {
 					action = Object.keys(trigger.body).join('-');
 					states[library.clean(action, true, '-')] = { 'trigger': false, 'options': JSON.stringify(trigger) };
 				});
@@ -865,15 +862,15 @@ function readData(key, data, channel)
 			}
 			
 			// convert value ranges
-			if (data.hue !== undefined)
+			if (data.hue !== undefined) {
 				data.hue = Math.max(Math.min(Math.round(data.hue / 65535 * 360), 360), 0);
-			
-			if (data.ct !== undefined && typeof data.ct !== 'object')
+			}
+			if (data.ct !== undefined && typeof data.ct !== 'object') {
 				data.ct = Math.max(Math.min(Math.round(1 / data.ct * 1000000), 6500), 2000);
+			}
 			
 			// add additional color spaces
-			if (data.bri !== undefined && data.sat !== undefined && data.hue !== undefined)
-			{
+			if (data.bri !== undefined && data.sat !== undefined && data.hue !== undefined) {
 				data.transitiontime = data.transitiontime || 4;
 				data.hsv = data.hue + ','+ (data.sat > 0 ? Math.max(Math.min(Math.round(data.sat/2.54), 100), 0) : 0) + ',' + data.level;
 				data.rgb = _color.hsv.rgb(data.hsv.split(',')).toString();
@@ -884,20 +881,17 @@ function readData(key, data, channel)
 			
 			// set brightness to 0 when device is off
 			let real_bri = library.getDeviceState(key.replace('.state', '.action') + '.real_brightness');
-			if (data.bri !== undefined && data.on == false && adapter.config.briWhenOff)
-			{
+			if (data.bri !== undefined && data.on == false && adapter.config.briWhenOff) {
 				data.bri = 0;
 				data.level = 0;
 			}
-			else if (data.bri !== undefined && data.on == true && real_bri != data.bri && adapter.config.briWhenOff)
+			else if (data.bri !== undefined && data.on == true && real_bri != data.bri && adapter.config.briWhenOff) {
 				library.setDeviceState(key.replace('.state', '.action') + '.real_brightness', data.bri);
-			
+			}
 			
 			// remap states for standardization (see https://github.com/Zefau/ioBroker.hue-extended/issues/1 and https://forum.iobroker.net/post/298019)
-			for (let state in _MAPPING)
-			{
-				if (data[state] !== undefined && typeof data[state] !== 'object')
-				{
+			for (let state in _MAPPING) {
+				if (data[state] !== undefined && typeof data[state] !== 'object') {
 					data[_MAPPING[state]] = data[state];
 					delete data[state];
 				}
@@ -905,19 +899,16 @@ function readData(key, data, channel)
 			
 			// create sub channel for scenes
 			let pathKey = '';
-			if (channel == 'scenes' && (((data.type == 'GroupScene' || data.type == 'LabScene') && data.group) || (data.type == 'LightScene' && data.lights && data.lights[0])))
-			{
+			if (channel == 'scenes' && (((data.type == 'GroupScene' || data.type == 'LabScene') && data.group) || (data.type == 'LightScene' && data.lights && data.lights[0]))) {
 				// skips if groups are not indexed so far
-				if ((data.type == 'GroupScene' || data.type == 'LabScene') && (!DEVICES['groups'] || !DEVICES['groups'][data.group]))
-				{
+				if ((data.type == 'GroupScene' || data.type == 'LabScene') && (!DEVICES['groups'] || !DEVICES['groups'][data.group])) {
 					adapter.log.silly('Groups not yet given, thus scene ' + data.name + ' (' + data.uid + ') skipped for now.');
 					return false;
 				}
 				
 				// LightScene
 				let pathDescription = '';
-				if (data.type == 'LightScene')
-				{
+				if (data.type == 'LightScene') {
 					key = key.replace('.' + data.uid, adapter.config.sceneNaming == 'scene' ? '.' + id : '.LightScenes');
 					pathKey = '.' + library.clean(data.name, true, '_').replace(/\./g, '-') + '_' + data.lights.join('-');
 					
@@ -926,8 +917,7 @@ function readData(key, data, channel)
 				}
 				
 				// GroupScene or LabScene
-				else
-				{
+				else {
 					let groupId = library.clean(DEVICES['groups'][data.group].name, true, '_').replace(/\./g, '-');
 					let groupUid = adapter.config.nameId == 'append' ? data.group : ('00' + data.group).substr(-3);
 					
@@ -935,8 +925,7 @@ function readData(key, data, channel)
 					let scene = library.clean(data.name, true, '_').replace(/\./g, '-');
 					
 					// update state
-					if (data.type == 'LabScene')
-					{
+					if (data.type == 'LabScene') {
 						library.setDeviceState('groups.' + (adapter.config.nameId == 'append' ? groupId + '-' + groupUid : groupUid + '-' + groupId) + '.action.hueLabScene', library.getDeviceState('groups.' + (adapter.config.nameId == 'append' ? groupId + '-' + groupUid : groupUid + '-' + groupId) + '.action.on') ? data.uid : '');
 						DEVICES['groups'][data.group].lights.forEach(light =>
 						{
@@ -948,8 +937,7 @@ function readData(key, data, channel)
 					}
 					
 					// scene.group
-					if (adapter.config.sceneNaming == 'scene')
-					{
+					if (adapter.config.sceneNaming == 'scene') {
 						key = key.replace('.' + data.uid, '.' + scene);
 						pathKey = '.' + group;
 						description = 'Scene ' + data.name;
@@ -957,8 +945,7 @@ function readData(key, data, channel)
 					}
 					
 					// group.scene
-					else
-					{
+					else {
 						key = key.replace('.' + data.uid, '.' + group);
 						pathKey = '.' + scene;
 						description = data.type == 'LabScene' ? 'Hue Lab Scenes' : 'Scenes for Group ' + DEVICES['groups'][data.group].name;
@@ -968,50 +955,56 @@ function readData(key, data, channel)
 				
 				// Duplicates
 				let uid = library.getDeviceState(key + pathKey + '.uid');
-				if (uid && uid != data.uid && adapter.config.syncScenesDuplicates)
+				if (uid && uid != data.uid && adapter.config.syncScenesDuplicates) {
 					pathKey += '_' + data.uid;
+				}
 				
 				// update path
 				DEVICES['scenes'][data.uid].path = key + pathKey;
 				
 				// create channel for group and scene
 				library.set({
-						'node': key + pathKey,
-						'role': 'channel',
-						'description': pathDescription
-					});
+					'node': key + pathKey,
+					'role': 'channel',
+					'description': pathDescription
+				});
 			}
 			
 			// read nested data
-			for (let nestedKey in data)
+			for (let nestedKey in data) {
 				readData(key + pathKey + '.' + nestedKey, data[nestedKey], channel);
+			}
 			
 			// create channel
 			library.set({
-					'node': key,
-					'role': 'channel',
-					'description': description || id && data.name || library.ucFirst(key.substr(key.lastIndexOf('.')+1))
-				});
+				'node': key,
+				'role': 'channel',
+				'description': description || id && data.name || library.ucFirst(key.substr(key.lastIndexOf('.')+1))
+			});
 		}
 	}
 	
 	// write to states
-	else
-	{
+	else {
 		// convert data
 		node.key = key;
 		data = convertNode(node, data);
 		
+		// skip .on due to .any_on
+		if (channel == 'groups' && key.indexOf('.action.on') > -1) {
+			return false;
+		}
+		
 		// remap state to action
 		let action = key.substr(key.lastIndexOf('.')+1);
-		if (_SUBSCRIPTIONS.indexOf(action) > -1 && (key.indexOf('state.' + action) > -1 || key.indexOf('config.' + action) > -1))
-		{
+		if (_SUBSCRIPTIONS.indexOf(action) > -1 && (key.indexOf('state.' + action) > -1 || key.indexOf('config.' + action) > -1)) {
+			
 			key = key.replace('.state.', '.action.').replace('.config.', '.action.');
 			library.set({
-					node: key.substr(0, key.indexOf('.action.')+7),
-					role: 'channel',
-					description: 'Action'
-				});
+				node: key.substr(0, key.indexOf('.action.')+7),
+				role: 'channel',
+				description: 'Action'
+			});
 		}
 		
 		// set state
@@ -1032,8 +1025,7 @@ function readData(key, data, channel)
 		);
 		
 		// subscribe to states
-		if (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('.action.') > -1 && key.indexOf('.' + action) > -1)
-		{
+		if (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('.action.') > -1 && key.indexOf('.' + action) > -1) {
 			node.subscribe = true;
 			adapter.subscribeStates(key);
 		}
