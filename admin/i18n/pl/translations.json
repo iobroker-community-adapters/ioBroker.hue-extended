@@ -1,4 +1,6 @@
 {
+    "briWhenNotReachable": "Ustawić jasność na 0, gdy urządzenie jest wyłączone",
+    "briWhenNotReachableInfo": "Ta opcja ustawia znacznik <pre>jasność i</pre> / <do>poziom</Pre> to do 0, gdy urządzenie nie jest dostępny (znaczniki<pre>można dostać i</pre> Auf <Pre>to kłamstwo i</pre>).",
     "briWhenOff": "Ustawić jasność na 0, gdy urządzenie jest wyłączone",
     "briWhenOffInfo": "Ta opcja ustawia znacznik <pre>jasność i</pre> / <do>poziom</Pre> to do 0, gdy urządzenie jest wyłączone (znaczniki<Pre>na</pre> Auf <Pre>to kłamstwo i</pre>).",
     "buttonDismiss": "Zwolnić",

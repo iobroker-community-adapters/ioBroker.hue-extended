@@ -1,4 +1,6 @@
 {
+    "briWhenNotReachable": "Impostare la luminosità a 0, quando il dispositivo è spento",
+    "briWhenNotReachableInfo": "Questa opzione imposta il tag <pre>luminosità</pre> / <pre>livello</pre> 0, quando il dispositivo non è raggiungibile (<pre>raggiungibile</pre> auf <pre>false</pre>).",
     "briWhenOff": "Impostare la luminosità a 0, quando il dispositivo è spento",
     "briWhenOffInfo": "Questa opzione imposta il tag <pre>luminosità</pre> / <pre>livello</pre> 0, quando il dispositivo è spento (<pre>su</pre> auf <pre>false</pre>).",
     "buttonDismiss": "Chiudere",

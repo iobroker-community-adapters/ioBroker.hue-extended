@@ -1,4 +1,6 @@
 {
+    "briWhenNotReachable": "Configurar el brillo a 0, cuando el dispositivo está apagado",
+    "briWhenNotReachableInfo": "Esta opción establece el <pre>brillo</pre> / <pre>nivel</pre> a 0, cuando el dispositivo no está accesible (<pre>accesible</pre> auf <pre>false</pre>).",
     "briWhenOff": "Configurar el brillo a 0, cuando el dispositivo está apagado",
     "briWhenOffInfo": "Esta opción establece el <pre>brillo</pre> / <pre>nivel</pre> a 0, cuando el dispositivo está apagado (<pre>en</pre> auf <pre>false</pre>).",
     "buttonDismiss": "Descartar",

@@ -881,11 +881,11 @@ function readData(key, data, channel)
 			
 			// set brightness to 0 when device is off
 			let real_bri = library.getDeviceState(key.replace('.state', '.action') + '.real_brightness');
-			if (data.bri !== undefined && data.on == false && adapter.config.briWhenOff) {
+			if (data.bri !== undefined && ((data.on === false && adapter.config.briWhenOff) || (data.reachable === false && adapter.config.briWhenNotReachable))) {
 				data.bri = 0;
 				data.level = 0;
 			}
-			else if (data.bri !== undefined && data.on == true && real_bri != data.bri && adapter.config.briWhenOff) {
+			else if (data.bri !== undefined && data.on === true && real_bri != data.bri && adapter.config.briWhenOff) {
 				library.setDeviceState(key.replace('.state', '.action') + '.real_brightness', data.bri);
 			}
 			

@@ -1,4 +1,6 @@
 {
+    "briWhenNotReachable": "亮度设置为0，当装置被关闭",
+    "briWhenNotReachableInfo": "这种选项将<预>亮度</预>/<预>级别</预>0,当设备是不可访问(<预>可访问</预>auf<预>假</预>).",
     "briWhenOff": "亮度设置为0，当装置被关闭",
     "briWhenOffInfo": "这种选项将<预>亮度</预>/<预>级别</预>0，当该装置被关闭(<预>就</预>auf<预>假</预>).",
     "buttonDismiss": "驳回",

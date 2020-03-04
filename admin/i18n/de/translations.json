@@ -1,4 +1,6 @@
 {
+    "briWhenNotReachable": "Setze Helligkeit auf 0, wenn das Gerät nicht erreichbar ist",
+    "briWhenNotReachableInfo": "Diese Option schaltet die Helligkeit (<pre>brightness</pre> bzw. <pre>level</pre>) auf 0, wenn das Gerät nicht erreichbar ist (<pre>reachable</pre> auf <pre>false</pre>).",
     "briWhenOff": "Setze Helligkeit auf 0, wenn das Gerät ausgeschaltet wird",
     "briWhenOffInfo": "Diese Option schaltet die Helligkeit (<pre>brightness</pre> bzw. <pre>level</pre>) auf 0, wenn das Gerät ausgeschaltet wird (<pre>on</pre> auf <pre>false</pre>).",
     "buttonDismiss": "schließen",

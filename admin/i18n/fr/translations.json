@@ -1,4 +1,6 @@
 {
+    "briWhenNotReachable": "Régler la luminosité à 0, lorsque l'appareil est éteint",
+    "briWhenNotReachableInfo": "Cette option définit le <pre>luminosité</pre> / <pre>niveau</pre> 0, lorsque l'appareil n'est pas accessible (<pre>accessible</pre> auf <pre>false</pre>).",
     "briWhenOff": "Régler la luminosité à 0, lorsque l'appareil est éteint",
     "briWhenOffInfo": "Cette option définit le <pre>luminosité</pre> / <pre>niveau</pre> 0, lorsque l'appareil est éteint (<pre>le</pre> auf <pre>false</pre>).",
     "buttonDismiss": "Rejeter",

@@ -1,4 +1,6 @@
 {
+    "briWhenNotReachable": "De helderheid instellen op 0 in, wanneer het apparaat is uitgeschakeld",
+    "briWhenNotReachableInfo": "Deze opties stelt u de <pre>helderheid</pre> / <pre>niveau</pre> 0 is, wanneer het apparaat niet bereikbaar is (<pre>bereikbaar</pre> auf <pre>false</pre>).",
     "briWhenOff": "De helderheid instellen op 0 in, wanneer het apparaat is uitgeschakeld",
     "briWhenOffInfo": "Deze opties stelt u de <pre>helderheid</pre> / <pre>niveau</pre> 0 is, wanneer het apparaat is uitgeschakeld (<pre>on</pre> auf <pre>false</pre>).",
     "buttonDismiss": "Sluiten",

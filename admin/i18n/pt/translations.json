@@ -1,4 +1,6 @@
 {
+    "briWhenNotReachable": "Ajuste o brilho para 0, quando o dispositivo está desligado",
+    "briWhenNotReachableInfo": "Esta opção define o <pre>brilho</pre> / <pre>nível</pre> 0, quando o dispositivo não está acessível (<pre>acessível</pre> auf <pre>false</pre>).",
     "briWhenOff": "Ajuste o brilho para 0, quando o dispositivo está desligado",
     "briWhenOffInfo": "Esta opção define o <pre>brilho</pre> / <pre>nível</pre> 0, quando o dispositivo está desligado (<pre>no</pre> auf <pre>false</pre>).",
     "buttonDismiss": "Fechar",
