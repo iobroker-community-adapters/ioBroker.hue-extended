@@ -42,6 +42,7 @@ pre {display: inline}
 
 .m [type="checkbox"] + span:not(.lever) {
 	margin-bottom: 3px;
+	height: auto;
 }
 
 .m .row {margin-bottom: 0 !important}

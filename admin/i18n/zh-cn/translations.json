@@ -44,6 +44,8 @@
     "sceneNamingRoom": "格式<预>色扩展。0.场景。<b>和名称的组gt;</b>.<b>和名称的场景-gt;</b>.名</预>",
     "sceneNamingScene": "格式<预>色扩展。0.场景。<b>和名称的场景-gt;</b>.<b>和名称的组gt;</b>.名</预>",
     "secureConnection": "使用安全连接到网桥（https）",
+    "switchOnlyWhenOn": "仅设置灯光的一个组都在",
+    "switchOnlyWhenOnInfo": "这项集中的灯光一组上了。",
     "sync": "同步设置",
     "syncConfig": "同步配置",
     "syncGroups": "同步组",

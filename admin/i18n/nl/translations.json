@@ -44,6 +44,8 @@
     "sceneNamingRoom": "Indeling <pre>scènes.<b>&lt;Naam van de Groep&gt;</b>.<b>&lt;Naam-van-Scene&gt;</b>.naam</pre>",
     "sceneNamingScene": "Indeling <pre>scènes.<b>&lt;Naam-van-Scene&gt;</b>.<b>&lt;Naam van de Groep&gt;</b>.naam</pre>",
     "secureConnection": "Gebruik beveiligde verbinding met Bridge (https)",
+    "switchOnlyWhenOn": "Alleen de lichten van een groep die op",
+    "switchOnlyWhenOnInfo": "Deze opties stelt lichten in een groep die al.",
     "sync": "Synchronisatie-Instellingen",
     "syncConfig": "Synchroniseren Config",
     "syncGroups": "Groepen Synchroniseren",

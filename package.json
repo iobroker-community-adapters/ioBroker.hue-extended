@@ -1,28 +1,30 @@
 {
-  "_from": "iobroker.hue-extended@1.1.6",
-  "_id": "iobroker.hue-extended@1.1.6",
+  "_from": "iobroker.hue-extended@1.2.3",
+  "_id": "iobroker.hue-extended@1.2.3",
   "_inBundle": false,
-  "_integrity": "sha512-vTwtDKXUrtflxGt9lFYMDxgMuDAq4LZDpY/f5syev8OwhTfw0Zl5PvVeTeGG98K7ZjP6EUBIr8PUS2e8GKUzjA==",
+  "_integrity": "sha512-LI2UCGfaKz1E4qNLCGmYoPy1dfccUSu/hro4JC3YurS04tbsyfsuzIoHLVR9HMI6EeP0P4xm6LCzRZ40lcEjhw==",
   "_location": "/iobroker.hue-extended",
-  "_phantomChildren": {},
+  "_phantomChildren": {
+    "@types/node": "13.7.7"
+  },
   "_requested": {
     "type": "version",
     "registry": true,
-    "raw": "iobroker.hue-extended@1.1.6",
+    "raw": "iobroker.hue-extended@1.2.3",
     "name": "iobroker.hue-extended",
     "escapedName": "iobroker.hue-extended",
-    "rawSpec": "1.1.6",
+    "rawSpec": "1.2.3",
     "saveSpec": null,
-    "fetchSpec": "1.1.6"
+    "fetchSpec": "1.2.3"
   },
   "_requiredBy": [
     "#USER",
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/iobroker.hue-extended/-/iobroker.hue-extended-1.1.6.tgz",
-  "_shasum": "c811dd40134ec209c9b97646b94c6e5da6c497ed",
-  "_spec": "iobroker.hue-extended@1.1.6",
-  "_where": "/root",
+  "_resolved": "https://registry.npmjs.org/iobroker.hue-extended/-/iobroker.hue-extended-1.2.3.tgz",
+  "_shasum": "de8f852f86d5cfd8f9c4acafc5aa3472f13cc3db",
+  "_spec": "iobroker.hue-extended@1.2.3",
+  "_where": "/opt",
   "author": {
     "name": "zefau",
     "email": "zefau@mailbox.org"
@@ -46,7 +48,7 @@
   "deprecated": false,
   "description": "Integration of your Philips Hue Lights with your ioBroker",
   "devDependencies": {
-    "@iobroker/testing": "^2.0.2",
+    "@iobroker/testing": "^2.1.0",
     "axios": "^0.19.2",
     "chai": "^4.2.0",
     "gulp": "^4.0.2",
@@ -76,5 +78,5 @@
     "test:unit": "mocha test/unit --exit",
     "translate": "gulp translateAndUpdateWordsJS"
   },
-  "version": "1.2.3"
+  "version": "1.3.0"
 }

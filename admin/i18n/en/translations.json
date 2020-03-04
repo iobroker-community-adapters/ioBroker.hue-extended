@@ -44,6 +44,8 @@
     "sceneNamingRoom": "Format <pre>scenes.<b>&lt;Name-of-Group&gt;</b>.<b>&lt;Name-of-Scene&gt;</b>.name</pre>",
     "sceneNamingScene": "Format <pre>scenes.<b>&lt;Name-of-Scene&gt;</b>.<b>&lt;Name-of-Group&gt;</b>.name</pre>",
     "secureConnection": "Use secure connection to Bridge (https)",
+    "switchOnlyWhenOn": "Only set lights of a group which are on",
+    "switchOnlyWhenOnInfo": "This options sets lights in a group which are on already.",
     "sync": "Synchronisation Settings",
     "syncConfig": "Synchronize Config",
     "syncGroups": "Synchronize Groups",

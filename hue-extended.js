@@ -285,19 +285,16 @@ function startAdapter(options)
 		}
 		
 		// handle schedules
-		else if (appliance.type == 'schedules' || appliance.type == 'rules')
-		{
+		else if (appliance.type == 'schedules' || appliance.type == 'rules') {
 			let options = null;
-			try
-			{
+			try {
 				options = JSON.parse(library.getDeviceState(appliance.path + '.action.options'));
 				
 				appliance.method = options.method;
 				appliance.trigger = options.address;
 				commands = options.body;
 			}
-			catch(err)
-			{
+			catch(err) {
 				adapter.log.warn('Invalid schedules data given!');
 				adapter.log.debug(err.message);
 				return false;
@@ -305,33 +302,31 @@ function startAdapter(options)
 		}
 		
 		// handle lights or groups
-		else if (appliance.type == 'lights' || appliance.type == 'groups')
-		{
+		else if (appliance.type == 'lights' || appliance.type == 'groups') {
 			let lights = appliance.type == 'lights' ? [appliance.uid] : DEVICES['groups'][appliance.uid].lights;
 			
 			// handle color spaces
 			let value = commands[action];
 			let rgb = null, hsv = null;
-			if (action == 'rgb')
-			{
+			if (action == 'rgb') {
 				rgb = value.split(',');
 				hsv = _color.rgb.hsv(rgb);
 			}
 			
-			else if (action == 'hsv')
+			else if (action == 'hsv') {
 				hsv = value.split(',');
-			
-			else if (action == 'cmyk')
+			}
+			else if (action == 'cmyk') {
 				hsv = _color.cmyk.hsv(value.split(','));
-			
-			else if (action == 'xyz')
+			}
+			else if (action == 'xyz') {
 				hsv = _color.xyz.hsv(value.split(','));
-			
-			else if (action == 'hex')
+			}
+			else if (action == 'hex') {
 				hsv = _color.hex.hsv(value.split(','));
+			}
 			
-			if (hsv !== null)
-			{
+			if (hsv !== null) {
 				delete commands[action];
 				commands = {
 					'hue': hsv[0],
@@ -350,8 +345,8 @@ function startAdapter(options)
 			let manufacturers = [];
 			let hueLabScene;
 			
-			for (let index in lights)
-			{
+			for (let index in lights) {
+				
 				// light identifier
 				let light = lights[index];
 				let lightId = library.clean(DEVICES['lights'][light].name, true, '_').replace(/\./g, '-');
@@ -359,12 +354,11 @@ function startAdapter(options)
 				
 				// check for activated hue lab scene
 				hueLabScene = library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.hueLabScene');
-				if (hueLabScene)
-				{
+				if (hueLabScene) {
+					
 					// turn off hue lab scene
 					let command = DEVICES['scenes'][hueLabScene].command;
-					if (command.body && command.body.status === 0)
-					{
+					if (command.body && command.body.status === 0) {
 						library.setDeviceState(appliance.path + '.action.hueLabScene', '');
 						sendCommand({ 'type': 'scenes', 'path': DEVICES['scenes'][hueLabScene].path, 'name': DEVICES['scenes'][hueLabScene].name, 'trigger': command.address, 'method': command.method }, command.body);
 					}
@@ -373,19 +367,30 @@ function startAdapter(options)
 				// get manufacturers
 				manufacturers.push(library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.manufacturername'));
 				xySupported.push(library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.xy'));
+				
+				// only set lights in a group which are on already
+				if (appliance.type == 'groups' && adapter.config.switchOnlyWhenOn && library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.on') === true) {
+					adapter.setState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.' + action, state.val);
+				}
 			}
 			
+			// only set lights in a group which are on already
+			if (appliance.type == 'groups' && adapter.config.switchOnlyWhenOn) {
+				
+				// lights have been set individually, so stop processing the group
+				return false;
+			}
+			
+			//
 			// go through commands and modify if required
 			let obj;
-			for (action in commands)
-			{
+			for (action in commands) {
 				value = commands[action];
 				obj = action;
 				
 				// remap states back due to standardization
 				let remapped = _MAPPING_STATES.indexOf(action);
-				if (remapped > -1)
-				{
+				if (remapped > -1) {
 					let key = _MAPPING_BRIDGE[remapped];
 					commands[key] = commands[action];
 					delete commands[action];
@@ -394,86 +399,85 @@ function startAdapter(options)
 				
 				// if device is turned off, set brightness to 0
 				// NOTE: Brightness is a scale from 1 (the minimum the light is capable of) to 254 (the maximum).
-				if (action == 'on' && value == false && library.getDeviceState(appliance.path + '.action.brightness') !== null && commands.level === undefined && commands.bri === undefined && adapter.config.briWhenOff)
-				{
+				if (action == 'on' && value == false && library.getDeviceState(appliance.path + '.action.brightness') !== null && commands.level === undefined && commands.bri === undefined && adapter.config.briWhenOff) {
 					library.setDeviceState(appliance.path + '.action.real_brightness', library.getDeviceState(appliance.path + '.action.brightness') || 0);
 					library._setValue(appliance.path + '.action.brightness', 0);
 					library._setValue(appliance.path + '.action.level', 0);
 				}
 				
 				// if device is turned on, make sure brightness is not 0
-				if (action == 'on' && value == true && library.getDeviceState(appliance.path + '.action.brightness') !== null && commands.level === undefined && commands.bri === undefined)
-				{
+				if (action == 'on' && value == true && library.getDeviceState(appliance.path + '.action.brightness') !== null && commands.level === undefined && commands.bri === undefined) {
 					let bri = adapter.config.briWhenOff ? library.getDeviceState(appliance.path + '.action.real_brightness') : library.getDeviceState(appliance.path + '.action.brightness');
 					commands.bri = !bri || bri == 0 ? 254 : bri;
 				}
 				
 				// if .level is changed the change will be applied to .brightness instead
-				if (action == 'level' && value > 0)
-				{
+				if (action == 'level' && value > 0) {
 					delete commands[action];
 					Object.assign(commands, { on: true, bri: Math.max(Math.min(Math.round(value*2.54), 254), 0) });
 				}
 			
 				// if .bri is changed, make sure light is on
-				if (action == 'bri' && value > 0)
-				{
+				if (action == 'bri' && value > 0) {
 					library.setDeviceState(appliance.path + '.action.real_brightness', value);
 					Object.assign(commands, { on: true, bri: value });
 				}
 				
 				// if .bri is changed to 0, turn off
-				if ((action == 'bri' || action == 'level') && value <= 0)
-				{
+				if ((action == 'bri' || action == 'level') && value <= 0) {
 					delete commands['level'];
 					Object.assign(commands, { on: false }); // , bri: 0
 				}
 				
 				// convert value ranges
-				if (action == 'hue' && value <= 360)
+				if (action == 'hue' && value <= 360) {
 					commands.hue = Math.max(Math.min(Math.round(value / 360 * 65535), 65535), 0);
+				}
 				
-				if (action == 'ct' && value > 500)
+				if (action == 'ct' && value > 500) {
 					commands.ct = Math.max(Math.min(Math.round(1 / value * 1000000), 500), 153);
+				}
 			}
 			
+			//
 			// convert HUE / CT to XY
-			if (adapter.config.hueToXY && (commands.hue !== undefined || commands.ct !== undefined))
+			if (adapter.config.hueToXY && (commands.hue !== undefined || commands.ct !== undefined)) {
 				adapter.log.debug('Converting ' + JSON.stringify(commands) + ' to xy: ' + JSON.stringify(lights) + ' - ' + JSON.stringify(manufacturers) + ' - ' + JSON.stringify(xySupported));
+			}
 			
-			if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && manufacturers.filter(manufacturer => manufacturer.indexOf('Philips') === -1 && manufacturer.indexOf('Signify') === -1).length > 0 && xySupported.indexOf(null) == -1)
-			{
-				if (!rgb)
-				{
-					if (commands.ct !== undefined && adapter.config.ctToXY)
-					{
+			if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && manufacturers.filter(manufacturer => manufacturer.indexOf('Philips') === -1 && manufacturer.indexOf('Signify') === -1).length > 0 && xySupported.indexOf(null) == -1) {
+				if (!rgb) {
+					if (commands.ct !== undefined && adapter.config.ctToXY) {
 						rgb = _ctColor.convertCTtoRGB(Math.max(Math.min(Math.round(1 / commands.ct * 1000000), 6500), 2000));
 						delete commands.ct;
 					}
-					else if (commands.hue !== undefined && adapter.config.hueToXY)
-					{
+					else if (commands.hue !== undefined && adapter.config.hueToXY) {
 						rgb = hsv ? _color.hsv.rgb(hsv) : _color.hsv.rgb([commands.hue, (commands.sat || library.getDeviceState(appliance.path + '.action.saturation')), commands.bri || library.getDeviceState(appliance.path + '.action.brightness')]);
 						delete commands.hue;
 					}
 				}
 				
-				if (rgb === null || rgb[0] === undefined || rgb[0] === null)
+				if (rgb === null || rgb[0] === undefined || rgb[0] === null) {
 					adapter.log.warn('Invalid RGB given (' + JSON.stringify(rgb) + ')!');
-				
-				else
+				}
+				else {
 					commands.xy = _hueColor.convertRGBtoXY(rgb);
+				}
 			}
 			
 			// if .on is not off, be sure device is on (except for alerts)
-			if (commands.on === undefined && commands.alert === undefined)
+			if (commands.on === undefined && commands.alert === undefined) {
 				commands.on = true; // A light cannot have its hue, saturation, brightness, effect, ct or xy modified when it is turned off. Doing so will return 201 error.
+			}
 		}
 		
 		// queue commands
-		if (adapter.config.useQueue)
+		if (adapter.config.useQueue) {
 			addToQueue(appliance, commands);
-		else
+		}
+		else {
 			sendCommand(appliance, commands);
+		}
 	});
 	
 	/*

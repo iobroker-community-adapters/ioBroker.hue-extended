@@ -44,6 +44,8 @@
     "sceneNamingRoom": "Format znacznika <pre>scen.<b>&lt;nazwa-z-grupy&GT;</b>.<b>&lt;nazwa-z-scena&GT;</b>.imię i</pre>",
     "sceneNamingScene": "Format znacznika <pre>scen.<b>&lt;nazwa-z-scena&GT;</b>.<b>&lt;nazwa-z-grupy&GT;</b>.imię i</pre>",
     "secureConnection": "Użyj bezpiecznego połączenia z mostem (https)",
+    "switchOnlyWhenOn": "Tylko zainstalować światła grupy, które znajdują się na",
+    "switchOnlyWhenOnInfo": "Ta opcja ustawia światła do grupy, która już na.",
     "sync": "Ustawienia Synchronizacji ",
     "syncConfig": "Synchronizować Konfigur",
     "syncGroups": "Synchronizacja Grup",
