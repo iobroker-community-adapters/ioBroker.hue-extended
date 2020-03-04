@@ -266,7 +266,7 @@ function startAdapter(options)
 					
 					appliance.method = options.method;
 					appliance.trigger = 'sensors/' + options.address;
-					commands = options.body;
+					commands = { ...options.body, 'status': state.val ? 1 : 0 };
 				}
 				catch(err)
 				{
