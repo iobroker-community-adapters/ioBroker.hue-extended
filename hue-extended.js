@@ -144,7 +144,9 @@ function startAdapter(options)
 		});
 		
 		// start listening for events in the queue
-		queue();
+		if (adapter.config.useQueue) {
+			queue();
+		}
 	});
 
 	/*
@@ -213,28 +215,29 @@ function startAdapter(options)
 			if (action == 'transitiontime') {
 				
 				// get current lightstates
-				_request({ ...REQUEST_OPTIONS, 'uri': bridge + 'scenes/' + scene.uid }).then(s => {
-					if (s.lightstates && typeof s.lightstates == 'object') {
-						
-						// set lightstates including transitiontime
-						for (let key in s.lightstates) {
+				_request({ ...REQUEST_OPTIONS, 'uri': bridge + 'scenes/' + scene.uid })
+					.then(s => {
+						if (s.lightstates && typeof s.lightstates == 'object') {
 							
-							let lightstate = s.lightstates[key];
-							lightstate.transitiontime = state.val;
-						
-							_request({
-								...REQUEST_OPTIONS,
-								uri: bridge + 'scenes/' + scene.uid + '/lightstates/' + key,
-								method: 'PUT',
-								body: s.lightstates[key]
+							// set lightstates including transitiontime
+							for (let key in s.lightstates) {
+								
+								let lightstate = s.lightstates[key];
+								lightstate.transitiontime = state.val;
+							
+								_request({
+									...REQUEST_OPTIONS,
+									uri: bridge + 'scenes/' + scene.uid + '/lightstates/' + key,
+									method: 'PUT',
+									body: s.lightstates[key]
 
-							})
-								.then(function(res) {
-									adapter.log.info('Set transitiontime of scene ' + scene.name + ' (' + scene.uid + ') to ' + state.val + '.');
-								});
+								})
+									.then(res => adapter.log.info('Set transitiontime of scene ' + scene.name + ' (' + scene.uid + ') to ' + state.val + '.'))
+									.catch(err => adapter.log.error(err.message));
+							}
 						}
-					}
-				});
+					})
+					.catch(err => adapter.log.error(err.message));
 				
 				library._setValue(id, '');
 				return false;
@@ -551,11 +554,15 @@ else
 function getPayload(refresh)
 {
 	// get data from bridge
-	_request({ ...REQUEST_OPTIONS, 'uri': bridge }).then(payload =>
-	{
-		if (!payload || (payload[0] && payload[0].error))
-		{
-			adapter.log.error('Error retrieving payload from Hue Bridge' + (payload[0] && payload[0].error ? ': ' + payload[0].error.description : '!'));
+	_request({ ...REQUEST_OPTIONS, 'uri': bridge, resolveWithFullResponse: true }).then(response => {
+		let payload = response.body;
+		
+		if (response.statusCode !== 200) {
+			adapter.log.error('Error while retrieving payload from Hue Bridge (Status Code ' + response.statusCode + ')!');
+			return false;
+		}
+		else if (!payload || (payload[0] && payload[0].error)) {
+			adapter.log.error('Error while retrieving payload from Hue Bridge' + (payload[0] && payload[0].error ? ': ' + payload[0].error.description : '!'));
 			return false;
 		}
 		
@@ -565,15 +572,14 @@ function getPayload(refresh)
 		library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' }, true);
 		
 		// read hue labs from payload
-		if (adapter.config.syncScenes && adapter.config.syncHueLabsScenes)
-		{
+		if (adapter.config.syncScenes && adapter.config.syncHueLabsScenes) {
+			
 			// find "huelabs" in resourcelinks
 			let formulas = [];
-			for (let key in payload['resourcelinks'])
-			{
+			for (let key in payload['resourcelinks']) {
 				let resourcelink = payload['resourcelinks'][key];
-				if (resourcelink && resourcelink.name == 'HueLabs 2.0')
-				{
+				
+				if (resourcelink && resourcelink.name == 'HueLabs 2.0') {
 					// get formulas
 					formulas = resourcelink.links.map(formula => payload['resourcelinks'][formula.substr(formula.lastIndexOf('/')+1)]);
 					break;
@@ -581,8 +587,7 @@ function getPayload(refresh)
 			}
 			
 			// get formula trigger
-			formulas.forEach((formula, i) =>
-			{
+			formulas.forEach((formula, i) => {
 				for (let index in formula.links)
 				{
 					let link = formula.links[index];
@@ -624,10 +629,8 @@ function getPayload(refresh)
 			});
 			
 			// sync all groups
-			if (channel == 'groups')
-			{
-				_request({ ...REQUEST_OPTIONS, 'uri': bridge + channel + '/0' }).then(pl =>
-				{
+			if (channel == 'groups') {
+				_request({ ...REQUEST_OPTIONS, 'uri': bridge + channel + '/0' }).then(pl => {
 					pl.name = 'All Lights';
 					
 					// index
@@ -635,17 +638,18 @@ function getPayload(refresh)
 					DEVICES[channel][0] = JSON.parse(JSON.stringify(pl));
 					
 					// only write if syncing is on
-					if (adapter.config['sync' + library.ucFirst(channel)])
+					if (adapter.config['sync' + library.ucFirst(channel)]) {
 						addBridgeData(channel, { '0': pl });
+					}
 					
 				}).catch(err => {});
 			}
-			else
+			else {
 				DEVICES[channel] = JSON.parse(JSON.stringify(payload[channel])); // copy and index payload
+			}
 			
 			// only write if syncing is on
-			if (adapter.config['sync' + library.ucFirst(channel)])
-			{
+			if (adapter.config['sync' + library.ucFirst(channel)]) {
 				// update overall syncing information
 				library.set({ ...library.getNode('datetime'), 'node': 'info.datetime' }, library.getDateTime(Date.now()));
 				library.set({ ...library.getNode('timestamp'), 'node': 'info.timestamp' }, Math.floor(Date.now()/1000));
@@ -657,8 +661,7 @@ function getPayload(refresh)
 				addBridgeData(channel, payload[channel]);
 			}
 			
-			else
-			{
+			else {
 				library.set({ ...library.getNode('syncing'), 'node': channel + '.syncing' }, false);
 				library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' + library.ucFirst(channel) }, false);
 			}
@@ -668,17 +671,16 @@ function getPayload(refresh)
 		retry = 0;
 		const maxRefresh = 2;
 		
-		if (refresh > 0 && refresh < maxRefresh)
-		{
+		if (refresh > 0 && refresh < maxRefresh) {
 			adapter.log.warn('Due to performance reasons, the refresh rate can not be set to less than ' + maxRefresh + ' seconds. Using ' + maxRefresh + ' seconds now.');
 			refresh = maxRefresh;
 		}
 		
-		if (refresh > 0 && !unloaded)
+		if (refresh > 0 && !unloaded) {
 			refreshCycle = setTimeout(getPayload, refresh*1000, refresh);
+		}
 		
-	}).catch(err =>
-	{
+	}).catch(err => {
 		// Indicate that tree is not synchronized anymore
 		library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' }, false);
 		//library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' + library.ucFirst(channel) }, false);
@@ -708,16 +710,14 @@ function getPayload(refresh)
 			error = 'Socket hang up';
 		
 		// TRY AGAIN OR STOP ADAPTER
-		if (!retry || retry < 10)
-		{
+		if (!retry || retry < 10) {
 			adapter.log.debug('Error connecting to Hue Bridge: ' + error + '. ' + (retry > 0 ? 'Already retried ' + retry + 'x so far. ' : '') + 'Try again in 10 seconds..');
 			//adapter.log.debug(err.message);
 			//adapter.log.debug(JSON.stringify(err.stack));
 			retry = !retry ? 1 : retry+1;
 			refreshCycle = setTimeout(getPayload, 10*1000, refresh);
 		}
-		else
-		{
+		else {
 			library.terminate('Error connecting to Hue Bridge: ' + error + '. ' + (retry > 0 ? 'Already retried ' + retry + 'x in total, thus connection closed now.' : 'Connection closed.') + ' See debug log for details.');
 			adapter.log.debug(err.message);
 			adapter.log.debug(JSON.stringify(err.stack));
@@ -801,7 +801,7 @@ function readData(key, data, channel)
 			}
 			
 			// change state for groups
-			if (data.any_on) {
+			if (data.any_on !== data.on) {
 				data.on = data.any_on;
 			}
 			
