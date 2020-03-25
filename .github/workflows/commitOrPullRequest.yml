@@ -1,0 +1,10 @@
+on: [push]
+
+jobs:
+  commitOrPullRequest:
+    runs-on: ubuntu-latest
+    name: commitOrPullRequest
+    steps:
+    - name: commitOrPullRequest
+      id: commitOrPullRequest
+      uses: actions/commitOrPullRequest@v1
