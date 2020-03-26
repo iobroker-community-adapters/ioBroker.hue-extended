@@ -1,5 +1,0 @@
-name: 'commitOrPullRequestAction'
-description: 'commitOrPullRequestAction'
-runs:
-  using: 'node12'
-  main: 'commitOrPullRequestAction.js'
