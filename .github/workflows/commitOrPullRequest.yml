@@ -8,4 +8,4 @@ jobs:
     steps:
     - name: commitOrPullRequest
       id: commitOrPullRequest
-      uses: actions/commitOrPullRequest@v1
+      uses: actions/githubActions-iobroker-commitOrPullRequest@v1
