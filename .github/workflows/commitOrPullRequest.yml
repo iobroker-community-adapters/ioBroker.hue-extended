@@ -8,4 +8,4 @@ jobs:
     steps:
     - name: commitOrPullRequest
       id: commitOrPullRequest
-      uses: Zefau/githubActions-iobroker-commitOrPullRequest
+      uses: Zefau/githubActions-iobroker-commitOrPullRequest@v1
