@@ -108,8 +108,7 @@
                 "name": "Zefau",
                 "email": "zefau@mailbox.org"
             }
-        ],
-        "installedFrom": "iobroker.hue-extended@1.2.3"
+        ]
     },
     "native": {
         "refresh": 30,
