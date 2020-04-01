@@ -34,6 +34,9 @@ Connect your Philips Hue Lights with ioBroker.
 
 Please also see [release page](https://github.com/Zefau/ioBroker.hue-extended/releases) for changelog and detailed information.
 
+### 1.3.2 (2020-04-01)
+- (Zefau) fixed `on` state being disappeared
+
 ### 1.3.1 (2020-03-24)
 - (Zefau) added check for http status code to the response received from the Hue Bridge (see [#45](https://github.com/Zefau/ioBroker.hue-extended/issues/45))
 - (Zefau) second try changing state `on` of a group to match state `any_on` (see [#19](https://github.com/Zefau/ioBroker.hue-extended/issues/19))
