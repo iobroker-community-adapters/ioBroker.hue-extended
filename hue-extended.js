@@ -950,6 +950,9 @@ function readData(key, data, channel)
 								break;
 							}
 						}
+						
+						data.bri = data.reachable ? data.bri : 0;
+						data.level = data.reachable ? data.level : 0;
 					}
 					
 					// scene.group
