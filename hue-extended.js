@@ -801,7 +801,7 @@ function readData(key, data, channel)
 			}
 			
 			// change state for groups
-			if (data.any_on !== data.on) {
+			if (data.any_on !== undefined && data.any_on !== data.on) {
 				data.on = data.any_on;
 			}
 			
