@@ -588,39 +588,36 @@ function getPayload(refresh)
 			
 			// get formula trigger
 			formulas.forEach((formula, i) => {
-				for (let index in formula.links)
-				{
+				for (let index in formula.links) {
 					let link = formula.links[index];
 					let id = link.substr(link.lastIndexOf('/')+1);
 					
 					// add sensor data to scene
-					if (link && link.indexOf('sensors') > -1)
-					{
+					if (link && link.indexOf('sensors') > -1) {
 						let sensor = payload['sensors'][id];
-						if (sensor && sensor.manufacturername == 'Philips' && sensor.modelid == 'HUELABSVTOGGLE')
-						{
+						if (sensor && sensor.manufacturername == 'Philips' && sensor.modelid == 'HUELABSVTOGGLE') {
 							formulas[i].state = { 'on': (sensor.state.status == 1), ...sensor.state };
 							formulas[i].command = { 'address': '/sensors/' + id + '/state', 'body': {"status": (1-sensor.state.status)}, 'method': 'PUT' };
 						}
 					}
 					
 					// add group data to scene
-					else if (link && link.indexOf('groups') > -1)
-					{
+					else if (link && link.indexOf('groups') > -1) {
 						formulas[i].group = id;
 						formulas[i].type = 'LabScene';
 					}
 				}
 				
 				// add huelab scene to ordinary scenes
-				if (formulas[i].group && formulas[i].command)
+				if (formulas[i].group && formulas[i].command) {
 					payload['scenes'][library.clean(formula.description)] = formulas[i];
+				}
 			});
 		}
 		
 		// go through channels
-		for (let channel in payload)
-		{
+		for (let channel in payload) {
+			
 			// create channel
 			library.set({
 				'node': channel,
@@ -747,30 +744,29 @@ function addBridgeData(channel, data)
 function readData(key, data, channel)
 {
 	// only proceed if data is given
-	if (data === undefined || data === 'undefined')
+	if (data === undefined || data === 'undefined') {
 		return false;
+	}
 	
 	// skip recycled
-	if (channel && !adapter.config['sync' + library.ucFirst(channel) + 'Recycled'] && data && data.recycle === true && !(channel == 'scenes' && adapter.config.syncHueLabsScenes && data.type == 'LabScene'))
-	{
+	if (channel && !adapter.config['sync' + library.ucFirst(channel) + 'Recycled'] && data && data.recycle === true && !(channel == 'scenes' && adapter.config.syncHueLabsScenes && data.type == 'LabScene')) {
 		adapter.log.silly('Skipping device ' + data['name'] + ' in channel ' + channel + '.');
 		return false;
 	}
 	
 	// set current device name
-	if (data && data.name)
+	if (data && data.name) {
 		device = data.name;
+	}
 	
 	// get node details
 	key = key.replace(/ /g, '_');
 	let node = get(key.split('.'));
 	
 	// loop nested data
-	if (data !== null && typeof data == 'object' && !(Array.isArray(data) && (key.substr(-2) == 'xy' || key.substr(-6) == 'lights' || key.substr(-7) == 'sensors' || key.substr(-5) == 'links')))
-	{
+	if (data !== null && typeof data == 'object' && !(Array.isArray(data) && (key.substr(-2) == 'xy' || key.substr(-6) == 'lights' || key.substr(-7) == 'sensors' || key.substr(-5) == 'links'))) {
 		// create channel
-		if (Object.keys(data).length > 0)
-		{
+		if (Object.keys(data).length > 0) {
 			let description = false;
 			
 			// add last seen date
@@ -780,19 +776,20 @@ function readData(key, data, channel)
 			
 			// use uid and name instead of only uid
 			let id = false;
-			if (data.name && channel != 'config' && channel != 'scenes' && channel != 'resourcelinks')
-			{
+			if (data.name && channel != 'config' && channel != 'scenes' && channel != 'resourcelinks') {
 				data.uid = key.substr(key.lastIndexOf('.')+1);
 				id = library.clean(data.name, true, '_').replace(/\./g, '-');
 				let uid = ('00' + data.uid).substr(-3);
 				
 				// append UID
-				if (adapter.config.nameId == 'append')
+				if (adapter.config.nameId == 'append') {
 					key = key.replace('.' + data.uid, '.' + id + '-' + data.uid);
-					
+				}
+				
 				// prepend UID
-				else
+				else {
 					key = key.replace('.' + data.uid, '.' + uid + '-' + id);
+				}
 			}
 			
 			// add uid to scenes
@@ -827,15 +824,15 @@ function readData(key, data, channel)
 			}
 			
 			// change state for scenes
-			if (data.type == 'GroupScene' || data.type == 'LightScene')
+			if (data.type == 'GroupScene' || data.type == 'LightScene') {
 				data.action = {
 					'trigger': false,
 					'transitiontime': ''
 				};
+			}
 			
 			// change state for schedules / scenes
-			if ((channel == 'schedules' || channel == 'scenes') && key.substr(-7) == 'command')
-			{
+			if ((channel == 'schedules' || channel == 'scenes') && key.substr(-7) == 'command') {
 				key = key.replace('.command', '') + '.action';
 				
 				data.address = data.address.substr(data.address.indexOf('/', 5)+1, data.address.length);
@@ -843,8 +840,7 @@ function readData(key, data, channel)
 			}
 			
 			// add additional states level, scene, _commands and lastAction
-			if (data.bri !== undefined)
-			{
+			if (data.bri !== undefined) {
 				data.level = data.bri > 0 ? Math.max(Math.min(Math.round(data.bri/2.54), 100), 0) : 0;
 				data.scene = '';
 				data._commands = '';
@@ -883,11 +879,12 @@ function readData(key, data, channel)
 				data.hex = _color.rgb.hex(data.rgb.split(','));
 			}
 			
-			// set brightness to 0 when device is off
+			// set brightness to 0 when device is off or device is not reachable
 			let real_bri = library.getDeviceState(key.replace('.state', '.action') + '.real_brightness');
 			if (data.bri !== undefined && ((data.on === false && adapter.config.briWhenOff) || (data.reachable === false && adapter.config.briWhenNotReachable))) {
 				data.bri = 0;
 				data.level = 0;
+				data.on = false;
 			}
 			else if (data.bri !== undefined && data.on === true && real_bri != data.bri && adapter.config.briWhenOff) {
 				library.setDeviceState(key.replace('.state', '.action') + '.real_brightness', data.bri);
@@ -928,16 +925,31 @@ function readData(key, data, channel)
 					let group = data.type == 'LabScene' && (!adapter.config.groupHueLabs || adapter.config.groupHueLabs == 'extra') ? 'HueLabsScenes' : adapter.config.nameId == 'append' ? groupId + '-' + groupUid : groupUid + '-' + groupId;
 					let scene = library.clean(data.name, true, '_').replace(/\./g, '-');
 					
-					// update state
+					// update state for hueLabScene
 					if (data.type == 'LabScene') {
 						library.setDeviceState('groups.' + (adapter.config.nameId == 'append' ? groupId + '-' + groupUid : groupUid + '-' + groupId) + '.action.hueLabScene', library.getDeviceState('groups.' + (adapter.config.nameId == 'append' ? groupId + '-' + groupUid : groupUid + '-' + groupId) + '.action.on') ? data.uid : '');
-						DEVICES['groups'][data.group].lights.forEach(light =>
-						{
+						DEVICES['groups'][data.group].lights.forEach(light => {
 							let lightId = library.clean(DEVICES['lights'][light].name, true, '_').replace(/\./g, '-');
 							let lightUid = adapter.config.nameId == 'append' ? light : ('00' + light).substr(-3);
 							
 							library.setDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.hueLabScene', library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.on') ? data.uid : '');
 						});
+					}
+					
+					// set reachability for group if all lights are not reachable
+					else if (adapter.config.briWhenNotReachable && data.on === true) {
+						data.on = false;
+						data.reachable = false;
+						
+						for (let light in DEVICES['groups'][data.group].lights) {
+							let lightReachability = DEVICES['lights'][light].state.reachable;
+							
+							if (lightReachability !== false) {
+								data.on = true;
+								data.reachable = true;
+								break;
+							}
+						}
 					}
 					
 					// scene.group
