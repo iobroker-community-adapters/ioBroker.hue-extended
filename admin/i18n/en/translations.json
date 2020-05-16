@@ -1,5 +1,5 @@
 {
-    "briWhenNotReachable": "Set brightness to 0, when device is turned off",
+    "briWhenNotReachable": "Set brightness to 0, when device is not reachable",
     "briWhenNotReachableInfo": "This options sets the <pre>brightness</pre> / <pre>level</pre> to 0, when the device is not reachable (<pre>reachable</pre> auf <pre>false</pre>).",
     "briWhenOff": "Set brightness to 0, when device is turned off",
     "briWhenOffInfo": "This options sets the <pre>brightness</pre> / <pre>level</pre> to 0, when the device is turned off (<pre>on</pre> auf <pre>false</pre>).",

@@ -40,7 +40,7 @@
     }
   ],
   "dependencies": {
-    "@iobroker/adapter-core": "^2.2.1",
+    "@iobroker/adapter-core": "^2.4.0",
     "color-convert": "^2.0.1",
     "request": "^2.88.2",
     "request-promise": "^4.2.5"
@@ -48,11 +48,11 @@
   "deprecated": false,
   "description": "Integration of your Philips Hue Lights with your ioBroker",
   "devDependencies": {
-    "@iobroker/testing": "^2.1.0",
+    "@iobroker/testing": "^2.2.0",
     "axios": "^0.19.2",
     "chai": "^4.2.0",
     "gulp": "^4.0.2",
-    "mocha": "^7.1.1"
+    "mocha": "^7.1.2"
   },
   "directories": {
     "lib": "lib",
@@ -78,5 +78,5 @@
     "test:unit": "mocha test/unit --exit",
     "translate": "gulp translateAndUpdateWordsJS"
   },
-  "version": "1.3.3"
+  "version": "1.3.4"
 }

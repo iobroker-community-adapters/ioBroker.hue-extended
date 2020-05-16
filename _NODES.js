@@ -23,6 +23,7 @@ module.exports =
 		
 		// ACTIONS
 		"on": {"description": "Switch light on / off", "role": "switch.light", "type": "boolean"},
+		"onOffAllLights": {"description": "Switch all lights in the group on / off", "role": "switch.light", "type": "boolean"},
 		"brightness": {"description": "Brightness of the light between 0 and 254", "role": "level.color.brightness", "type": "number", "common": { "min": 0, "max": 254 }},
 		"level": {"description": "Level of the light between 0% and 100%", "role": "level.dimmer", "type": "number", "common": { "min": 0, "max": 100, "unit": "%" }},
 		//"hue": {"description": "Hue of the light between 0 and 65535", "role": "level.color.hue", "type": "number", "common": { "min": 0, "max": 65535 }},
@@ -94,6 +95,7 @@ module.exports =
 		
 		"groups.state.all_on": {"description": "Indicates if all lights of the group are turned on", "role": "indicator", "type": "boolean"},
 		"groups.state.any_on": {"description": "Indicates if any light of the group is turned on", "role": "indicator", "type": "boolean"},
+		"groups.state.reachable": {"description": "Indicates if group can be reached by the bridge", "role": "indicator.reachable", "type": "boolean"},
 		
 		"groups.class": {"description": "Category of Room types", "role": "text", "type": "string"},
 		"groups.lights": {"description": "Lights assigned to the group", "role": "text", "type": "string"},
@@ -171,6 +173,7 @@ module.exports =
 		 * On/Off state of the light. On=true, Off=false
 		 */
 		'on',
+		'onOffAllLights',
 		
 		/*
 		 * Brightness of the light. This is a scale from the minimum brightness the light is capable of, 1, to the maximum capable brightness, 254.

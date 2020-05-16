@@ -372,7 +372,7 @@ function startAdapter(options)
 				xySupported.push(library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.xy'));
 				
 				// only set lights in a group which are on already
-				if (appliance.type == 'groups' && adapter.config.switchOnlyWhenOn && library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.on') === true) {
+				if (appliance.type == 'groups' && adapter.config.switchOnlyWhenOn && (action === 'on' || library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.on') === true)) {
 					adapter.setState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.' + action, state.val);
 				}
 			}
@@ -448,7 +448,11 @@ function startAdapter(options)
 				adapter.log.debug('Converting ' + JSON.stringify(commands) + ' to xy: ' + JSON.stringify(lights) + ' - ' + JSON.stringify(manufacturers) + ' - ' + JSON.stringify(xySupported));
 			}
 			
-			if (((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) && manufacturers.filter(manufacturer => manufacturer.indexOf('Philips') === -1 && manufacturer.indexOf('Signify') === -1).length > 0 && xySupported.indexOf(null) == -1) {
+			if (
+					((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) &&
+					manufacturers.filter(manufacturer => manufacturer.indexOf('Philips') === -1 && manufacturer.indexOf('Signify') === -1).length > 0 && xySupported.indexOf(null) == -1
+				) {
+				
 				if (!rgb) {
 					if (commands.ct !== undefined && adapter.config.ctToXY) {
 						rgb = _ctColor.convertCTtoRGB(Math.max(Math.min(Math.round(1 / commands.ct * 1000000), 6500), 2000));
@@ -765,6 +769,7 @@ function readData(key, data, channel)
 	
 	// loop nested data
 	if (data !== null && typeof data == 'object' && !(Array.isArray(data) && (key.substr(-2) == 'xy' || key.substr(-6) == 'lights' || key.substr(-7) == 'sensors' || key.substr(-5) == 'links'))) {
+		
 		// create channel
 		if (Object.keys(data).length > 0) {
 			let description = false;
@@ -798,19 +803,48 @@ function readData(key, data, channel)
 			}
 			
 			// change state for groups
+			if (channel === 'groups') {
+				if (data.on !== undefined) {
+					//data.onOffAllLights = data.on;
+				}
+				
+				// set reachability for group if all lights are not reachable
+				if (data.lights && adapter.config.briWhenNotReachable) {
+					//data.on = false;
+					data.state.reachable = false;
+					
+					for (const light of data.lights) {
+						let lightReachability = DEVICES['lights'][light].state.reachable;
+						
+						if (lightReachability !== false) {
+							//data.on = true;
+							data.state.reachable = true;
+							break;
+						}
+					}
+				}
+				
+				// set states according to reachability
+				if (data.reachable !== undefined) {
+					//data.on = data.reachable ? data.on : false;
+					data.bri = data.reachable ? data.bri : 0;
+					data.level = data.reachable ? data.level : 0;
+				}
+			}
+			
 			if (data.any_on !== undefined && data.any_on !== data.on) {
 				data.on = data.any_on;
 			}
 			
 			// change state for resourcelinks
-			if (data.name && channel == 'resourcelinks') {
+			if (data.name && channel === 'resourcelinks') {
 				data.uid = key.substr(key.lastIndexOf('.')+1);
 				id = library.clean(data.name, true, '_').replace(/\./g, '-');
 				key = key.replace('.' + data.uid, '.' + id);
 			}
 			
 			// change state for rules
-			if (channel == 'rules' && key.substr(-7) == 'actions') {
+			if (channel === 'rules' && key.substr(-7) === 'actions') {
 				key = key.replace('.actions', '.action');
 				let states = {};
 				let action;
@@ -936,25 +970,6 @@ function readData(key, data, channel)
 						});
 					}
 					
-					// set reachability for group if all lights are not reachable
-					else if (adapter.config.briWhenNotReachable && data.on === true) {
-						data.on = false;
-						data.reachable = false;
-						
-						for (let light in DEVICES['groups'][data.group].lights) {
-							let lightReachability = DEVICES['lights'][light].state.reachable;
-							
-							if (lightReachability !== false) {
-								data.on = true;
-								data.reachable = true;
-								break;
-							}
-						}
-						
-						data.bri = data.reachable ? data.bri : 0;
-						data.level = data.reachable ? data.level : 0;
-					}
-					
 					// scene.group
 					if (adapter.config.sceneNaming == 'scene') {
 						key = key.replace('.' + data.uid, '.' + scene);
@@ -1010,7 +1025,7 @@ function readData(key, data, channel)
 		data = convertNode(node, data);
 		
 		// skip .on due to .any_on
-		if (channel == 'groups' && key.indexOf('.action.on') > -1) {
+		if (channel == 'groups' && key.substr(-10) === '.action.on') {
 			return false;
 		}
 		
