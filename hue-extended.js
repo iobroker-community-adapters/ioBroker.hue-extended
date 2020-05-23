@@ -472,6 +472,12 @@ function startAdapter(options)
 				}
 			}
 			
+			// set group .on state
+			if (commands.onOffAllLights !== undefined) {
+				commands.on = commands.onOffAllLights;
+				delete commands.onOffAllLights;
+			}
+			
 			// if .on is not off, be sure device is on (except for alerts)
 			if (commands.on === undefined && commands.alert === undefined) {
 				commands.on = true; // A light cannot have its hue, saturation, brightness, effect, ct or xy modified when it is turned off. Doing so will return 201 error.
@@ -804,8 +810,15 @@ function readData(key, data, channel)
 			
 			// change state for groups
 			if (channel === 'groups') {
-				if (data.on !== undefined) {
-					//data.onOffAllLights = data.on;
+				
+				// add additional action for turning on/off all lights 
+				if (data.all_on !== undefined) {
+					data.onOffAllLights = data.all_on;
+				}
+				
+				// change state of action .on to match state of .any_on
+				if (data.any_on !== undefined && data.any_on !== data.on) {
+					data.on = data.any_on;
 				}
 				
 				// set reachability for group if all lights are not reachable
@@ -830,10 +843,6 @@ function readData(key, data, channel)
 					data.bri = data.reachable ? data.bri : 0;
 					data.level = data.reachable ? data.level : 0;
 				}
-			}
-			
-			if (data.any_on !== undefined && data.any_on !== data.on) {
-				data.on = data.any_on;
 			}
 			
 			// change state for resourcelinks
