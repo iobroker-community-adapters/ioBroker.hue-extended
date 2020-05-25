@@ -813,35 +813,35 @@ function readData(key, data, channel)
 				
 				// add additional action for turning on/off all lights 
 				if (data.all_on !== undefined) {
-					data.onOffAllLights = data.all_on;
+					data.onOffAllLights = data.all_on === true;
 				}
 				
 				// change state of action .on to match state of .any_on
 				if (data.any_on !== undefined && data.any_on !== data.on) {
-					data.on = data.any_on;
+					data.on = data.any_on === true;
 				}
 				
 				// set reachability for group if all lights are not reachable
 				if (data.lights && adapter.config.briWhenNotReachable) {
-					//data.on = false;
 					data.state.reachable = false;
 					
 					for (const light of data.lights) {
 						let lightReachability = DEVICES['lights'][light].state.reachable;
 						
 						if (lightReachability !== false) {
-							//data.on = true;
 							data.state.reachable = true;
 							break;
 						}
 					}
-				}
-				
-				// set states according to reachability
-				if (data.reachable !== undefined) {
-					//data.on = data.reachable ? data.on : false;
-					data.bri = data.reachable ? data.bri : 0;
-					data.level = data.reachable ? data.level : 0;
+					
+					// set states according to reachability
+					if (data.state.reachable !== undefined) {
+						data.action.onOffAllLights = data.state.reachable ? data.action.onOffAllLights : false;
+						data.action.bri = data.state.reachable ? data.action.bri : 0;
+						data.action.level = data.state.reachable ? data.action.level : 0;
+						data.state.all_on = data.state.reachable ? data.state.all_on : false;
+						data.state.any_on = data.state.reachable ? data.state.any_on : false;
+					}
 				}
 			}
 			
