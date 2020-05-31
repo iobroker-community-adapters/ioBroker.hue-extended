@@ -717,18 +717,22 @@ function getPayload(refresh)
 			error = 'Socket hang up';
 		
 		// TRY AGAIN OR STOP ADAPTER
+		let timeout = 60;
 		if (!retry || retry < 10) {
 			adapter.log.debug('Error connecting to Hue Bridge: ' + error + '. ' + (retry > 0 ? 'Already retried ' + retry + 'x so far. ' : '') + 'Try again in 10 seconds..');
 			//adapter.log.debug(err.message);
 			//adapter.log.debug(JSON.stringify(err.stack));
-			retry = !retry ? 1 : retry+1;
-			refreshCycle = setTimeout(getPayload, 10*1000, refresh);
+			timeout = 10;
 		}
 		else {
 			library.terminate('Error connecting to Hue Bridge: ' + error + '. ' + (retry > 0 ? 'Already retried ' + retry + 'x in total, thus connection closed now.' : 'Connection closed.') + ' See debug log for details.');
 			adapter.log.debug(err.message);
 			adapter.log.debug(JSON.stringify(err.stack));
 		}
+		
+		// TRY AGAIN
+		retry = !retry ? 1 : retry+1;
+		refreshCycle = setTimeout(getPayload, timeout*1000, refresh);
 	});
 }
 
