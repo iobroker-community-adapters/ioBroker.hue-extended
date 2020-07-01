@@ -1,30 +1,25 @@
 {
-  "_from": "iobroker.hue-extended@1.2.3",
-  "_id": "iobroker.hue-extended@1.2.3",
+  "_from": "https://github.com/Zefau/ioBroker.hue-extended/tarball/4667185e9a4db67b24b2165e868301576d881613",
+  "_id": "iobroker.hue-extended@1.3.6",
   "_inBundle": false,
-  "_integrity": "sha512-LI2UCGfaKz1E4qNLCGmYoPy1dfccUSu/hro4JC3YurS04tbsyfsuzIoHLVR9HMI6EeP0P4xm6LCzRZ40lcEjhw==",
+  "_integrity": "sha512-Oew4JpcBqB+T/RU+Dhn9fcCgwkvVtPTmtfkCA046A5BdlJ0fv3tvot/rdF+HxHIwtVaEwxFby/q+gFadNhnb9A==",
   "_location": "/iobroker.hue-extended",
-  "_phantomChildren": {
-    "@types/node": "13.7.7"
-  },
+  "_phantomChildren": {},
   "_requested": {
-    "type": "version",
-    "registry": true,
-    "raw": "iobroker.hue-extended@1.2.3",
-    "name": "iobroker.hue-extended",
-    "escapedName": "iobroker.hue-extended",
-    "rawSpec": "1.2.3",
-    "saveSpec": null,
-    "fetchSpec": "1.2.3"
+    "type": "remote",
+    "raw": "https://github.com/Zefau/ioBroker.hue-extended/tarball/4667185e9a4db67b24b2165e868301576d881613",
+    "rawSpec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/4667185e9a4db67b24b2165e868301576d881613",
+    "saveSpec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/4667185e9a4db67b24b2165e868301576d881613",
+    "fetchSpec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/4667185e9a4db67b24b2165e868301576d881613"
   },
   "_requiredBy": [
     "#USER",
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/iobroker.hue-extended/-/iobroker.hue-extended-1.2.3.tgz",
-  "_shasum": "de8f852f86d5cfd8f9c4acafc5aa3472f13cc3db",
-  "_spec": "iobroker.hue-extended@1.2.3",
-  "_where": "/opt",
+  "_resolved": "https://github.com/Zefau/ioBroker.hue-extended/tarball/4667185e9a4db67b24b2165e868301576d881613",
+  "_shasum": "c2c8aebfc251946f2de05232cc0382f14edc41e0",
+  "_spec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/4667185e9a4db67b24b2165e868301576d881613",
+  "_where": "/opt/iobroker",
   "author": {
     "name": "zefau",
     "email": "zefau@mailbox.org"
@@ -78,5 +73,5 @@
     "test:unit": "mocha test/unit --exit",
     "translate": "gulp translateAndUpdateWordsJS"
   },
-  "version": "1.3.6"
+  "version": "1.3.7"
 }

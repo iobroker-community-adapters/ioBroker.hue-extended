@@ -19,6 +19,7 @@ const _SUBSCRIPTIONS = require(__dirname + '/_NODES.js').SUBSCRIPTIONS;
 
 const _MAPPING_BRIDGE = Object.keys(_MAPPING);
 const _MAPPING_STATES = Object.values(_MAPPING);
+const _CHANNELS = ['config', 'groups', 'lights', 'resourcelinks', 'rules', 'scenes', 'schedules', 'sensors'];
 
 /*
  * variables initiation
@@ -567,13 +568,12 @@ function getPayload(refresh)
 	_request({ ...REQUEST_OPTIONS, 'uri': bridge, resolveWithFullResponse: true }).then(response => {
 		let payload = response.body;
 		
+		// error handler
 		if (response.statusCode !== 200) {
-			adapter.log.error('Error while retrieving payload from Hue Bridge (Status Code ' + response.statusCode + ')!');
-			return false;
+			throw new Error('Error while retrieving payload from Hue Bridge (Status Code ' + response.statusCode + ')');
 		}
 		else if (!payload || (payload[0] && payload[0].error)) {
-			adapter.log.error('Error while retrieving payload from Hue Bridge' + (payload[0] && payload[0].error ? ': ' + payload[0].error.description : '!'));
-			return false;
+			throw new Error('Error while retrieving payload from Hue Bridge' + (payload[0] && payload[0].error ? ': ' + payload[0].error.description : ''));
 		}
 		
 		// add meta data
@@ -628,6 +628,11 @@ function getPayload(refresh)
 		// go through channels
 		for (let channel in payload) {
 			
+			// verify channel
+			if (_CHANNELS.indexOf(channel) === -1) {
+				throw new Error('Incorrect data return from Hue API');
+			}
+			
 			// create channel
 			library.set({
 				'node': channel,
@@ -637,8 +642,17 @@ function getPayload(refresh)
 			
 			// sync all groups
 			if (channel == 'groups') {
-				_request({ ...REQUEST_OPTIONS, 'uri': bridge + channel + '/0' }).then(pl => {
+				_request({ ...REQUEST_OPTIONS, 'uri': bridge + channel + '/0', resolveWithFullResponse: true }).then(res => {
+					let pl = res.body;
 					pl.name = 'All Lights';
+					
+					// error handler
+					if (res.statusCode !== 200) {
+						throw new Error('Error while retrieving payload from Hue Bridge (Status Code ' + res.statusCode + ')');
+					}
+					else if (!pl || (pl[0] && pl[0].error)) {
+						throw new Error('Error while retrieving payload from Hue Bridge' + (pl[0] && pl[0].error ? ': ' + pl[0].error.description : ''));
+					}
 					
 					// index
 					DEVICES[channel] = JSON.parse(JSON.stringify(payload[channel]));

@@ -32,7 +32,9 @@ Connect your Philips Hue Lights with ioBroker.
 
 ## Changelog
 
-Please also see [release page](https://github.com/Zefau/ioBroker.hue-extended/releases) for changelog and detailed information.
+### 1.3.7 (2020-07-01)
+- (Zefau) added additional verification checks of the response received from the Hue Bridge (see [#45](https://github.com/Zefau/ioBroker.hue-extended/issues/45))
+- (Zefau) fixed long-time polling for connection retry after connection fails serval times on short-time polling (see [#58](https://github.com/Zefau/ioBroker.hue-extended/issues/58))
 
 ### 1.3.6 (2020-05-31)
 - (Zefau) added long-time polling for connection retry after connection fails serval times on short-time polling (see [#58](https://github.com/Zefau/ioBroker.hue-extended/issues/58))
