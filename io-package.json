@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "hue-extended",
-    "version": "1.3.7",
+    "version": "1.3.8",
     "title": "Philips Hue Extended",
     "desc": {
       "en": "Integration of all your Philips Hue Devices with your ioBroker",
@@ -109,7 +109,7 @@
         "email": "zefau@mailbox.org"
       }
     ],
-    "installedFrom": "https://github.com/Zefau/ioBroker.hue-extended/tarball/4667185e9a4db67b24b2165e868301576d881613"
+    "installedFrom": "iobroker.hue-extended@1.3.7"
   },
   "native": {
     "refresh": 30,

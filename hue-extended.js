@@ -111,8 +111,9 @@ function startAdapter(options)
 			library.set(Library.CONNECTION, true);
 			
 			// set current states from objects
-			for (let state in states)
+			for (let state in states) {
 				library.setDeviceState(state.replace(adapterName + '.' + adapter.instance + '.', ''), states[state] && states[state].val);
+			}
 			
 			// retrieve payload from Hue Bridge
 			getPayload(adapter.config.refresh || 30);
@@ -633,6 +634,9 @@ function getPayload(refresh)
 				throw new Error('Incorrect data return from Hue API');
 			}
 			
+			// everything looks good
+			library.set(Library.CONNECTION, true);
+			
 			// create channel
 			library.set({
 				'node': channel,
@@ -702,6 +706,8 @@ function getPayload(refresh)
 		}
 		
 	}).catch(err => {
+		library.set(Library.CONNECTION, false);
+		
 		// Indicate that tree is not synchronized anymore
 		library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' }, false);
 		//library.set({ ...library.getNode('syncing'), 'node': 'info.syncing' + library.ucFirst(channel) }, false);
@@ -733,13 +739,13 @@ function getPayload(refresh)
 		// TRY AGAIN OR STOP ADAPTER
 		let timeout = 60;
 		if (!retry || retry < 10) {
-			adapter.log.debug('Error connecting to Hue Bridge: ' + error + '. ' + (retry > 0 ? 'Already retried ' + retry + 'x so far. ' : '') + 'Try again in 10 seconds..');
+			adapter.log[!retry ? 'warn' : 'debug']('Error connecting to Hue Bridge: ' + error + '. ' + (retry > 0 ? 'Already retried ' + retry + 'x so far. ' : '') + 'Reconnecting..');
 			//adapter.log.debug(err.message);
 			//adapter.log.debug(JSON.stringify(err.stack));
-			timeout = 10;
+			timeout = 6;
 		}
 		else {
-			library.terminate('Error connecting to Hue Bridge: ' + error + '. ' + (retry > 0 ? 'Already retried ' + retry + 'x in total, thus connection closed now.' : 'Connection closed.') + ' See debug log for details.');
+			adapter.log.warn('Error connecting to Hue Bridge: ' + error + '. ' + (retry > 0 ? 'Already retried ' + retry + 'x so far. ' : '') + 'Try again in 1 minute..');
 			adapter.log.debug(err.message);
 			adapter.log.debug(JSON.stringify(err.stack));
 		}
