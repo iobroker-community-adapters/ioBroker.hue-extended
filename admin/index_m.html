@@ -19,14 +19,12 @@
 	let globalParams;
 	
 	// load
-	function load(settings, onChange)
-	{
+	function load(settings, onChange) {
 		//initModal(settings.modal);
 		if (!settings.nameId) settings.nameId = 'prepend';
 		
 		//
-		['Groups', 'Resourcelinks', 'Scenes', 'Schedules', 'Rules', 'Sensors'].forEach(function(item)
-		{
+		['Groups', 'Resourcelinks', 'Scenes', 'Schedules', 'Rules', 'Sensors'].forEach(function(item) {
 			$('body').on('change', '#sync' + item, function()
 			{
 				$('#show' + $(this).attr('id').replace('sync', '') + 'Recycled').css('display', $(this).prop('checked') ? 'block' : 'none');
@@ -37,33 +35,51 @@
 		});
 		
 		// certificates
+		if (settings.bridgeType != 'hue') {
+			$('#secureSettings').hide();
+		}
+		
 		$('body').on('change', '#secureConnection', function() {$('.boxCertificates').toggleClass('hidden', !$(this).prop('checked'))});
-		if (settings.secureConnection)
+		if (settings.secureConnection) {
 			$('.boxCertificates').removeClass('hidden');
+		}
 		
 		_load(settings, onChange);
 		globalParams = settings;
 	}
 	
 	// save
-	function save(callback)
-	{
+	function save(callback) {
 		_save(callback, saveParams);
 	}
 	
 	// page loaded
-	$(window).on('load', function()
-	{
+	$(window).on('load', function() {
         $('.modal').modal(); // initialize all modals
 
-		var getUser = $('#button_getUser');
 		var generateUser = $('#button_generateUser');
+		var user = 'hue';
 		
 		/*
-		 * Get User
+		 *
+		 *
 		 */
-		getUser.on('click', function()
-		{
+		$('#bridgeType').on('change', function() {
+			var type = $('#bridgeType').val();
+			
+			if (type == 'hue') {
+				$('#secureSettings').show();
+			}
+			else {
+				$('#secureSettings').hide();
+			}
+		});
+		
+		/*
+		 * Get Hue User
+		 */
+		$('#button_getUser').on('click', function() {
+			user = $('#bridgeType').val();
 			$('#log').text('');
 			$('#modal').modal('open');
 		});
@@ -85,7 +101,7 @@
 				var timeout = setTimeout(function() {_log(translateWord('message_noconnection'), 'error');}, 7000);
 
 				// send request
-				sendTo(null, 'getUser', { bridgeIp: $('#bridgeIp').val(), bridgePort: $('#bridgePort').val() }, function(res)
+				sendTo(null, 'getUser', { type: user, bridgeIp: $('#bridgeIp').val(), bridgePort: $('#bridgePort').val() }, function(res)
 				{
 					_log(translateWord('message_connected'));
 					clearTimeout(timeout);
@@ -185,9 +201,16 @@
 						</div>
 					</div>
 					<div class="row box" style="padding-bottom: 0 !important">
-						<p class="subtitle translate">connectionInformation</p>
+						<p></p>
 						
-						<div class="input-field col s3 m3">
+						<div class="input-field col s2 m2">
+							<label for="bridgeType" class="select translate">bridgeType</label>
+							<select class="value" id="bridgeType">
+								<option value="hue">Hue Bridge</option>
+								<option value="deconz">Deconz / Conbee Stick</option>
+							</select>
+						</div>
+						<div class="input-field col s2 m2">
 							<input class="value" id="bridgeIp" type="text" />
 							<label for="bridgeIp" class="translate">ip</label>
 						</div>
@@ -202,9 +225,9 @@
 						<div class="input-field col s2 m2">
 							<a class="btn blue translate" id="button_getUser">button_getUser</a>
 						</div>
-						<div class="input-field col s3 m3"></div>
+						<div class="input-field col s2 m2"></div>
 					</div>
-					<div class="row box">
+					<div class="row box" id="secureSettings">
 						<div class="col s12 m12">
 							<div class="row">
 								<div class="col s12 m12">

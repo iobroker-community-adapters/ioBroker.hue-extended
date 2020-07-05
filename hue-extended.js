@@ -4,6 +4,7 @@ const utils = require('@iobroker/adapter-core'); // Get common adapter utils
 
 const _fs = require('fs');
 const _request = require('request-promise');
+const _websocket = require('ws');
 const _color = require('color-convert');
 const _hueColor = require('./lib/node-hue-api');
 const _ctColor = require('./lib/ct-color-converter');
@@ -41,8 +42,7 @@ let QUEUE = {};
  * ADAPTER
  *
  */
-function startAdapter(options)
-{
+function startAdapter(options) {
 	options = options || {};
 	adapter = new utils.Adapter({ ...options, name: adapterName });
 	
@@ -50,32 +50,31 @@ function startAdapter(options)
 	 * ADAPTER READY
 	 *
 	 */
-	adapter.on('ready', function()
-	{
+	adapter.on('ready', function() {
 		unloaded = false;
 		library = new Library(adapter, { nodes: _NODES, updatesInLog: adapter.config.debug || false });
 		
 		// Check Node.js Version
 		let version = parseInt(process.version.substr(1, process.version.indexOf('.')-1));
-		if (version <= 6)
+		if (version <= 6) {
 			return library.terminate('This Adapter is not compatible with your Node.js Version ' + process.version + ' (must be >= Node.js v7).', true);
+		}
 		
 		// Check Configuration
 		library.set(Library.CONNECTION, true);
-		if (!adapter.config.bridgeIp || !adapter.config.bridgeUser)
+		if (!adapter.config.bridgeIp || !adapter.config.bridgeUser) {
 			return library.terminate('Please provide connection settings for Hue Bridge!');
+		}
 		
 		// 
 		MAX_ATTEMPTS = adapter.config.maxAttempts || MAX_ATTEMPTS;
 		
 		// Secure connection
 		REQUEST_OPTIONS.secureConnection = false;
-		if (adapter.config.secureConnection)
-		{
+		if (adapter.config.secureConnection) {
 			adapter.log.info('Establishing secure connection to bridge..');
 			
-			try
-			{
+			try {
 				REQUEST_OPTIONS = {
 					...REQUEST_OPTIONS,
 					'cert': adapter.config.certPublicPath.indexOf('.') === -1 ? adapter.config.certPublicPath : _fs.readFileSync(adapter.config.certPublicPath),
@@ -84,30 +83,31 @@ function startAdapter(options)
 					'secureConnection': true
 				};
 				
-				if (adapter.config.certChainedPath)
+				if (adapter.config.certChainedPath) {
 					REQUEST_OPTIONS.ca = adapter.config.certChainedPath.indexOf('.') === -1 ? adapter.config.certChainedPath : _fs.readFileSync(adapter.config.certChainedPath);
+				}
 				
-				if (REQUEST_OPTIONS.key.indexOf('ENCRYPTED') > -1)
+				if (REQUEST_OPTIONS.key.indexOf('ENCRYPTED') > -1) {
 					REQUEST_OPTIONS.passphrase = adapter.config.passphrase;
+				}
 			}
-			catch(err)
-			{
+			catch(err) {
 				adapter.log.warn('Establishing secure connection failed! Falling back to unsecure connection to bridge..');
 				adapter.log.debug(err.message);
 				
 				REQUEST_OPTIONS.secureConnection = false;
 			}
 		}
-		else
+		else {
 			adapter.log.info('Establishing connection to bridge..');
+		}
 		
 		// Bridge connection
 		adapter.config.bridgePort = REQUEST_OPTIONS.secureConnection ? 443 : (adapter.config.bridgePort || 80);
 		bridge = (REQUEST_OPTIONS.secureConnection ? 'https://' : 'http://') + adapter.config.bridgeIp + ':' + adapter.config.bridgePort + '/api/' + adapter.config.bridgeUser + '/';
 		
 		// retrieve all values from states to avoid message "Unsubscribe from all states, except system's, because over 3 seconds the number of events is over 200 (in last second 0)"
-		adapter.getStates(adapterName + '.' + adapter.instance + '.*', (err, states) =>
-		{
+		adapter.getStates(adapterName + '.' + adapter.instance + '.*', (err, states) => {
 			library.set(Library.CONNECTION, true);
 			
 			// set current states from objects
@@ -115,8 +115,44 @@ function startAdapter(options)
 				library.setDeviceState(state.replace(adapterName + '.' + adapter.instance + '.', ''), states[state] && states[state].val);
 			}
 			
-			// retrieve payload from Hue Bridge
-			getPayload(adapter.config.refresh || 30);
+			// use websocket for state updates, if possible
+			const ws = new _websocket('ws://' + (adapter.config.websocketIp || adapter.config.bridgeIp) + ':' + (adapter.config.websocketPort || 443));
+			
+			ws.on('open', () => {
+				adapter.log.info('Using websockets for state updates.');
+				getPayload(30);
+			});
+			
+			ws.on('error', () => {
+				adapter.log.info('Using polling for state updates.');
+				getPayload(adapter.config.refresh || 30);
+			});
+			
+			ws.onmessage = msg => {
+				let data = null;
+				try {
+					data = JSON.parse(msg.data);
+					if (data.state || data.sensor || data.light || data.group || data.config) {
+						adapter.log.debug('Received data from websocket: ' + msg.data);
+						
+						addBridgeData(data.r, {
+							[data.id]: {
+								name: DEVICES[data.r][data.id].name,
+								state: data.state || {},
+								sensor: data.sensor || {},
+								light: data.light || {},
+								group: data.group || {},
+								config: data.config || {}
+							}
+						});
+					}
+					
+				}
+				catch(err) {
+					adapter.log.debug('Could not parse data from websocket!');
+					adapter.log.debug(err.message);
+				}
+			}
 			
 			// add states for last action
 			readData(
@@ -134,10 +170,8 @@ function startAdapter(options)
 			);
 			
 			// delete old states (which were not updated recently)
-			garbageCollector = setTimeout(function runGarbageCollector()
-			{
-				if (!unloaded && adapter.config.refresh > 0 && adapter.config.garbageCollector)
-				{
+			garbageCollector = setTimeout(function runGarbageCollector() {
+				if (!unloaded && adapter.config.refresh > 0 && adapter.config.garbageCollector) {
 					library.runGarbageCollector(adapterName + '.' + adapter.instance, true, 24*60*60); // delete states older than 24h
 					garbageCollector = setTimeout(runGarbageCollector, 60*60*1000); // run every hour
 				}
@@ -155,9 +189,10 @@ function startAdapter(options)
 	 * STATE CHANGE
 	 *
 	 */
-	adapter.on('stateChange', function(id, state)
-	{
-		if (state === undefined || state === null || state.ack === true || state.val === undefined || state.val === null) return;
+	adapter.on('stateChange', function(id, state) {
+		if (state === undefined || state === null || state.ack === true || state.val === undefined || state.val === null) {
+			return;
+		}
 		adapter.log.debug('State of ' + id + ' has changed ' + JSON.stringify(state) + '.');
 		
 		// get params & action
@@ -234,7 +269,7 @@ function startAdapter(options)
 									body: s.lightstates[key]
 
 								})
-									.then(res => adapter.log.info('Set transitiontime of scene ' + scene.name + ' (' + scene.uid + ') to ' + state.val + '.'))
+									.then(() => adapter.log.info('Set transitiontime of scene ' + scene.name + ' (' + scene.uid + ') to ' + state.val + '.'))
 									.catch(err => adapter.log.error(err.message));
 							}
 						}
@@ -246,35 +281,30 @@ function startAdapter(options)
 			}
 			
 			// GroupScene
-			if (scene.type == 'GroupScene')
-			{
+			if (scene.type == 'GroupScene') {
 				appliance.trigger = 'groups/' + scene.groupId + '/action';
 				appliance.name = DEVICES['groups'][scene.groupId].name + ' (' + scene.name + ')';
 				commands = { 'scene': appliance.uid };
 			}
 			
 			// LightScene
-			else if (scene.type == 'LightScene')
-			{
+			else if (scene.type == 'LightScene') {
 				appliance.trigger = 'groups/0/action';
 				appliance.name = 'lights (' + scene.name + ')';
 				commands = { 'scene': appliance.uid };
 			}
 			
 			// LabScene
-			else if (scene.type == 'LabScene')
-			{
+			else if (scene.type == 'LabScene') {
 				let options = null;
-				try
-				{
+				try {
 					options = JSON.parse(library.getDeviceState(appliance.path + '.action.options'));
 					
 					appliance.method = options.method;
 					appliance.trigger = 'sensors/' + options.address;
 					commands = { ...options.body, 'status': state.val ? 1 : 0 };
 				}
-				catch(err)
-				{
+				catch(err) {
 					adapter.log.warn('Invalid scene data given!');
 					adapter.log.debug(err.message);
 					return false;
@@ -282,8 +312,7 @@ function startAdapter(options)
 			}
 			
 			// Error
-			else
-			{
+			else {
 				adapter.log.warn('Invalid scene type given! Must bei either GroupScene, LightScene or LabScene.');
 				return false;
 			}
@@ -451,9 +480,9 @@ function startAdapter(options)
 			}
 			
 			if (
-					((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) &&
+				((commands.hue !== undefined && adapter.config.hueToXY) || (commands.ct !== undefined && adapter.config.ctToXY)) &&
 					manufacturers.filter(manufacturer => manufacturer.indexOf('Philips') === -1 && manufacturer.indexOf('Signify') === -1).length > 0 && xySupported.indexOf(null) == -1
-				) {
+			) {
 				
 				if (!rgb) {
 					if (commands.ct !== undefined && adapter.config.ctToXY) {
@@ -499,25 +528,21 @@ function startAdapter(options)
 	 * HANDLE MESSAGES
 	 *
 	 */
-	adapter.on('message', function(msg)
-	{
+	adapter.on('message', function(msg) {
 		adapter.log.debug('Message: ' + JSON.stringify(msg));
 		
-		switch(msg.command)
-		{
-			case 'getUser':
-				getUser(msg.message.bridgeIp, msg.message.bridgePort || 80, username =>
-				{
-					adapter.log.debug('Retrieved user from Hue Bridge: ' + JSON.stringify(username));
-					library.msg(msg.from, msg.command, {result: true, user: username}, msg.callback);
-					
-				}, error =>
-				{
-					adapter.log.warn('Failed retrieving user (' + error + ')!');
-					library.msg(msg.from, msg.command, {result: false, error: error}, msg.callback);
-				});
+		switch(msg.command) {
+		case 'getUser':
+			getUser(msg.message.type, msg.message.bridgeIp, msg.message.bridgePort || 80, username => {
+				adapter.log.debug('Retrieved user from ' + library.ucFirst(msg.message.type) + ' Bridge: ' + JSON.stringify(username));
+				library.msg(msg.from, msg.command, { result: true, user: username }, msg.callback);
+			},
+			error => {
+				adapter.log.warn('Failed retrieving user (' + error + ')!');
+				library.msg(msg.from, msg.command, { result: false, error: error }, msg.callback);
+			});
 				
-				break;
+			break;
 		}
 	});
 	
@@ -525,10 +550,8 @@ function startAdapter(options)
 	 * ADAPTER UNLOAD
 	 *
 	 */
-	adapter.on('unload', function(callback)
-	{
-		try
-		{
+	adapter.on('unload', function(callback) {
+		try {
 			adapter.log.info('Adapter stopped und unloaded.');
 			
 			unloaded = true;
@@ -538,14 +561,13 @@ function startAdapter(options)
 			
 			callback();
 		}
-		catch(e)
-		{
+		catch(e) {
 			callback();
 		}
 	});
 
 	return adapter;	
-};
+}
 
 
 /*
@@ -553,18 +575,20 @@ function startAdapter(options)
  * If started as allInOne/compact mode => returnfunction to create instance
  *
  */
-if (module && module.parent)
+if (module && module.parent) {
 	module.exports = startAdapter;
-else
-	startAdapter(); // or start the instance directly
+}
+else {
+	startAdapter();
+} // or start the instance directly
 
 
 /**
  *
  *
  */
-function getPayload(refresh)
-{
+function getPayload(refresh) {
+	
 	// get data from bridge
 	_request({ ...REQUEST_OPTIONS, 'uri': bridge, resolveWithFullResponse: true }).then(response => {
 		let payload = response.body;
@@ -646,28 +670,30 @@ function getPayload(refresh)
 			
 			// sync all groups
 			if (channel == 'groups') {
-				_request({ ...REQUEST_OPTIONS, 'uri': bridge + channel + '/0', resolveWithFullResponse: true }).then(res => {
-					let pl = res.body;
-					pl.name = 'All Lights';
-					
-					// error handler
-					if (res.statusCode !== 200) {
-						throw new Error('Error while retrieving payload from Hue Bridge (Status Code ' + res.statusCode + ')');
-					}
-					else if (!pl || (pl[0] && pl[0].error)) {
-						throw new Error('Error while retrieving payload from Hue Bridge' + (pl[0] && pl[0].error ? ': ' + pl[0].error.description : ''));
-					}
-					
-					// index
-					DEVICES[channel] = JSON.parse(JSON.stringify(payload[channel]));
-					DEVICES[channel][0] = JSON.parse(JSON.stringify(pl));
-					
-					// only write if syncing is on
-					if (adapter.config['sync' + library.ucFirst(channel)]) {
-						addBridgeData(channel, { '0': pl });
-					}
-					
-				}).catch(err => {});
+				_request({ ...REQUEST_OPTIONS, 'uri': bridge + channel + '/0', resolveWithFullResponse: true })
+					.then(res => {
+						let pl = res.body;
+						pl.name = 'All Lights';
+						
+						// error handler
+						if (res.statusCode !== 200) {
+							throw new Error('Error while retrieving payload from Hue Bridge (Status Code ' + res.statusCode + ')');
+						}
+						else if (!pl || (pl[0] && pl[0].error)) {
+							throw new Error('Error while retrieving payload from Hue Bridge' + (pl[0] && pl[0].error ? ': ' + pl[0].error.description : ''));
+						}
+						
+						// index
+						DEVICES[channel] = JSON.parse(JSON.stringify(payload[channel]));
+						DEVICES[channel][0] = JSON.parse(JSON.stringify(pl));
+						
+						// only write if syncing is on
+						if (adapter.config['sync' + library.ucFirst(channel)]) {
+							addBridgeData(channel, { '0': pl });
+						}
+						
+					})
+					.catch(() => {});
 			}
 			else {
 				DEVICES[channel] = JSON.parse(JSON.stringify(payload[channel])); // copy and index payload
@@ -717,24 +743,29 @@ function getPayload(refresh)
 		let error = err.message;
 		
 		// ERROR: HTTP 500
-		if (err.message.substr(0, 3) == 500)
+		if (err.message.substr(0, 3) == 500) {
 			error = 'Hue Bridge is busy';
+		}
 		
 		// ERROR: HTTP 502
-		else if (err.message.substr(0, 3) == 502)
+		else if (err.message.substr(0, 3) == 502) {
 			error = '502 Bad Gateway';
+		}
 		
 		// ERROR: ECONNREFUSED
-		else if (err.message.indexOf('ECONNREFUSED') > -1)
+		else if (err.message.indexOf('ECONNREFUSED') > -1) {
 			error = 'Connection refused';
+		}
 		
 		// ERROR: EHOSTUNREACH
-		else if (err.message.indexOf('EHOSTUNREACH') > -1)
+		else if (err.message.indexOf('EHOSTUNREACH') > -1) {
 			error = 'Host not reachable';
+		}
 		
 		// ERROR: SOCKET HANG UP
-		else if (err.message.indexOf('socket hang up') > -1)
+		else if (err.message.indexOf('socket hang up') > -1) {
 			error = 'Socket hang up';
+		}
 		
 		// TRY AGAIN OR STOP ADAPTER
 		let timeout = 60;
@@ -760,8 +791,7 @@ function getPayload(refresh)
 /**
  *
  */
-function addBridgeData(channel, data)
-{
+function addBridgeData(channel, data) {
 	// add meta data
 	library.set({ ...library.getNode('datetime'), 'node': channel + '.datetime' }, library.getDateTime(Date.now()));
 	library.set({ ...library.getNode('timestamp'), 'node': channel + '.timestamp' }, Math.floor(Date.now()/1000));
@@ -775,8 +805,8 @@ function addBridgeData(channel, data)
 /**
  *
  */
-function readData(key, data, channel)
-{
+function readData(key, data, channel) {
+	
 	// only proceed if data is given
 	if (data === undefined || data === 'undefined') {
 		return false;
@@ -1064,7 +1094,7 @@ function readData(key, data, channel)
 		
 		// remap state to action
 		let action = key.substr(key.lastIndexOf('.')+1);
-		if (_SUBSCRIPTIONS.indexOf(action) > -1 && (key.indexOf('state.' + action) > -1 || key.indexOf('config.' + action) > -1)) {
+		if (channel !== 'sensors' && _SUBSCRIPTIONS.indexOf(action) > -1 && (key.indexOf('state.' + action) > -1 || key.indexOf('config.' + action) > -1)) {
 			
 			key = key.replace('.state.', '.action.').replace('.config.', '.action.');
 			library.set({
@@ -1102,18 +1132,17 @@ function readData(key, data, channel)
 /**
  *
  */
-function convertNode(node, data)
-{
+function convertNode(node, data) {
 	// flatten Array
-	if (Array.isArray(data))
+	if (Array.isArray(data)) {
 		data = data.join(',');
+	}
 	
 	// convert
-	switch(node.convert)
-	{
-		case "temperature":
-			data = data / 100;
-			break;
+	switch(node.convert) {
+	case "percentage":
+		data = data / 100;
+		break;
 	}
 	
 	return data;
@@ -1122,8 +1151,7 @@ function convertNode(node, data)
 /**
  *
  */
-function get(node)
-{
+function get(node) {
 	let ns = node.shift() || ''; // lights, groups, scenes, etc.
 	
 	return _NODES[library.clean(ns + '.' + node.join('.'))] || // from --lights.<light>.name-- it searches the whole string
@@ -1137,18 +1165,19 @@ function get(node)
  * Get remapped states (due to standardization)
  *
  */
-function getAction(action)
-{
+function getAction(action) {
 	// map bridge to states
 	let state = _MAPPING_STATES.indexOf(action);
 	let bridge = _MAPPING_BRIDGE.indexOf(action);
 	
-	if (bridge > -1)
+	if (bridge > -1) {
 		return _MAPPING_STATES[bridge];
+	}
 	
 	// map states to bridge
-	else if (state > -1)
+	else if (state > -1) {
 		return _MAPPING_BRIDGE[state];
+	}
 	
 	// no changes
 	return action;
@@ -1158,8 +1187,7 @@ function getAction(action)
  * Send commands to device
  *
  */
-function sendCommand(device, actions, attempt = 1)
-{
+function sendCommand(device, actions, attempt = 1) {
 	// check if target value is actually different from current value
 	if ((device.type == 'lights' || device.type == 'groups') && device.trigger != 'groups/0/action') {
 		
@@ -1201,8 +1229,9 @@ function sendCommand(device, actions, attempt = 1)
 	}
 	
 	// align command xy
-	if (actions.xy)
+	if (actions.xy) {
 		actions.xy = (Array.isArray(actions.xy) ? actions.xy : actions.xy.split(',')).map(val => Number.parseFloat(val));
+	}
 	
 	// clean trigger
 	device.trigger = device.trigger.substr(0, 1) == '/' ? device.trigger.substr(1, device.trigger.length) : device.trigger;
@@ -1218,10 +1247,8 @@ function sendCommand(device, actions, attempt = 1)
 	let error = false, lastAction = null;
 	adapter.log.debug('Attempt ' + attempt + 'x - Send commands to ' + device.name + ' (' + device.trigger + '): ' + JSON.stringify(actions) + '.');
 	
-	_request({ ...REQUEST_OPTIONS, ...options }).then(res =>
-	{
-		if (!Array.isArray(res))
-		{
+	_request({ ...REQUEST_OPTIONS, ...options }).then(res => {
+		if (!Array.isArray(res)) {
 			adapter.log.warn('Unknown error applying actions ' + JSON.stringify(actions) + ' on ' + device.name + ' (to ' + device.trigger + ')!');
 			adapter.log.debug('Response: ' + JSON.stringify(res));
 			
@@ -1230,8 +1257,7 @@ function sendCommand(device, actions, attempt = 1)
 			readData('info', lastAction);
 		}
 		
-		else
-		{
+		else {
 			// log last action in states
 			error = JSON.stringify(res).indexOf('error') > -1;
 			lastAction = {'lastAction': { 'timestamp': Math.floor(Date.now()/1000), 'datetime': library.getDateTime(Date.now()), 'lastCommand': JSON.stringify(actions), 'lastResult': JSON.stringify(res), 'error': error }};
@@ -1240,24 +1266,25 @@ function sendCommand(device, actions, attempt = 1)
 			
 			// print results in log
 			let type;
-			res.forEach(msg =>
-			{
+			res.forEach(msg => {
 				type = Object.keys(msg);
-				if (type == 'error')
+				if (type == 'error') {
 					adapter.log.warn('Attempt ' + attempt + 'x - Error setting ' + msg[type].address + ': ' + msg[type].description);
+				}
 				
-				else
-				{
+				else {
 					let state = Object.keys(msg[type]).shift();
 					let value = Object.values(msg[type]).shift();
 					let action = state.substr(state.lastIndexOf('/')+1);
 					
 					// convert value ranges
-					if (action == 'hue')
+					if (action == 'hue') {
 						value = Math.max(Math.min(Math.round(value / 65535 * 360), 360), 0);
+					}
 
-					if (action == 'ct')
+					if (action == 'ct') {
 						value = Math.max(Math.min(Math.round(1 / value * 1000000), 6500), 2000);
+					}
 					
 					//
 					library._setValue(device.path + '.action.' + (_MAPPING[action] || action), value);
@@ -1265,12 +1292,12 @@ function sendCommand(device, actions, attempt = 1)
 				}
 			});
 			
-			if (!error)
+			if (!error) {
 				adapter.log.info('Attempt ' + attempt + 'x - Successfully set ' + device.name + '.');
+			}
 		}
 		
-	}).catch(err =>
-	{
+	}).catch(err => {
 		adapter.log.warn('Failed sending request to ' + device.trigger + '!');
 		adapter.log.debug(err.message);
 		
@@ -1280,8 +1307,7 @@ function sendCommand(device, actions, attempt = 1)
 		readData('info', lastAction);
 		
 		// try again if socket hang up (except if device is not reachable)
-		if (err.message && (err.message.indexOf('EHOSTUNREACH') > -1 || err.message.indexOf('socket hang up') > -1) && attempt <= MAX_ATTEMPTS && !(device.type == 'lights' && !library.getDeviceState(device.path + '.state.reachable')))
-		{
+		if (err.message && (err.message.indexOf('EHOSTUNREACH') > -1 || err.message.indexOf('socket hang up') > -1) && attempt <= MAX_ATTEMPTS && !(device.type == 'lights' && !library.getDeviceState(device.path + '.state.reachable'))) {
 			attempt++;
 			adapter.log.debug('Try again with attempt ' + attempt + 'x..');
 			setTimeout(() => sendCommand(device, actions, attempt), (adapter.config.reattemptIfError || 3)*1000);
@@ -1292,8 +1318,7 @@ function sendCommand(device, actions, attempt = 1)
 /**
  *
  */
-function addToQueue(appliance, commands)
-{
+function addToQueue(appliance, commands) {
 	adapter.log.debug('Add to queue (' + JSON.stringify(appliance) + ') commands: ' + JSON.stringify(commands));
 	QUEUE[appliance.trigger] = QUEUE[appliance.trigger] ? { ...appliance, commands: Object.assign({}, QUEUE[appliance.trigger].commands, commands) } : { ...appliance, commands: commands };
 }
@@ -1301,10 +1326,9 @@ function addToQueue(appliance, commands)
 /**
  *
  */
-function queue()
-{
-	for (let trigger in QUEUE)
-	{
+function queue() {
+	
+	for (let trigger in QUEUE) {
 		let appliance = QUEUE[trigger];
 		sendCommand({ ...appliance, trigger: trigger }, appliance.commands);
 		delete QUEUE[trigger];
@@ -1316,8 +1340,8 @@ function queue()
 /**
  *
  */
-function getUser(bridgeIp, bridgePort, success, failure)
-{
+function getUser(type, bridgeIp, bridgePort, success, failure) {
+	
 	let options = {
 		uri: 'http://' + bridgeIp + ':' + bridgePort + '/api/',
 		method: 'POST',
@@ -1325,19 +1349,22 @@ function getUser(bridgeIp, bridgePort, success, failure)
 		body: { 'devicetype': 'iobroker.hue-extended' }
 	};
 	
-	_request(options).then(res =>
-	{
-		if (res && res[0] && res[0].success && res[0].success.username)
-			success && success(res[0].success.username);
-		
-		else if (res && res[0] && res[0].error && res[0].error.description)
-			failure && failure(res[0].error.description);
-		
-		else
-			failure && failure('Unknown error occurred!');
-		
-	}).catch(err =>
-	{
-		failure && failure(err.message);
-	});
+	_request(options)
+		.then(res => {
+			if (res && res[0] && res[0].success && res[0].success.username) {
+				success && success(res[0].success.username);
+			}
+			
+			else if (res && res[0] && res[0].error && res[0].error.description) {
+				failure && failure(res[0].error.description);
+			}
+			
+			else {
+				failure && failure('Unknown error occurred!');
+			}
+			
+		})
+		.catch(err => {
+			failure && failure(err.message);
+		});
 }

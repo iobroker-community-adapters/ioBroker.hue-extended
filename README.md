@@ -32,7 +32,10 @@ Connect your Philips Hue Lights with ioBroker.
 
 ## Changelog
 
-### 1.3.8 (2020-07-04)
+### 2.0.0 (2020-07-xx)
+- (Zefau) Support for [deCONZ REST API](https://dresden-elektronik.github.io/deconz-rest-doc/) (meaning support for Conbee / Conbee II stick)
+
+### 1.3.8 (2020-07-05)
 - (Zefau) fixed long-time polling for connection retry after connection fails serval times on short-time polling (see [#58](https://github.com/Zefau/ioBroker.hue-extended/issues/58))
 
 ### 1.3.7 (2020-07-01)
