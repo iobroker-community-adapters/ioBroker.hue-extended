@@ -1,6 +1,6 @@
 ![Logo](admin/hue-extended.png)
 # ioBroker.hue-extended
-Connect your Philips Hue Lights with ioBroker.
+Connect your Philips Hue and / or deCONZ devices with ioBroker 
 
 [![Paypal Donation](https://img.shields.io/badge/paypal-donate%20|%20spenden-blue.svg)](https://paypal.me/chvoelkel)
 
@@ -15,6 +15,7 @@ Connect your Philips Hue Lights with ioBroker.
 
 
 ## Features
+- Supports both Philips Hue and deCONZ devices
 - Synchronize Lights
 - Synchronize Groups
 - Synchronize Scenes (including GroupScenes, LightScenes and Scenes from [HueLabs](https://labs.meethue.com/))
