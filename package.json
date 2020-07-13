@@ -1,27 +1,24 @@
 {
-  "_from": "iobroker.hue-extended@1.3.7",
-  "_id": "iobroker.hue-extended@1.3.7",
+  "_from": "https://github.com/Zefau/ioBroker.hue-extended/tarball/7030137b96a8a4db4371340fb2e4e2601e76a5b5",
+  "_id": "iobroker.hue-extended@2.0.0-beta.1",
   "_inBundle": false,
-  "_integrity": "sha512-6jDitHrsQpUkUM1FXBJjzazL3fM+fldJSr4QR9QKmytYrYcdZIXPdsLeN3osXiNThoUqZ5mHu1oaYnhQCRkOuA==",
+  "_integrity": "sha512-rfQznke6mKcEtZaW4UZcAUv97ZGxZ8NWTBEsno4kgLCOhwKpxiAQRxNx5a56XXO2A6wXF4irXRs+WueUGzCCHA==",
   "_location": "/iobroker.hue-extended",
   "_phantomChildren": {},
   "_requested": {
-    "type": "version",
-    "registry": true,
-    "raw": "iobroker.hue-extended@1.3.7",
-    "name": "iobroker.hue-extended",
-    "escapedName": "iobroker.hue-extended",
-    "rawSpec": "1.3.7",
-    "saveSpec": null,
-    "fetchSpec": "1.3.7"
+    "type": "remote",
+    "raw": "https://github.com/Zefau/ioBroker.hue-extended/tarball/7030137b96a8a4db4371340fb2e4e2601e76a5b5",
+    "rawSpec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/7030137b96a8a4db4371340fb2e4e2601e76a5b5",
+    "saveSpec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/7030137b96a8a4db4371340fb2e4e2601e76a5b5",
+    "fetchSpec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/7030137b96a8a4db4371340fb2e4e2601e76a5b5"
   },
   "_requiredBy": [
     "#USER",
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/iobroker.hue-extended/-/iobroker.hue-extended-1.3.7.tgz",
-  "_shasum": "5a095093f3c1f6ccce5b58c5d416011e1e755b74",
-  "_spec": "iobroker.hue-extended@1.3.7",
+  "_resolved": "https://github.com/Zefau/ioBroker.hue-extended/tarball/7030137b96a8a4db4371340fb2e4e2601e76a5b5",
+  "_shasum": "ee417db95effa0f065b2621184e312480fabcc44",
+  "_spec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/7030137b96a8a4db4371340fb2e4e2601e76a5b5",
   "_where": "/opt/iobroker",
   "author": {
     "name": "zefau",
@@ -78,5 +75,5 @@
     "test:unit": "mocha test/unit --exit",
     "translate": "gulp translateAndUpdateWordsJS"
   },
-  "version": "2.0.0-beta.1"
+  "version": "2.0.0"
 }
