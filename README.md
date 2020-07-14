@@ -33,7 +33,7 @@ Connect your Philips Hue and / or deCONZ devices with ioBroker
 
 ## Changelog
 
-### 2.0.0 (2020-07-13)
+### 2.0.0 (2020-07-14)
 - (Zefau) Support for [deCONZ REST API](https://dresden-elektronik.github.io/deconz-rest-doc/) (meaning support for Conbee / Conbee II stick)
 
 ### 1.3.8 (2020-07-05)
