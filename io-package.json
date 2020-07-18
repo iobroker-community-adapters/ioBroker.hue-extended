@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "hue-extended",
-        "version": "1.3.8",
+        "version": "1.3.9",
         "title": "Philips Hue Extended",
         "desc": {
             "en": "Integration of all your Philips Hue Devices with your ioBroker",
@@ -16,6 +16,9 @@
             "zh-cn": "一体化的所有飞利浦色调设备与你ioBroker"
         },
         "news": {
+            "1.3.9": {
+                "en": "- Reduced warn logging to debug"
+			},
             "1.3.8": {
                 "en": "- fixed long-time polling for connection retry after connection fails serval times on short-time polling (see #58)",
                 "de": "- Feste long-time-polling für die Verbindung erneut, nachdem die Verbindung fehlschlägt serval mal auf short-time polling (siehe #58)",
