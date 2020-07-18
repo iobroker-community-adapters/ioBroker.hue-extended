@@ -770,7 +770,7 @@ function getPayload(refresh) {
 		// TRY AGAIN OR STOP ADAPTER
 		let timeout = 60;
 		if (!retry || retry < 10) {
-			adapter.log[!retry ? 'warn' : 'debug']('Error connecting to Hue Bridge: ' + error + '. ' + (retry > 0 ? 'Already retried ' + retry + 'x so far. ' : '') + 'Reconnecting..');
+			adapter.log['debug'/*!retry ? 'warn' : 'debug'*/]('Error connecting to Hue Bridge: ' + error + '. ' + (retry > 0 ? 'Already retried ' + retry + 'x so far. ' : '') + 'Reconnecting..');
 			//adapter.log.debug(err.message);
 			//adapter.log.debug(JSON.stringify(err.stack));
 			timeout = 6;
