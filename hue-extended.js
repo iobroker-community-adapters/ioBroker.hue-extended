@@ -179,6 +179,12 @@ function startAdapter(options)
 			return false;
 		}
 		
+		// no DEVICES loaded so far
+		else if (DEVICES[appliance.type] === undefined) {
+			adapter.log.warn('Devices not retrieved from Bridge so far! Command aborted.');
+			return false;
+		}
+		
 		// reset if scene was set
 		if (action == 'scene') {
 			library._setValue(id, '');
@@ -375,7 +381,7 @@ function startAdapter(options)
 				
 				// only set lights in a group which are on already
 				if (appliance.type == 'groups' && adapter.config.switchOnlyWhenOn && (action === 'on' || library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.on') === true)) {
-					adapter.setState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.' + action, state.val);
+					library._setValue('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.' + action, state.val);
 				}
 			}
 			
