@@ -38,7 +38,7 @@
     "@iobroker/adapter-core": "^2.4.0",
     "color-convert": "^2.0.1",
     "request": "^2.88.2",
-    "request-promise": "^4.2.5",
+    "request-promise": "^4.2.6",
     "ws": "^7.3.0"
   },
   "deprecated": false,
@@ -47,9 +47,9 @@
     "@iobroker/testing": "^2.2.0",
     "axios": "^0.19.2",
     "chai": "^4.2.0",
-    "eslint": "^7.4.0",
+    "eslint": "^7.6.0",
     "gulp": "^4.0.2",
-    "mocha": "^8.0.1"
+    "mocha": "^8.1.1"
   },
   "directories": {
     "lib": "lib",
@@ -75,5 +75,5 @@
     "test:unit": "mocha test/unit --exit",
     "translate": "gulp translateAndUpdateWordsJS"
   },
-  "version": "2.0.0-rc.3"
+  "version": "2.0.0"
 }
