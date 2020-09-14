@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "hue-extended",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "title": "Philips Hue Extended",
     "desc": {
       "en": "Integration of all your Philips Hue or deCONZ / Conbee devices with your ioBroker",

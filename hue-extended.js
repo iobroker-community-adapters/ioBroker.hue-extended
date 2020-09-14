@@ -410,12 +410,15 @@ function startAdapter(options) {
 				
 				// only set lights in a group which are on already
 				if (appliance.type == 'groups' && adapter.config.switchOnlyWhenOn && (action === 'on' || library.getDeviceState('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.on') === true)) {
-					library._setValue('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.' + action, state.val);
+					adapter.log.warn('switchOnlyWhenOn: lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.' + action + ' with ' + state.val);
+					
+					library._setValue('lights.' + (adapter.config.nameId == 'append' ? lightId + '-' + lightUid : lightUid + '-' + lightId) + '.action.' + action, state.val, { ack: false });
 				}
 			}
 			
 			// only set lights in a group which are on already
 			if (appliance.type == 'groups' && adapter.config.switchOnlyWhenOn) {
+				adapter.log.debug('Drop all commands for group, because lights have been set individually.');
 				
 				// lights have been set individually, so stop processing the group
 				return false;
@@ -1194,25 +1197,27 @@ function getAction(action) {
  *
  */
 function sendCommand(device, actions, attempt = 1) {
+	adapter.log.debug('sendCommand: ' + JSON.stringify(device) + ' ### ' + JSON.stringify(actions));
+	
 	// check if target value is actually different from current value
-	if ((device.type == 'lights' || device.type == 'groups') && device.trigger != 'groups/0/action') {
+	if ((device.type === 'lights' || device.type === 'groups') && device.trigger !== 'groups/0/action') {
 		
 		let curValue, value, obj;
 		for (let action in actions) {
-			
 			value = actions[action];
 			obj = action;
 			action = getAction(action);
 			
 			// ignore states
 			let ignoreStates = ['effect', 'alert', 'transitiontime', 'trigger', 'scene'];
-			if (device.type == 'groups') {
+			if (device.type === 'groups') {
 				ignoreStates.push('on');
 			}
 			
 			// get current value and compare
 			curValue = library.getDeviceState(device.path + '.action.' + action);
 			if (ignoreStates.indexOf(action) === -1 && curValue !== null && value == curValue) {
+				adapter.log.debug('Drop command (' + action + '): value ' + value + ' === ' + curValue + ' curValue');
 				delete actions[obj];
 			}
 		}
@@ -1224,7 +1229,7 @@ function sendCommand(device, actions, attempt = 1) {
 		}
 		
 		// check reachability
-		if (device.type == 'lights' && !library.getDeviceState(device.path + '.state.reachable')) {
+		if (device.type === 'lights' && !library.getDeviceState(device.path + '.state.reachable')) {
 			adapter.log.warn('Attempt ' + attempt + 'x - Device ' + device.name + ' does not seem to be reachable! Command is sent anyway.');
 			
 			let reachableAttempt = attempt+1;
