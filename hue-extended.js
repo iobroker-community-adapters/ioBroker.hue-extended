@@ -1103,7 +1103,7 @@ function readData(key, data, channel) {
 		
 		// remap state to action
 		let action = key.substr(key.lastIndexOf('.')+1);
-		if (channel !== 'sensors' && _SUBSCRIPTIONS.indexOf(action) > -1 && (key.indexOf('state.' + action) > -1 || key.indexOf('config.' + action) > -1)) {
+		if (_SUBSCRIPTIONS.indexOf(action) > -1 && (key.indexOf('state.' + action) > -1 || key.indexOf('config.' + action) > -1)) { // removed in v2.0.2: channel !== 'sensors' && 
 			
 			key = key.replace('.state.', '.action.').replace('.config.', '.action.');
 			library.set({
@@ -1123,7 +1123,7 @@ function readData(key, data, channel) {
 				'common': Object.assign(
 					node.common || {},
 					{
-						'write': (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('action.' + action) > -1)
+						'write': (_SUBSCRIPTIONS.indexOf(action) > -1 && key.indexOf('.action.') > -1 && key.indexOf('.' + action) > -1)
 					}
 				)
 			},
