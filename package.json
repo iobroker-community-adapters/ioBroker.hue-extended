@@ -45,7 +45,7 @@
   "description": "Integration of your Philips Hue Lights with your ioBroker",
   "devDependencies": {
     "@iobroker/testing": "^2.3.0",
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "chai": "^4.2.0",
     "eslint": "^7.9.0",
     "gulp": "^4.0.2",
