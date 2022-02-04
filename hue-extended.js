@@ -20,7 +20,7 @@ const _SUBSCRIPTIONS = require(__dirname + '/_NODES.js').SUBSCRIPTIONS;
 
 const _MAPPING_BRIDGE = Object.keys(_MAPPING);
 const _MAPPING_STATES = Object.values(_MAPPING);
-const _CHANNELS = ['config', 'groups', 'lights', 'resourcelinks', 'rules', 'scenes', 'schedules', 'sensors'];
+const _CHANNELS = ['alarmsystems', 'config', 'groups', 'lights', 'resourcelinks', 'rules', 'scenes', 'schedules', 'sensors'];
 
 /*
  * variables initiation

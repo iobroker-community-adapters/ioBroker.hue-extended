@@ -188,6 +188,7 @@
   },
   "native": {
     "refresh": 30,
+    "syncAlarmsystems": true,
     "syncLights": true,
     "syncGroups": true,
     "syncScenes": true,
