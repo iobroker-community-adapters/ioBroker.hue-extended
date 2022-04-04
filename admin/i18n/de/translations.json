@@ -59,6 +59,7 @@
     "syncScenesDuplicates": "Synchronisiere auch doppelte Szenen",
     "syncSchedules": "Synchronisation der Zeitpläne",
     "syncSensors": "Synchronisation der Sensoren",
+    "syncAlarmsystems": "Synchronisation der Alarmsysteme",
     "tab_alexa": "Alexa Integration",
     "tab_config": "Konfiguration",
     "tab_donate": "Spenden",
