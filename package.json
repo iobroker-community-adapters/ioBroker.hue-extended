@@ -39,7 +39,7 @@
     "color-convert": "^2.0.1",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
-    "ws": "^7.3.0"
+    "ws": "^8.7.0"
   },
   "deprecated": false,
   "description": "Integration of your Philips Hue Lights with your ioBroker",
