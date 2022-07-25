@@ -1,33 +1,11 @@
 {
-  "_from": "https://github.com/Zefau/ioBroker.hue-extended/tarball/7030137b96a8a4db4371340fb2e4e2601e76a5b5",
-  "_id": "iobroker.hue-extended@2.0.0-beta.1",
-  "_inBundle": false,
-  "_integrity": "sha512-rfQznke6mKcEtZaW4UZcAUv97ZGxZ8NWTBEsno4kgLCOhwKpxiAQRxNx5a56XXO2A6wXF4irXRs+WueUGzCCHA==",
-  "_location": "/iobroker.hue-extended",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "remote",
-    "raw": "https://github.com/Zefau/ioBroker.hue-extended/tarball/7030137b96a8a4db4371340fb2e4e2601e76a5b5",
-    "rawSpec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/7030137b96a8a4db4371340fb2e4e2601e76a5b5",
-    "saveSpec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/7030137b96a8a4db4371340fb2e4e2601e76a5b5",
-    "fetchSpec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/7030137b96a8a4db4371340fb2e4e2601e76a5b5"
-  },
-  "_requiredBy": [
-    "#USER",
-    "/"
-  ],
-  "_resolved": "https://github.com/Zefau/ioBroker.hue-extended/tarball/7030137b96a8a4db4371340fb2e4e2601e76a5b5",
-  "_shasum": "ee417db95effa0f065b2621184e312480fabcc44",
-  "_spec": "https://github.com/Zefau/ioBroker.hue-extended/tarball/7030137b96a8a4db4371340fb2e4e2601e76a5b5",
-  "_where": "/opt/iobroker",
   "author": {
     "name": "zefau",
     "email": "zefau@mailbox.org"
   },
   "bugs": {
-    "url": "https://github.com/Zefau/ioBroker.hue-extended/issues"
+    "url": "https://github.com/iobroker-community-adapters/ioBroker.hue-extended/issues"
   },
-  "bundleDependencies": false,
   "contributors": [
     {
       "name": "zefau",
@@ -41,7 +19,6 @@
     "request-promise": "^4.2.6",
     "ws": "^7.3.0"
   },
-  "deprecated": false,
   "description": "Integration of your Philips Hue Lights with your ioBroker",
   "devDependencies": {
     "@iobroker/testing": "^2.3.0",
@@ -55,7 +32,7 @@
     "lib": "lib",
     "test": "test"
   },
-  "homepage": "https://github.com/Zefau/ioBroker.hue-extended",
+  "homepage": "https://github.com/iobroker-community-adapters/ioBroker.hue-extended",
   "keywords": [
     "ioBroker",
     "hue",
@@ -66,7 +43,7 @@
   "name": "iobroker.hue-extended",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Zefau/ioBroker.hue-extended.git"
+    "url": "git+https://github.com/iobroker-community-adapters/ioBroker.hue-extended.git"
   },
   "scripts": {
     "test": "npm run test:package && npm run test:unit",
