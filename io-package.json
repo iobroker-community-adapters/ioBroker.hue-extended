@@ -153,7 +153,7 @@
     "platform": "Javascript/Node.js",
     "mode": "daemon",
     "icon": "hue-extended.png",
-    "extIcon": "https://raw.githubusercontent.com/Zefau/ioBroker.hue-extended/master/admin/hue-extended.png",
+    "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.hue-extended/master/admin/hue-extended.png",
     "keywords": [
       "hue",
       "conbee",
@@ -170,7 +170,7 @@
       "config",
       "extended"
     ],
-    "readme": "https://github.com/Zefau/ioBroker.hue-extended/blob/master/README.md",
+    "readme": "https://github.com/iobroker-community-adapters/ioBroker.hue-extended/blob/master/README.md",
     "loglevel": "info",
     "materialize": true,
     "compact": true,
