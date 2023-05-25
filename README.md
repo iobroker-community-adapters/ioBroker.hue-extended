@@ -1,3 +1,13 @@
+
+# This adapter is DEPRECATED and will not be developed any further
+
+-----
+
+Currently there is no further development for this adapter planned. __Please migrate to ioBroker.hue adapter__ which is maintained.
+If you miss any features at ioBroker.hue open an issue at that repository (https://github.com/iobroker-community-adapters/ioBroker.hue)
+
+-----
+
 ![Logo](admin/hue-extended.png)
 # ioBroker.hue-extended
 Connect your Philips Hue and / or deCONZ devices with ioBroker 
