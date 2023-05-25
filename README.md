@@ -6,7 +6,7 @@
 Currently there is no further development for this adapter planned. __Please migrate to ioBroker.hue adapter__ which is maintained.
 If you miss any features at ioBroker.hue open an issue at that repository (https://github.com/iobroker-community-adapters/ioBroker.hue).
 
-IoBroker.hue-extended will saty available for some time, but keep in mind, that it will nozt be tested against node 20 or upcoming js-controller v5.
+IoBroker.hue-extended will stay available for some time, but keep in mind, that it will not be tested with node 20 or upcoming js-controller v5.
 
 -----
 
